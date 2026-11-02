@@ -16,8 +16,8 @@ from pathlib import Path
 import cv2
 import supervision as sv
 
-from argus_visao.config import TrackerConfig
-from argus_visao.offline import detectar_video, histograma_duracoes, rodar
+from aip_visao.config import TrackerConfig
+from aip_visao.offline import detectar_video, histograma_duracoes, rodar
 
 
 def main() -> None:

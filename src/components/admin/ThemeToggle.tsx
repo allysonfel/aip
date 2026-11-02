@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { IconeSol, IconeLua } from '@/components/ui/icones';
 
-const CHAVE_STORAGE = 'argus-theme';
+const CHAVE_STORAGE = 'aip-theme';
 
 // Alternador claro/escuro — claro é o padrão (ver script bloqueante em
 // layout.tsx, que só adiciona a classe "dark" se o localStorage disser

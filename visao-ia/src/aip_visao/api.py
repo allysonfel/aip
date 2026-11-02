@@ -1,8 +1,8 @@
 """API do motor de visão (FastAPI). O painel fica no app Next.js do
-Argus; aqui só existe API + WebSocket.
+AIP; aqui só existe API + WebSocket.
 
 Uso (de dentro de visao-ia/):
-    uv run uvicorn argus_visao.api:app --port 8500
+    uv run uvicorn aip_visao.api:app --port 8500
 
 Endpoints:
     GET  /api/saude                     motor no ar + dispositivo/modelo
@@ -82,9 +82,9 @@ async def lifespan(_: FastAPI):
         a.parar()
 
 
-app = FastAPI(title="Argus Visão", lifespan=lifespan)
+app = FastAPI(title="AIP Visão", lifespan=lifespan)
 
-origens = os.environ.get("ARGUS_PAINEL_ORIGENS", "http://localhost:3000,http://localhost:3002").split(",")
+origens = os.environ.get("AIP_PAINEL_ORIGENS", "http://localhost:3000,http://localhost:3002").split(",")
 app.add_middleware(CORSMiddleware, allow_origins=origens, allow_methods=["*"], allow_headers=["*"])
 # Arquivos estáticos (com Range, pra o <video> do painel poder pular no tempo).
 app.mount("/casos", StaticFiles(directory=RAIZ / "casos", check_dir=False), name="casos")

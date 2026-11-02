@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { obterSessao, type UsuarioSessao } from './auth';
 import { podeVer, primeiraRota, type AbaId } from './shopping/permissoes';
 
-export const COOKIE_SESSAO = 'argus_sessao';
+export const COOKIE_SESSAO = 'aip_sessao';
 
 /** Lê a sessão atual (Server Component / Route Handler) — null se não logado. */
 export async function getSessaoAtual(): Promise<UsuarioSessao | null> {

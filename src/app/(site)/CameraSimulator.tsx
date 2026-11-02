@@ -107,7 +107,7 @@ function Option({
         {dotColor && <span className="h-2 w-2 shrink-0" style={{ backgroundColor: dotColor }} />}
         {label}
       </span>
-      <span className="argus-mono text-[10px] leading-snug text-on-surface-variant">{hint}</span>
+      <span className="aip-mono text-[10px] leading-snug text-on-surface-variant">{hint}</span>
     </button>
   );
 }
@@ -134,7 +134,7 @@ function WhatsAppGlyph() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
-      <span className="argus-mono w-24 shrink-0 pt-0.5 text-[10px] text-on-surface-variant">{label}</span>
+      <span className="aip-mono w-24 shrink-0 pt-0.5 text-[10px] text-on-surface-variant">{label}</span>
       <span className="text-body-md text-on-surface">{value}</span>
     </div>
   );
@@ -165,24 +165,24 @@ function AlertCard({
             <WhatsAppGlyph />
           )}
           <div className="leading-tight">
-            <p className="text-label-md text-on-surface">{isPanel ? "Painel Argus" : "Argus Alertas"}</p>
-            <p className="argus-mono text-[10px] text-on-surface-variant">
+            <p className="text-label-md text-on-surface">{isPanel ? "Painel AIP" : "AIP Alertas"}</p>
+            <p className="aip-mono text-[10px] text-on-surface-variant">
               {isPanel ? "Registro de ocorrência" : "Notificação instantânea"}
             </p>
           </div>
         </div>
-        <span className="argus-mono text-[10px] text-on-surface-variant">{formatClock(now)}</span>
+        <span className="aip-mono text-[10px] text-on-surface-variant">{formatClock(now)}</span>
       </div>
 
       <div className="flex flex-col gap-3 p-3">
         <div className="max-w-[300px]">
           <CameraTile event={event} zone={zone} severity={severity} variant="compact" />
-          <p className="argus-mono mt-1 text-[10px] text-on-surface-variant">
+          <p className="aip-mono mt-1 text-[10px] text-on-surface-variant">
             {isPanel ? "Imagem salva no painel" : "Foto capturada da câmera"}
           </p>
         </div>
 
-        <p className="argus-mono text-label-sm" style={{ color: sev.color }}>
+        <p className="aip-mono text-label-sm" style={{ color: sev.color }}>
           {sev.tag}
         </p>
 
@@ -254,7 +254,7 @@ export default function CameraSimulator() {
         </Group>
 
         <div className="border-t border-outline-variant/60 pt-md">
-          <p className="argus-mono text-[10px] text-on-surface-variant">Cenários rápidos</p>
+          <p className="aip-mono text-[10px] text-on-surface-variant">Cenários rápidos</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {SCENARIOS.map((s) => {
               const active = s.event === event && s.zone === zone && s.severity === severity;
@@ -267,7 +267,7 @@ export default function CameraSimulator() {
                     setZone(s.zone);
                     setSeverity(s.severity);
                   }}
-                  className={`argus-mono border px-3 py-1.5 text-[10px] transition-colors ${
+                  className={`aip-mono border px-3 py-1.5 text-[10px] transition-colors ${
                     active
                       ? "border-tertiary text-tertiary"
                       : "border-outline-variant text-on-surface-variant hover:border-outline hover:text-on-surface"

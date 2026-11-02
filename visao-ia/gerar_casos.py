@@ -32,9 +32,9 @@ import cv2
 import numpy as np
 import supervision as sv
 
-from argus_visao.config import CameraConfig, MotorConfig, RAIZ, TrackerConfig, carregar_cameras
-from argus_visao.inferencia import DetectorPessoas
-from argus_visao.regras import RegrasCamera
+from aip_visao.config import CameraConfig, MotorConfig, RAIZ, TrackerConfig, carregar_cameras
+from aip_visao.inferencia import DetectorPessoas
+from aip_visao.regras import RegrasCamera
 
 PASTA = RAIZ / "casos"
 FPS_ANALISE = 3  # o mesmo da operação ao vivo (parâmetros calibrados nele)
@@ -306,7 +306,7 @@ def main() -> None:
     detector = DetectorPessoas(motor)
     extrator = None
     if motor.reid == "osnet":
-        from argus_visao.reid import ExtratorReid
+        from aip_visao.reid import ExtratorReid
 
         extrator = ExtratorReid()
 

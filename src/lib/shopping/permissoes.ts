@@ -12,7 +12,7 @@ export const ABAS: Aba[] = [
   { id: 'comparativo', nome: 'Comparativos', rotas: ['/shopping/comparativo'], descricao: 'Comparar períodos' },
   { id: 'rotas', nome: 'Rotas e fluxo', rotas: ['/shopping/rotas'], descricao: 'Caminhos e fluxos entre áreas' },
   { id: 'crianca-perdida', nome: 'Busca de criança perdida', rotas: ['/shopping/crianca-perdida'], descricao: 'Procurar criança pela descrição da família', seguranca: true },
-  { id: 'pergunte', nome: 'Pergunte ao Argus', rotas: [], descricao: 'Chat com perguntas sobre os dados das abas que o usuário vê' },
+  { id: 'pergunte', nome: 'Pergunte à AIP', rotas: [], descricao: 'Chat com perguntas sobre os dados das abas que o usuário vê' },
   { id: 'cameras', nome: 'Câmeras', rotas: ['/shopping/ao-vivo', '/shopping/cameras'], descricao: 'Câmeras ao vivo e saúde do sistema', seguranca: true },
   { id: 'usuarios', nome: 'Usuários', rotas: ['/shopping/usuarios'], descricao: 'Cadastro de usuários e permissões', soAdminGeral: true },
   { id: 'configuracoes', nome: 'Configurações', rotas: ['/shopping/configuracoes'], descricao: 'Dados do shopping, horários, retenção e limites', soAdminGeral: true },

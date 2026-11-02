@@ -226,7 +226,7 @@ export function MapaSimulacao({ sim, andar, relogio, calor = null, destaque = nu
   const [estilo, setEstilo] = useState<EstiloMapa>(estiloInicial);
   useEffect(() => {
     try {
-      const salvo = localStorage.getItem('argus-estilo-planta');
+      const salvo = localStorage.getItem('aip-estilo-planta');
       if (salvo === 'esboco' || salvo === 'mapa') setEstilo('mapa');
       else if (salvo === 'planta') setEstilo('planta');
     } catch {}
@@ -234,7 +234,7 @@ export function MapaSimulacao({ sim, andar, relogio, calor = null, destaque = nu
   const mudarEstilo = (e: EstiloMapa) => {
     setEstilo(e);
     try {
-      localStorage.setItem('argus-estilo-planta', e);
+      localStorage.setItem('aip-estilo-planta', e);
     } catch {}
   };
   const estado = useRef<{ grade: Float32Array; ate: number; idx: number; chave: string } | null>(null);

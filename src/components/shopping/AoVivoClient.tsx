@@ -13,7 +13,7 @@ import { partesDoNome, pessoasNaImagem, type CameraMotor } from './cameras/tipos
 // A câmera aberta fica na URL (?camera=id): o "voltar" do navegador volta
 // ao mosaico e dá pra compartilhar o link de uma câmera.
 
-const CHAVE_LAYOUT = 'argus.cameras.layout';
+const CHAVE_LAYOUT = 'aip.cameras.layout';
 
 function lerLayoutSalvo(): Layout {
   try {
@@ -93,8 +93,8 @@ export function AoVivoClient({ urlMotor }: { urlMotor: string }) {
           Não foi possível falar com o motor de visão em <code>{urlMotor}</code>.
         </p>
         <p className="mt-2 text-sm text-on-surface-variant">
-          Rode em <code>visao-ia/</code>: <code>uv run uvicorn argus_visao.api:app --port 8500</code>. Se o motor já está no ar, confira se a
-          origem deste painel está em <code>ARGUS_PAINEL_ORIGENS</code> (CORS).
+          Rode em <code>visao-ia/</code>: <code>uv run uvicorn aip_visao.api:app --port 8500</code>. Se o motor já está no ar, confira se a
+          origem deste painel está em <code>AIP_PAINEL_ORIGENS</code> (CORS).
         </p>
       </Card>
     );

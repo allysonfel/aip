@@ -18,14 +18,14 @@ import {
   zonasMortas,
 } from '@/lib/shopping/demo';
 
-// "Pergunte ao Argus" — MODO DEMONSTRAÇÃO. Na versão final, a pergunta
+// "Pergunte à AIP" — MODO DEMONSTRAÇÃO. Na versão final, a pergunta
 // vai para um LLM (provedor configurável, padrão Claude Haiku) com tool
 // calling restrito às mesmas funções de consulta usadas aqui
 // (fluxo_por_periodo, ranking_zonas, horario_de_pico, zonas_mortas...),
 // recebendo SÓ dados agregados — nunca imagem, vídeo ou dado de
 // segurança. Aqui o roteamento é por palavras-chave, sem IA.
 
-export type RespostaArgus = {
+export type RespostaAIP = {
   texto: string;
   /** Perguntas que o usuário já fez hoje (limite contado no servidor). */
   usadasHoje?: number;
@@ -56,7 +56,7 @@ function temaDa(p: string): AbaId | null {
   return null;
 }
 
-export async function perguntarArgus(pergunta: string): Promise<RespostaArgus> {
+export async function perguntarAIP(pergunta: string): Promise<RespostaAIP> {
   let sessao;
   try {
     sessao = await exigirAbaAcao('pergunte');
@@ -64,7 +64,7 @@ export async function perguntarArgus(pergunta: string): Promise<RespostaArgus> {
     return { texto: e instanceof Error ? e.message : 'Sem permissão.' };
   }
   const cfg = await obterConfiguracoes(sessao.empresaId);
-  if (!cfg.pergunte_ativo) return { texto: 'O Pergunte ao Argus está desligado nas configurações.' };
+  if (!cfg.pergunte_ativo) return { texto: 'O Pergunte à AIP está desligado nas configurações.' };
   const usadas = await perguntasHoje(sessao.id, cfg.fuso);
   if (usadas >= cfg.pergunte_limite_dia) return { texto: `Você já fez ${cfg.pergunte_limite_dia} perguntas hoje, o limite diário. Amanhã libera de novo.`, usadasHoje: usadas };
   await registrarAuditoria({ empresaId: sessao.empresaId, usuarioId: sessao.id, acao: 'pergunte', detalhes: { pergunta: pergunta.slice(0, 300) } });
@@ -72,7 +72,7 @@ export async function perguntarArgus(pergunta: string): Promise<RespostaArgus> {
   return { ...resposta, usadasHoje: usadas + 1 };
 }
 
-async function responder(pergunta: string, sessao: { adminGeral: boolean; abas: string[] }): Promise<RespostaArgus> {
+async function responder(pergunta: string, sessao: { adminGeral: boolean; abas: string[] }): Promise<RespostaAIP> {
   const p = normalizar(pergunta);
   const { data: hoje } = agoraDemo();
 

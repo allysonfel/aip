@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { cn } from '@/lib/cn';
 import { fazerLogout } from '@/app/(sistema)/login/actions';
 import { ThemeToggle } from '@/components/admin/ThemeToggle';
-import { LogoArgus } from './Logo';
+import { LogoAIP } from './Logo';
 import {
   IconeVisaoGeral,
   IconeCamera,
@@ -99,10 +99,10 @@ function Navegacao({ permissoes, aoNavegar }: { permissoes: Permissoes; aoNavega
 function Cabecalho() {
   return (
     <div className="px-6 pb-4 pt-6">
-      {/* Slogan logo embaixo, nunca mais largo que o logotipo */}
+      {/* Slogan logo embaixo, alinhado à esquerda do logotipo */}
       <div className="inline-flex flex-col items-start">
-        <LogoArgus className="h-7 text-on-surface" />
-        <span className="mt-1 whitespace-nowrap text-[6.5px] font-semibold uppercase tracking-[0.12em] text-on-surface-variant">Inteligência Patrimonial</span>
+        <LogoAIP className="h-10 text-on-surface" />
+        <span className="mt-1.5 whitespace-nowrap text-[7.5px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">Agência de Inteligência Patrimonial</span>
       </div>
     </div>
   );
@@ -148,7 +148,7 @@ export function MenuMovelShopping(dados: DadosMenu) {
     <div className="lg:hidden print:hidden">
       <div className="sticky top-0 z-40 flex items-center justify-between border-b border-outline-variant bg-surface/80 px-4 py-3 backdrop-blur-md">
         <div className="flex items-center gap-3">
-          <LogoArgus className="h-5 text-on-surface" />
+          <LogoAIP className="h-7 text-on-surface" />
           <img src={dados.logo ?? '/caruaru-simbolo.png'} alt={dados.nomeShopping} className="h-7 w-7 object-contain" />
         </div>
         <button onClick={() => setAberto(true)} className="rounded-sm border border-outline-variant px-3 py-1.5 text-sm text-on-surface" aria-label="Abrir menu">

@@ -1,7 +1,7 @@
 import type { SVGProps } from 'react';
 
 // Ícones de linha simples (18px, stroke 1.75 por padrão) — ver DESIGN.md
-// "nav-icon". Sem lib externa: só o que a sidebar/telas do Argus precisam.
+// "nav-icon". Sem lib externa: só o que a sidebar/telas da AIP precisam.
 type IconeProps = SVGProps<SVGSVGElement> & { strokeWidth?: number };
 
 function Base({ children, strokeWidth = 1.75, ...props }: IconeProps & { children: React.ReactNode }) {

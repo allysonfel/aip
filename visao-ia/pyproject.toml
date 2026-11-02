@@ -1,7 +1,7 @@
 [project]
-name = "argus-visao"
+name = "aip-visao"
 version = "0.1.0"
-description = "Argus - motor de visão computacional (detecção, tracking e contagem de pessoas)"
+description = "AIP - motor de visão computacional (detecção, tracking e contagem de pessoas)"
 readme = "README.md"
 authors = [
     { name = "allysumotion", email = "allysumotion@gmail.com" }

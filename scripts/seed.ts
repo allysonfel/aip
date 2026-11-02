@@ -32,7 +32,7 @@ async function main() {
   }
 
   console.log('Criando empresa...');
-  const chaveApi = `argus_live_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
+  const chaveApi = `aip_live_${Math.random().toString(36).slice(2)}${Math.random().toString(36).slice(2)}`;
   const [empresa] = await sql<{ id: number }[]>`
     INSERT INTO empresas (nome, cnpj, chave_api) VALUES ('Construtora Nordeste Ltda', '12.345.678/0001-90', ${chaveApi}) RETURNING id
   `;
@@ -93,10 +93,10 @@ async function main() {
   }
 
   console.log('Criando usuário admin de login...');
-  const senhaHash = await hashSenha('argus2026');
+  const senhaHash = await hashSenha('aip2026');
   await sql`
     INSERT INTO usuarios (empresa_id, username, senha_hash, nome, role, admin_geral)
-    VALUES (${empresaId}, 'admin', ${senhaHash}, 'Administrador Argus', 'ADMIN', true)
+    VALUES (${empresaId}, 'admin', ${senhaHash}, 'Administrador AIP', 'ADMIN', true)
   `;
 
   console.log('Criando dispositivos...');
@@ -235,7 +235,7 @@ async function main() {
   }
 
   console.log('\nSeed concluído com sucesso.');
-  console.log('Login de exemplo -> usuário: admin | senha: argus2026');
+  console.log('Login de exemplo -> usuário: admin | senha: aip2026');
   await sql.end();
 }
 

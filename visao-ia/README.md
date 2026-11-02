@@ -1,4 +1,4 @@
-# Argus Visão — motor de visão computacional
+# AIP Visão — motor de visão computacional
 
 Detecta pessoas (RF-DETR), rastreia (ByteTrack, supervision), conta
 passagens por linha e ocupação por zona, e entrega tudo ao vivo para a
@@ -9,18 +9,18 @@ tela **Câmeras ao vivo** do painel (`/shopping/ao-vivo`).
 ```bash
 uv sync
 uv run preparar_demo.py                     # baixa e prepara os vídeos de demonstração
-ARGUS_PAINEL_ORIGENS="http://localhost:3000" \
-  uv run uvicorn argus_visao.api:app --port 8500
+AIP_PAINEL_ORIGENS="http://localhost:3000" \
+  uv run uvicorn aip_visao.api:app --port 8500
 ```
 
-`ARGUS_PAINEL_ORIGENS` precisa conter a origem do painel (CORS). O
-painel encontra o motor por `NEXT_PUBLIC_ARGUS_VISAO_URL` (padrão
+`AIP_PAINEL_ORIGENS` precisa conter a origem do painel (CORS). O
+painel encontra o motor por `NEXT_PUBLIC_AIP_VISAO_URL` (padrão
 `http://localhost:8500`).
 
 > **Windows com acento no caminho** (ex.: `C:\Users\André`): o Python
 > 3.11 lê errado o `.pth` da instalação editável e o import
-> `argus_visao` falha. Rode com `PYTHONPATH=src`:
-> `PYTHONPATH=src .venv/Scripts/python.exe -m uvicorn argus_visao.api:app --port 8500`
+> `aip_visao` falha. Rode com `PYTHONPATH=src`:
+> `PYTHONPATH=src .venv/Scripts/python.exe -m uvicorn aip_visao.api:app --port 8500`
 
 ## Câmeras de demonstração
 
@@ -143,4 +143,4 @@ rastreio e por isso vale mesmo nessas câmeras mais lentas.
 
 ## Endpoints
 
-Ver o docstring de `src/argus_visao/api.py`.
+Ver o docstring de `src/aip_visao/api.py`.

@@ -6,7 +6,7 @@
 
 import type { Andar } from './planta';
 
-export const URL_MOTOR = process.env.NEXT_PUBLIC_ARGUS_VISAO_URL || 'http://localhost:8500';
+export const URL_MOTOR = process.env.NEXT_PUBLIC_AIP_VISAO_URL || 'http://localhost:8500';
 
 /** [tempo no vídeo (s), x1, y1, x2, y2], caixa normalizada 0-1. */
 export type Ponto = [number, number, number, number, number];

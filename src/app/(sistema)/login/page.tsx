@@ -5,9 +5,9 @@ import { fazerLogin } from './actions';
 import { Field } from '@/components/ui/Field';
 import { Button } from '@/components/ui/Button';
 import { Alert } from '@/components/ui/Alert';
-import { LogoArgus } from '@/components/shopping/Logo';
+import { LogoAIP } from '@/components/shopping/Logo';
 
-const RECURSOS = ['Câmeras com IA', 'Contagem de visitantes', 'Mapa de calor', 'Rotas e fluxo', 'Zonas mortas', 'Comparativo de períodos', 'Busca de criança perdida', 'Pergunte ao Argus'];
+const RECURSOS = ['Câmeras com IA', 'Contagem de visitantes', 'Mapa de calor', 'Rotas e fluxo', 'Zonas mortas', 'Comparativo de períodos', 'Busca de criança perdida', 'Pergunte à AIP'];
 
 export default function LoginPage() {
   const [state, formAction, pendente] = useActionState(fazerLogin, { erro: null });
@@ -27,9 +27,8 @@ export default function LoginPage() {
             </span>
             <span className="h-10 w-px bg-white/30" />
             <span className="flex flex-col items-start">
-              <LogoArgus className="h-9 text-white" />
-              {/* Mesma largura do logotipo ARGUS */}
-              <span className="mt-1 whitespace-nowrap text-[8.2px] font-medium uppercase tracking-[0.12em] text-white/70">Inteligência Patrimonial</span>
+              <LogoAIP className="h-12 text-white" />
+              <span className="mt-1.5 whitespace-nowrap text-[8.5px] font-medium uppercase tracking-[0.1em] text-white/70">Agência de Inteligência Patrimonial</span>
             </span>
           </div>
           <h1 className="text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">O Caruaru Shopping inteiro, em tempo real.</h1>

@@ -76,7 +76,7 @@ def baixar(v: VideoDemo) -> Path:
     if destino.exists() and destino.stat().st_size > 0:
         return destino
     print(f"[baixar] {v.nome} <- {v.url}")
-    req = urllib.request.Request(v.url, headers={"User-Agent": "Mozilla/5.0 (argus-demo)"})
+    req = urllib.request.Request(v.url, headers={"User-Agent": "Mozilla/5.0 (aip-demo)"})
     with urllib.request.urlopen(req, timeout=300) as resp, open(destino, "wb") as f:
         while bloco := resp.read(1 << 20):
             f.write(bloco)

@@ -1,14 +1,14 @@
-# Progresso — Sistema Argus
+# Progresso — Sistema AIP
 
 Bom dia. Isso foi construído numa sessão autônoma noturna, sem pausar pra
 te perguntar nada (por instrução sua). Leia isto primeiro. O
 `DECISIONS.md` tem o porquê de cada escolha não especificada; aqui é só
 o estado das coisas.
 
-## Publicado: `argus-production-49d3.up.railway.app`
+## Publicado: `aip-production.up.railway.app`
 
 > **Atualização (2026-10-12):** o serviço agora fica no projeto Railway
-> exclusivo `argus` (id `743a5871-3628-4868-8cd2-b2c4b6a704f9`) e é
+> exclusivo `aip` (id `743a5871-3628-4868-8cd2-b2c4b6a704f9`) e é
 > acessado pelo domínio do próprio Railway. `argus.sistemainterno.app`
 > não é mais usado. O histórico abaixo é da primeira publicação.
 
@@ -18,7 +18,7 @@ ver histórico no `DECISIONS.md`). Você confirmou explicitamente depois
 o mesmo padrão dos outros produtos Logos nesse projeto Railway
 compartilhado (`pesquisa-campo-campanha`):
 
-- Serviço `argus` (Railway, deploy direto do diretório local via
+- Serviço `aip` (Railway, deploy direto do diretório local via
   upload/tarball — não precisou de GitHub, já que o repo é só local
   mesmo, como pedido).
 - Postgres de produção dedicado: `Postgres-8_E2`.
@@ -31,7 +31,7 @@ compartilhado (`pesquisa-campo-campanha`):
 - Testado em produção de verdade (Playwright: login + dashboard + Uso
   Digital, sem erro).
 
-**Acesse**: https://argus-production-49d3.up.railway.app — login `admin` /
+**Acesse**: https://aip-production.up.railway.app — login `admin` /
 `argus2026`.
 
 Continuam valendo os pontos já documentados como incompletos (IA mock,
@@ -112,7 +112,7 @@ abaixo carregam com status 200 e sem erro de servidor/console:
 
 ## O que ficou pra depois (nada foi "pulado" por trava técnica — tudo abaixo é escopo cortado conscientemente por tempo, com nota no `DECISIONS.md`)
 
-- Deploy em `argus-production-49d3.up.railway.app` (projeto Railway `argus`) — ver seção acima.
+- Deploy em `aip-production.up.railway.app` (projeto Railway `aip`) — ver seção acima.
 - Consentimento LGPD pra foto biométrica + política de retenção — não
   implementado, documentado como obrigatório antes de produção real.
 - Storage de imagem (S3 ou similar) pra guardar a selfie — hoje a foto
@@ -130,7 +130,7 @@ abaixo carregam com status 200 e sem erro de servidor/console:
 
 ## Commits desta sessão
 
-Histórico completo em `git log` no repositório `argus-sistema` (repo
+Histórico completo em `git log` no repositório `aip-sistema` (repo
 próprio, separado da landing page, só local — sem remoto configurado).
 Um commit por bloco de funcionalidade fechado, do setup inicial até
 Cadastros/Mapas/Uso Digital/Configurações. Este commit de documentação

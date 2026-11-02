@@ -1,16 +1,16 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { perguntarArgus, type RespostaArgus } from '@/app/(sistema)/shopping/acoes';
+import { perguntarAIP, type RespostaAIP } from '@/app/(sistema)/shopping/acoes';
 import { LogoA } from './Logo';
 import { GraficoBarras, GraficoLinhas } from './Graficos';
 import { cn } from '@/lib/cn';
 
 const SUGESTOES = ['Qual corredor mais cresceu em outubro?', 'Qual o horário de pico hoje?', 'Quantas pessoas estão no shopping agora?', 'Quais são as zonas mortas?', 'Quantas pessoas entraram hoje?'];
-type Mensagem = { de: 'voce'; texto: string } | { de: 'argus'; resposta: RespostaArgus };
+type Mensagem = { de: 'voce'; texto: string } | { de: 'aip'; resposta: RespostaAIP };
 
 // O limite diário é contado no servidor (por usuário); aqui só mostramos.
-export function PergunteArgus({ limiteDia, usadasHoje }: { limiteDia: number; usadasHoje: number }) {
+export function PergunteAIP({ limiteDia, usadasHoje }: { limiteDia: number; usadasHoje: number }) {
   const LIMITE_DIA = limiteDia;
   const [aberto, setAberto] = useState(false);
   const [texto, setTexto] = useState('');
@@ -36,9 +36,9 @@ export function PergunteArgus({ limiteDia, usadasHoje }: { limiteDia: number; us
     setTexto('');
     setMensagens((m) => [...m, { de: 'voce', texto: q }]);
     iniciar(async () => {
-      const resposta = await perguntarArgus(q);
+      const resposta = await perguntarAIP(q);
       if (resposta.usadasHoje !== undefined) setUsadas(resposta.usadasHoje);
-      setMensagens((m) => [...m, { de: 'argus', resposta }]);
+      setMensagens((m) => [...m, { de: 'aip', resposta }]);
     });
   }
 
@@ -46,8 +46,8 @@ export function PergunteArgus({ limiteDia, usadasHoje }: { limiteDia: number; us
     <>
       <button
         onClick={() => setAberto((a) => !a)}
-        aria-label="Pergunte ao Argus"
-        title="Pergunte ao Argus"
+        aria-label="Pergunte à AIP"
+        title="Pergunte à AIP"
         aria-expanded={aberto}
         className={cn(
           'group fixed bottom-5 right-5 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg transition-all duration-300 ease-out hover:scale-110 hover:shadow-xl active:scale-90 print:hidden',
@@ -68,7 +68,7 @@ export function PergunteArgus({ limiteDia, usadasHoje }: { limiteDia: number; us
             'fixed bottom-24 right-5 z-50 flex h-[min(640px,calc(100vh-8rem))] w-[min(420px,calc(100vw-2.5rem))] origin-bottom-right flex-col overflow-hidden rounded-md border border-outline-variant bg-surface shadow-2xl',
             !aberto && 'pointer-events-none'
           )}
-          style={{ animation: aberto ? 'argus-abrir 220ms ease-out' : 'argus-fechar 300ms cubic-bezier(.5, 0, .75, 0) forwards' }}
+          style={{ animation: aberto ? 'aip-abrir 220ms ease-out' : 'aip-fechar 300ms cubic-bezier(.5, 0, .75, 0) forwards' }}
         >
           <div className="flex items-center justify-between border-b border-outline-variant px-4 py-3">
             <div className="flex items-center gap-2.5">
@@ -76,7 +76,7 @@ export function PergunteArgus({ limiteDia, usadasHoje }: { limiteDia: number; us
                 <LogoA className="h-3.5" />
               </span>
               <div>
-                <p className="text-sm font-semibold text-on-surface">Pergunte ao Argus</p>
+                <p className="text-sm font-semibold text-on-surface">Pergunte à AIP</p>
                 <p className="text-[11px] text-on-surface-variant">Respostas a partir dos dados do shopping</p>
               </div>
             </div>

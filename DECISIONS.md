@@ -1,20 +1,20 @@
-# Decisões — Sistema Argus
+# Decisões — Sistema AIP
 
 Este documento registra toda decisão de produto/arquitetura que não estava
 especificada no briefing original, com o motivo de cada uma. Escrito
 durante uma sessão autônoma (o usuário estava dormindo) — sem pausa pra
 perguntar, conforme instruído.
 
-## Publicação: projeto Railway `argus`, domínio do Railway
+## Publicação: projeto Railway `aip`, domínio do Railway
 
-**Decisão atual (2026-10-12):** o Argus roda no projeto Railway
-exclusivo `argus` e é acessado em
-https://argus-production-49d3.up.railway.app. Não usar
+**Decisão atual (2026-10-12):** a AIP roda no projeto Railway
+exclusivo `aip` e é acessado em
+https://aip-production.up.railway.app. Não usar
 `sistemainterno.app` nem o roteador do projeto `sistema-interno`: o
 roteador só alcança serviços do próprio projeto, então depois que o
-Argus foi para o projeto `argus` o endereço antigo passou a dar
+AIP foi para o projeto `aip` o endereço antigo passou a dar
 "Erro ao encaminhar a requisição". Próximos deploys vão para o projeto
-`argus`.
+`aip`.
 
 ### Histórico: primeira publicação em `argus.sistemainterno.app`
 
@@ -36,7 +36,7 @@ id `bb560b4b-8b6b-4aa1-8e9f-6162246ff15c`, ambiente `production`):
   (`Postgres-8_E2`) — cada app do projeto tem seu próprio banco, não
   compartilha com os outros clientes (confirmado olhando `showroom` e
   `rota-instalacoes`, que seguem o mesmo padrão).
-- **Serviço `argus`** criado sem repositório GitHub conectado — o deploy
+- **Serviço `aip`** criado sem repositório GitHub conectado — o deploy
   foi feito por upload direto do diretório local (`railway deploy` via
   MCP, que empacota e sobe o diretório como está). Isso respeita o "repo
   próprio, comitado localmente" pedido no briefing original: não foi
@@ -54,7 +54,7 @@ id `bb560b4b-8b6b-4aa1-8e9f-6162246ff15c`, ambiente `production`):
   apagam nenhum dado real que você tiver criado depois. `tsx` foi
   movido de `devDependencies` pra `dependencies` porque esse script
   precisa dele em produção, não só em dev.
-- **Roteamento**: linha `argus: 'http://argus.railway.internal:8080'`
+- **Roteamento**: linha `aip: 'http://aip.railway.internal:8080'`
   adicionada em `router/rotas.js` (repo `sistema-interno-app`, branch
   `main`) — mesmo mecanismo de coringa `*.sistemainterno.app` que os
   outros clientes já usam, sem precisar de DNS novo. Commit `7cf1f75`,
@@ -74,7 +74,7 @@ mudou, não o estado de maturidade do produto.
 - **Next.js 16 (App Router) + TypeScript + `postgres` (sem ORM) +
   Tailwind CSS v4** — exatamente a stack pedida, confirmada olhando o
   `package.json` do outro produto Logos (`logoscompany`, a própria
-  landing page do Argus) que já roda nesse conjunto.
+  landing page da AIP) que já roda nesse conjunto.
 - **Design system**: reaproveitei `DESIGN.md` do `logoscompany`
   integralmente (variante "admin/dashboard" descrita lá: cantos retos
   `rounded-sm` em controles, hairline borders em vez de sombra pesada,
@@ -83,7 +83,7 @@ mudou, não o estado de maturidade do produto.
   palavra, então usei o arquivo de verdade em vez de aproximar da
   descrição. Copiado pra `src/app/globals.css` como variáveis CSS +
   `@theme inline`, com um comentário explicando a origem. Quando você
-  mandar o `.md` oficial do design system do Argus, é só substituir os
+  mandar o `.md` oficial do design system da AIP, é só substituir os
   valores desse bloco — os componentes (`src/components/ui/*`) já leem
   tudo via classe Tailwind/variável, nenhum estilo inline espalhado.
 - **Sem NextAuth**: o `package.json` do produto reaproveitado não inclui
@@ -212,20 +212,20 @@ mudou, não o estado de maturidade do produto.
   painel `logoscompany` (sol/lua na sidebar). Copiei o mecanismo de lá
   quase igual: classe `dark` em `document.documentElement` (não
   `data-theme`, não Context/Provider), `localStorage` por navegador
-  (`argus-theme`), e um `<script>` bloqueante em `layout.tsx` que roda
+  (`aip-theme`), e um `<script>` bloqueante em `layout.tsx` que roda
   antes da primeira pintura pra aplicar o tema salvo sem piscar claro
   primeiro.
 - Tive que acrescentar `suppressHydrationWarning` na tag `<html>` — o
   `logoscompany` não precisou porque lá o layout com o script fica numa
   árvore separada (`/admin/layout.tsx`, fora do `[locale]`), enquanto o
-  Argus tem um único layout raiz. Sem isso, o React reclamava de
+  AIP tem um único layout raiz. Sem isso, o React reclamava de
   hydration mismatch (classe `dark` aparece no DOM antes da hidratação,
   servidor não sabia disso ao renderizar). Confirmado com Playwright que
   não sobra warning nenhum no console depois da correção.
 - Aplica no site inteiro (login/checkin incluído), não só no admin —
   diferente do `logoscompany`, que restringe a `/admin`. Não vi motivo
   pra restringir aqui, já que não existe "site público" separado no
-  Argus (tudo é painel ou tela de check-in).
+  AIP (tudo é painel ou tela de check-in).
 
 ## Conformidade (LGPD / REP-P)
 
@@ -257,7 +257,7 @@ mudou, não o estado de maturidade do produto.
 - Rate limiting / bloqueio de conta após tentativas de login erradas —
   não implementado.
 - Exportação CSV em qualquer tela (o `logoscompany` tem isso em
-  Militantes) — não pedido no briefing do Argus, não implementei.
+  Militantes) — não pedido no briefing da AIP, não implementei.
 - Testes automatizados formais (Jest/Playwright como suíte do
   repositório) — validei manualmente com scripts Playwright avulsos
   durante a sessão (não commitados), mas não configurei uma suíte de

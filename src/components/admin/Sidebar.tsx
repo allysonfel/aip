@@ -44,7 +44,7 @@ export function Sidebar({ nomeUsuario, nomeEmpresa }: { nomeUsuario: string; nom
       <div className="flex items-center gap-2.5 px-6 py-6">
         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-sm bg-primary text-sm font-bold text-on-primary">A</div>
         <div className="min-w-0">
-          <p className="text-sm font-bold leading-tight text-on-surface">Argus</p>
+          <p className="text-sm font-bold leading-tight text-on-surface">AIP</p>
           <p className="truncate text-xs leading-tight text-on-surface-variant">{nomeEmpresa}</p>
         </div>
       </div>

@@ -88,7 +88,7 @@ export function FormConfiguracoes({ inicial }: { inicial: CamposConfiguracoes })
         </div>
       </Bloco>
 
-      <Bloco titulo="Fuso e horário de funcionamento" descricao="Base para o limite diário do Pergunte ao Argus, áreas restritas e relatórios." aplica={<Aplica agora />}>
+      <Bloco titulo="Fuso e horário de funcionamento" descricao="Base para o limite diário do Pergunte à AIP, áreas restritas e relatórios." aplica={<Aplica agora />}>
         <SelectField label="Fuso horário" value={c.fuso} onChange={txt('fuso')}>
           {FUSOS.map(([v, n]) => (
             <option key={v} value={v}>
@@ -111,7 +111,7 @@ export function FormConfiguracoes({ inicial }: { inicial: CamposConfiguracoes })
         <Field label="Buffer da busca de criança (horas)" type="number" min={1} max={168} value={c.retencao_busca_crianca_horas} onChange={num('retencao_busca_crianca_horas')} hint="Recortes e descritores usados pra procurar." />
       </Bloco>
 
-      <Bloco titulo="Pergunte ao Argus" descricao="O assistente responde só com dados agregados e só sobre as abas que cada usuário vê." aplica={<Aplica agora />}>
+      <Bloco titulo="Pergunte à AIP" descricao="O assistente responde só com dados agregados e só sobre as abas que cada usuário vê." aplica={<Aplica agora />}>
         <label className="flex items-center gap-2 text-sm text-on-surface">
           <input type="checkbox" checked={c.pergunte_ativo} onChange={(e) => setC({ ...c, pergunte_ativo: e.target.checked })} />
           Assistente ligado

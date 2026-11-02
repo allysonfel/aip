@@ -1,16 +1,16 @@
 import Link from "next/link";
-import ArgusHeader from "./ArgusHeader";
+import AIPHeader from "./AIPHeader";
 import TrackingDemo from "./TrackingDemo";
 import TypingOnScroll from "./TypingOnScroll";
 import CameraSimulator from "./CameraSimulator";
 import Reveal from "./Reveal";
 
-// Título do hero em Inter (ver argus-theme.css, --font-sans dessa
+// Título do hero em Inter (ver aip-theme.css, --font-sans dessa
 // página) — tema "Oxide" pede peso 400 fixo em tudo, hierarquia vem só
 // de tamanho/tracking, nunca de peso maior nem de fonte de destaque à
 // parte (Archivo/Alliance No.1 saíram daqui por causa disso).
 
-// Copy escrita pelo cliente pro Logos [Argus] (revisão de 11/09), adaptada
+// Copy escrita pelo cliente pro Logos [AIP] (revisão de 11/09), adaptada
 // aqui pro formato de seções que a página já usa (cards, grids, cores
 // alternando bg-surface/bg-surface-container-lowest) — sem travessão em
 // nenhum texto, por pedido explícito (regra já usada no resto do
@@ -125,7 +125,7 @@ const CAMERA_STEPS = [
   {
     icon: IconPlug,
     title: "Conectamos suas câmeras",
-    body: "Não é preciso comprar câmeras novas. O Argus se conecta aos gravadores e câmeras de rede que a sua empresa já tem instalados.",
+    body: "Não é preciso comprar câmeras novas. A AIP se conecta aos gravadores e câmeras de rede que a sua empresa já tem instalados.",
   },
   {
     icon: IconEye,
@@ -156,12 +156,12 @@ const ALERTS = [
 
 const FAQ = [
   {
-    q: "O que é o Sistema Argus?",
-    a: "O Sistema Argus é uma plataforma para acompanhamento de jornadas, dispositivos e informações da operação. O sistema reúne recursos como Ponto IA, localização de dispositivos, Câmeras IA, alertas inteligentes e uso digital da equipe em um único ambiente.",
+    q: "O que é o Sistema AIP?",
+    a: "O Sistema AIP é uma plataforma para acompanhamento de jornadas, dispositivos e informações da operação. O sistema reúne recursos como Ponto IA, localização de dispositivos, Câmeras IA, alertas inteligentes e uso digital da equipe em um único ambiente.",
   },
   {
     q: "O que é o Ponto IA?",
-    a: "É o recurso de inteligência artificial do Sistema Argus que analisa o check-in realizado pelo colaborador de acordo com os critérios definidos pela empresa. A análise pode considerar informações como rosto, uniforme, crachá, calçado, estação de trabalho e localização. Funciona tanto para equipe interna quanto externa.",
+    a: "É o recurso de inteligência artificial do Sistema AIP que analisa o check-in realizado pelo colaborador de acordo com os critérios definidos pela empresa. A análise pode considerar informações como rosto, uniforme, crachá, calçado, estação de trabalho e localização. Funciona tanto para equipe interna quanto externa.",
   },
   {
     q: "O Ponto IA bloqueia o registro?",
@@ -177,11 +177,11 @@ const FAQ = [
   },
   {
     q: "Preciso instalar um relógio de ponto?",
-    a: "Não. O Sistema Argus funciona por meio de software e aplicativo. Não depende da instalação de um relógio físico para realizar os registros.",
+    a: "Não. O Sistema AIP funciona por meio de software e aplicativo. Não depende da instalação de um relógio físico para realizar os registros.",
   },
   {
     q: "Posso acompanhar os dispositivos da empresa?",
-    a: "Sim. O Sistema Argus permite visualizar dispositivos no mapa, consultar sua última localização conhecida e acompanhar informações de status disponíveis no sistema.",
+    a: "Sim. O Sistema AIP permite visualizar dispositivos no mapa, consultar sua última localização conhecida e acompanhar informações de status disponíveis no sistema.",
   },
   {
     q: "Preciso trocar minhas câmeras para usar o Câmeras IA?",
@@ -189,7 +189,7 @@ const FAQ = [
   },
   {
     q: "Como recebo os avisos das câmeras?",
-    a: "Quando a IA detecta uma ocorrência, o Argus envia um aviso pelo WhatsApp com a foto do momento, em menos de 3 segundos. Os avisos vão para as pessoas que você definir.",
+    a: "Quando a IA detecta uma ocorrência, a AIP envia um aviso pelo WhatsApp com a foto do momento, em menos de 3 segundos. Os avisos vão para as pessoas que você definir.",
   },
   {
     q: "O sistema dispara alarme à toa com chuva, vento ou animais?",
@@ -200,21 +200,21 @@ const FAQ = [
     a: "Sim. É possível centralizar diferentes unidades, equipes, colaboradores e dispositivos na mesma plataforma.",
   },
   {
-    q: "O Sistema Argus serve para qualquer empresa?",
+    q: "O Sistema AIP serve para qualquer empresa?",
     a: "O sistema foi desenvolvido para operações que precisam acompanhar equipes, jornadas, dispositivos e informações operacionais de forma centralizada. A estrutura pode ser adaptada de acordo com a realidade da empresa.",
   },
 ];
 
-export default function ArgusPage() {
+export default function AIPPage() {
   return (
     <>
-      {/* HEADER — extraído pra ArgusHeader.tsx (Client Component): fica
+      {/* HEADER — extraído pra AIPHeader.tsx (Client Component): fica
           transparente no topo da página e "aparece" ao rolar (ver
           comentário lá pro porquê de fixed em vez de sticky). O ícone de
           menu (☰, ver MobileMenu.tsx) abre o mesmo painel em tela cheia
           do menu principal do site (MobileNav), até essa página ganhar
           uma navegação própria. */}
-      <ArgusHeader />
+      <AIPHeader />
 
       {/*
         HERO — vídeo de fundo cobrindo a seção inteira (não uma coluna
@@ -227,7 +227,7 @@ export default function ArgusPage() {
         empilhados) era justamente empurrar o texto pra fora da tela no
         celular.
 
-        O vídeo (/argus-hero.mp4) ainda não existe, o cliente vai gravar
+        O vídeo (/aip-hero.mp4) ainda não existe, o cliente vai gravar
         o próprio; até lá cai num fundo sólido (bg-surface-container-high)
         por trás do degradê.
 
@@ -241,7 +241,7 @@ export default function ArgusPage() {
       {/*
         min-h 100svh cheio agora (não mais calc(100svh-64px)): o
         cabeçalho virou fixed e some transparente no topo (ver
-        ArgusHeader.tsx), não ocupa mais espaço no fluxo normal, então
+        AIPHeader.tsx), não ocupa mais espaço no fluxo normal, então
         não precisa mais descontar a altura dele aqui — sobra mais tela
         pro hero, e o conteúdo (título/subtítulo/botão/quadrado) pôde
         subir e se agrupar mais.
@@ -254,7 +254,7 @@ export default function ArgusPage() {
           playsInline
           className="absolute inset-0 h-full w-full bg-surface-container-high object-cover"
         >
-          <source src="/argus-hero.mp4" type="video/mp4" />
+          <source src="/aip-hero.mp4" type="video/mp4" />
         </video>
         {/* Degradê escurecendo por trás do texto, mais forte embaixo (mobile)
             e mais forte à esquerda (desktop), pra manter contraste com
@@ -303,7 +303,7 @@ export default function ArgusPage() {
             <div className="mt-md">
               <Link
                 href="/contato"
-                className="argus-mono inline-flex h-12 items-center justify-center border border-primary bg-primary px-6 text-label-md text-on-primary transition-colors hover:bg-primary-hover"
+                className="aip-mono inline-flex h-12 items-center justify-center border border-primary bg-primary px-6 text-label-md text-on-primary transition-colors hover:bg-primary-hover"
               >
                 Fale Conosco Agora
               </Link>
@@ -329,7 +329,7 @@ export default function ArgusPage() {
             Uma visão completa da sua operação.
           </h2>
           <p className="mx-auto mt-xs max-w-[36rem] text-center text-body-md text-on-surface-variant">
-            O Sistema Argus reúne informações que normalmente ficam espalhadas em diferentes
+            O Sistema AIP reúne informações que normalmente ficam espalhadas em diferentes
             sistemas e transforma tudo em uma única visão.
           </p>
 
@@ -348,7 +348,7 @@ export default function ArgusPage() {
                 <div className="mx-auto flex h-10 w-10 items-center justify-center border border-outline-variant/60 bg-primary-container text-on-primary-container">
                   <o.icon />
                 </div>
-                <p className="argus-mono mt-sm text-label-md text-on-surface">{o.title}</p>
+                <p className="aip-mono mt-sm text-label-md text-on-surface">{o.title}</p>
                 <p className="mt-xs text-body-md text-on-surface-variant">{o.body}</p>
               </div>
             ))}
@@ -362,12 +362,12 @@ export default function ArgusPage() {
       <section className="border-b border-outline-variant/60 bg-surface-container-lowest">
         <Reveal className="mx-auto max-w-[1200px] px-gutter py-xl">
           <div className="mx-auto max-w-[36rem] text-center">
-            <p className="argus-mono text-label-sm text-on-surface-variant">Câmeras IA</p>
+            <p className="aip-mono text-label-sm text-on-surface-variant">Câmeras IA</p>
             <h2 className="mt-xs text-headline-md font-normal sm:text-[32px]">
               Aproveite as câmeras que você já tem.
             </h2>
             <p className="mt-xs text-body-md text-on-surface-variant">
-              O Argus dá inteligência às câmeras e gravadores já instalados na sua operação, sem trocar
+              A AIP dá inteligência às câmeras e gravadores já instalados na sua operação, sem trocar
               equipamento e sem obra.
             </p>
           </div>
@@ -376,7 +376,7 @@ export default function ArgusPage() {
             {CAMERA_STATS.map((stat) => (
               <div key={stat.label} className="bg-surface p-sm text-center">
                 <p className="text-title-lg text-on-surface">{stat.value}</p>
-                <p className="argus-mono mt-1 text-[10px] text-on-surface-variant">{stat.label}</p>
+                <p className="aip-mono mt-1 text-[10px] text-on-surface-variant">{stat.label}</p>
               </div>
             ))}
           </div>
@@ -388,7 +388,7 @@ export default function ArgusPage() {
                   <span className="flex h-10 w-10 items-center justify-center border border-outline-variant/60 bg-primary-container text-on-primary-container">
                     <step.icon />
                   </span>
-                  <span className="argus-mono text-label-sm text-on-surface-variant">
+                  <span className="aip-mono text-label-sm text-on-surface-variant">
                     Passo {String(index + 1).padStart(2, "0")}
                   </span>
                 </div>
@@ -399,10 +399,10 @@ export default function ArgusPage() {
           </div>
 
           <div className="mx-auto mt-xl max-w-[36rem] text-center">
-            <p className="argus-mono text-label-sm text-on-surface-variant">Simulador interativo</p>
+            <p className="aip-mono text-label-sm text-on-surface-variant">Simulador interativo</p>
             <h3 className="mt-xs text-headline-md font-normal sm:text-[32px]">Teste você mesmo.</h3>
             <p className="mt-xs text-body-md text-on-surface-variant">
-              Escolha o evento, o local e a severidade. Veja o Argus detectar a ocorrência e montar o
+              Escolha o evento, o local e a severidade. Veja a AIP detectar a ocorrência e montar o
               aviso que chega no WhatsApp.
             </p>
           </div>
@@ -421,7 +421,7 @@ export default function ArgusPage() {
               Nem todo problema aparece de uma vez. Primeiro, ele foge do padrão.
             </h2>
             <p className="mt-xs text-body-lg text-on-surface-variant">
-              O Sistema Argus ajuda você a perceber antes que passe despercebido.
+              O Sistema AIP ajuda você a perceber antes que passe despercebido.
             </p>
           </div>
 
@@ -451,7 +451,7 @@ export default function ArgusPage() {
             Precisa conseguir enxergar o que acontece neles.
           </p>
           <p className="mx-auto mt-md max-w-[36rem] text-body-md text-on-surface-variant">
-            O Sistema Argus centraliza informações importantes da operação para que você
+            O Sistema AIP centraliza informações importantes da operação para que você
             tenha uma visão mais clara do que está acontecendo, mesmo quando a sua equipe
             está longe de você.
           </p>
@@ -460,7 +460,7 @@ export default function ArgusPage() {
             {["Jornadas", "Check-ins", "Localização", "Dispositivos", "Câmeras", "Alertas", "Uso Digital"].map((item) => (
               <span
                 key={item}
-                className="argus-mono border border-outline-variant px-3 py-1 text-label-sm text-on-surface"
+                className="aip-mono border border-outline-variant px-3 py-1 text-label-sm text-on-surface"
               >
                 {item}
               </span>
@@ -480,7 +480,7 @@ export default function ArgusPage() {
             Segurança, rastreabilidade e conformidade.
           </h2>
           <p className="mx-auto mt-md max-w-[36rem] text-body-md text-on-surface-variant">
-            O Sistema Argus opera como REP-P (Registrador Eletrônico de Ponto via Programa),
+            O Sistema AIP opera como REP-P (Registrador Eletrônico de Ponto via Programa),
             desenvolvido para atender aos requisitos da Portaria MTP nº 671/2021.
           </p>
           <p className="mx-auto mt-md max-w-[36rem] text-body-md text-on-surface-variant">
@@ -537,7 +537,7 @@ export default function ArgusPage() {
           </p>
           <Link
             href="/contato"
-            className="argus-mono mt-lg inline-flex h-12 items-center justify-center border border-primary bg-primary px-6 text-label-md text-on-primary transition-colors hover:bg-primary-hover"
+            className="aip-mono mt-lg inline-flex h-12 items-center justify-center border border-primary bg-primary px-6 text-label-md text-on-primary transition-colors hover:bg-primary-hover"
           >
             Fale Conosco Agora
           </Link>

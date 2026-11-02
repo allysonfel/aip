@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LogoA, LogoArgus } from '@/components/shopping/Logo';
+import { LogoA, LogoAIP } from '@/components/shopping/Logo';
 
 /** Cookie curto criado no login (ver login/actions.ts): a abertura só toca logo depois de entrar. */
-const COOKIE = 'argus-abertura';
+const COOKIE = 'aip-abertura';
 const DURACAO_MS = 5000;
 
-// Abertura do sistema depois do login: o "A" do Argus acende, uma linha de
+// Abertura do sistema depois do login: o "A" da AIP acende, uma linha de
 // varredura (como a de uma câmera) revela o nome, aparece o "bem-vindo" e
 // tudo se dissolve revelando o painel. Clicar pula.
 // O servidor só renderiza este componente quando o cookie existe, então a
@@ -77,8 +77,8 @@ export function AberturaEntrada({ nome }: { nome: string }) {
 
         <div className="relative">
           <div className="nome flex flex-col items-center">
-            <LogoArgus className="h-10 text-white sm:h-12" />
-            <span className="mt-2 text-[10px] font-medium uppercase tracking-[0.3em] text-white/70 sm:text-xs">Inteligência Patrimonial</span>
+            <LogoAIP className="h-14 text-white sm:h-16" />
+            <span className="mt-2 whitespace-nowrap text-[10px] font-medium uppercase tracking-[0.2em] text-white/70 sm:text-xs">Agência de Inteligência Patrimonial</span>
           </div>
           <span aria-hidden className="varre absolute -top-2 opacity-0 h-[calc(100%+16px)] w-0.5 bg-sky-300 shadow-[0_0_16px_4px_rgb(56_189_248/.7)]" />
         </div>

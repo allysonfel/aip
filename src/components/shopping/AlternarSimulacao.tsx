@@ -7,8 +7,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 // mostram o shopping inteiro com visitantes simulados sobre a planta. A
 // escolha vale para Mapa de calor, Zonas mortas e Rotas (fica no navegador).
 
-const CHAVE = 'argus-simulacao-shopping';
-const EVENTO = 'argus-simulacao-shopping';
+const CHAVE = 'aip-simulacao-shopping';
+const EVENTO = 'aip-simulacao-shopping';
 
 export function useSimulacaoShopping(): [boolean, (v: boolean) => void] {
   const [ligada, setLigada] = useState(false);

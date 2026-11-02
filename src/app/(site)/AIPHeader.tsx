@@ -1,6 +1,6 @@
 "use client";
 
-// Cabeçalho do /argus, separado do page.tsx (Server Component) só por
+// Cabeçalho do /aip, separado do page.tsx (Server Component) só por
 // causa do scroll listener abaixo: no topo da página o fundo/borda ficam
 // transparentes (o vídeo do hero aparece por baixo, "clean"), e ao
 // rolar um pouco eles "aparecem" com uma transição suave, voltando a
@@ -20,7 +20,7 @@ import HeaderActions from "./HeaderActions";
 
 const SCROLL_THRESHOLD = 40;
 
-export default function ArgusHeader() {
+export default function AIPHeader() {
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -42,10 +42,8 @@ export default function ArgusHeader() {
     >
       <div className="mx-auto flex max-w-[1200px] items-center justify-between gap-sm px-gutter py-sm">
         <div className="flex shrink-0 items-center">
-          {/* Wordmark oficial do Argus (public/argus-logo.png, aparado de
-              public/argus-white.png, que é quadrado com margem vazia) —
-              substitui o ícone da Logos + texto "Logos [Argus]". */}
-          <Image src="/argus-logo.png" alt="Logos [Argus]" width={751} height={187} priority className="h-6 w-auto" />
+          {/* Logotipo oficial da AIP (public/aip-logo.png). */}
+          <Image src="/aip-logo.png" alt="AIP" width={711} height={293} priority className="h-9 w-auto" />
         </div>
         <HeaderActions />
       </div>

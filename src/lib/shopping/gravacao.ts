@@ -56,7 +56,7 @@ export function gravarCanvas(canvas: HTMLCanvasElement, fps = 30): { parar: () =
   };
 }
 
-/** Nome de arquivo seguro: "argus-cam-01-praca-central-0m52s.mp4". */
+/** Nome de arquivo seguro: "aip-cam-01-praca-central-0m52s.mp4". */
 export function nomeArquivo(partes: (string | number)[], ext: string): string {
   const base = partes
     .map((p) => String(p))
@@ -66,7 +66,7 @@ export function nomeArquivo(partes: (string | number)[], ext: string): string {
     .replace(/[̀-ͯ]/g, '')
     .replace(/[^a-z0-9]+/g, '-')
     .replace(/^-|-$/g, '');
-  return `argus-${base}.${ext}`;
+  return `aip-${base}.${ext}`;
 }
 
 export const fmtArquivoTempo = (s: number) => `${Math.floor(s / 60)}m${String(Math.floor(s % 60)).padStart(2, '0')}s`;

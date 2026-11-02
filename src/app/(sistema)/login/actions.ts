@@ -31,7 +31,7 @@ export async function fazerLogin(_prevState: { erro: string | null }, formData: 
   });
   await registrarAuditoria({ empresaId: r.usuario.empresaId, usuarioId: r.usuario.id, acao: 'login' });
   // Abertura animada na primeira tela depois do login (o painel apaga o cookie).
-  jar.set('argus-abertura', '1', { path: '/', maxAge: 120, sameSite: 'lax' });
+  jar.set('aip-abertura', '1', { path: '/', maxAge: 120, sameSite: 'lax' });
 
   redirect(destinoInicial(r.usuario));
 }

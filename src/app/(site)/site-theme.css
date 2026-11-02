@@ -60,13 +60,13 @@
   --color-foreground: var(--color-on-surface);
 
   /* Severidade do módulo Câmeras IA (coral, violeta, verde LED) */
-  --argus-sev-critical: #ff6285;
-  --argus-sev-attention: #c58aff;
-  --argus-sev-info: #00d892;
+  --aip-sev-critical: #ff6285;
+  --aip-sev-attention: #c58aff;
+  --aip-sev-info: #00d892;
 
   /* Corpo/títulos em Inter (via next/font/google em layout.tsx,
      --font-inter). Rótulo técnico fica só nos elementos marcados com
-     .argus-mono. */
+     .aip-mono. */
   --font-sans: var(--font-inter), -apple-system, BlinkMacSystemFont, "Helvetica Neue", system-ui, sans-serif;
 
   /* Espaçamento semântico (unidade base 8px). */
@@ -211,7 +211,7 @@
 
 /* Rótulo técnico (nav, badge, aba, botão, legenda de status) — mono com
    tracking largo, tudo maiúsculo, "leitura de sistema" do Oxide. */
-.argus-mono {
+.aip-mono {
   font-family: var(--font-jetbrains-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -219,7 +219,7 @@
 }
 
 /* Badge de status (ex.: "AO VIVO") — anel interno verde, como um LED, não uma pílula. */
-.argus-status-badge {
+.aip-status-badge {
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -231,7 +231,7 @@
 }
 
 /* Linha de varredura do quadro de câmera e entrada da caixa de detecção. */
-@keyframes argus-scan {
+@keyframes aip-scan {
   0% {
     top: 0;
     opacity: 0;
@@ -246,7 +246,7 @@
   }
 }
 
-@keyframes argus-box-in {
+@keyframes aip-box-in {
   from {
     opacity: 0;
     transform: scale(0.94);
@@ -257,12 +257,12 @@
   }
 }
 
-.argus-scan {
-  animation: argus-scan 3.2s linear infinite;
+.aip-scan {
+  animation: aip-scan 3.2s linear infinite;
 }
 
-.argus-box-in {
-  animation: argus-box-in 0.3s ease-out both;
+.aip-box-in {
+  animation: aip-box-in 0.3s ease-out both;
 }
 
 /* Entrada "subindo" do conteúdo de cada aba/cenário (TrackingDemo, CameraSimulator). */
@@ -289,8 +289,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .argus-scan,
-  .argus-box-in {
+  .aip-scan,
+  .aip-box-in {
     animation: none;
   }
 }

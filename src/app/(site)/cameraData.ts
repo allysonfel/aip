@@ -1,6 +1,6 @@
 // Dados simulados do módulo Câmeras IA (demonstração no hero e no
 // simulador interativo). Nada aqui vem de câmera de verdade: são
-// cenários fixos pra mostrar como o Argus detecta e avisa. Sem "—" em
+// cenários fixos pra mostrar como a AIP detecta e avisa. Sem "—" em
 // nenhum texto visível (regra do projeto).
 
 export type EventKey = "pessoa" | "veiculo" | "moto";
@@ -82,7 +82,7 @@ export const ZONES: Record<
 };
 
 // Cores de severidade vêm do guia do tema (coral, violeta, verde LED)
-// e ficam em variáveis CSS em argus-theme.css.
+// e ficam em variáveis CSS em aip-theme.css.
 export const SEVERITIES: Record<
   SeverityKey,
   {
@@ -100,7 +100,7 @@ export const SEVERITIES: Record<
     tag: "Alerta crítico",
     instruction: "Acionar imediatamente a equipe responsável e verificar o local.",
     short: "foto enviada no WhatsApp",
-    color: "var(--argus-sev-critical)",
+    color: "var(--aip-sev-critical)",
   },
   atencao: {
     label: "Atenção",
@@ -108,7 +108,7 @@ export const SEVERITIES: Record<
     tag: "Alerta de atenção",
     instruction: "Verificar a ocorrência assim que possível.",
     short: "foto enviada no WhatsApp",
-    color: "var(--argus-sev-attention)",
+    color: "var(--aip-sev-attention)",
   },
   info: {
     label: "Informativo",
@@ -116,7 +116,7 @@ export const SEVERITIES: Record<
     tag: "Registro informativo",
     instruction: "Ocorrência registrada no painel para consulta.",
     short: "registro salvo no painel",
-    color: "var(--argus-sev-info)",
+    color: "var(--aip-sev-info)",
   },
 };
 

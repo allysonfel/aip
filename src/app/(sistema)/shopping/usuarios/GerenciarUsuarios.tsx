@@ -176,7 +176,7 @@ export function GerenciarUsuarios({ eu, usuarios, auditoria }: { eu: number; usu
                 </label>
               ))}
             </div>
-            <p className="mt-2 text-xs text-on-surface-variant">Usuários e Configurações são só do administrador geral. O Pergunte ao Argus só responde sobre as abas liberadas e nunca sobre segurança.</p>
+            <p className="mt-2 text-xs text-on-surface-variant">Usuários e Configurações são só do administrador geral. O Pergunte à AIP só responde sobre as abas liberadas e nunca sobre segurança.</p>
           </div>
 
           {erro && <Alert variant="error" className="mt-4">{erro}</Alert>}

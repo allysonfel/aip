@@ -40,7 +40,7 @@ export async function listarAuditoria(empresaId: number, limite = 150): Promise<
   `;
 }
 
-/** Perguntas feitas hoje ao Pergunte ao Argus (limite diário por usuário). */
+/** Perguntas feitas hoje ao Pergunte à AIP (limite diário por usuário). */
 export async function perguntasHoje(usuarioId: number, fuso: string): Promise<number> {
   const [r] = await sql<{ n: number }[]>`
     SELECT count(*)::int AS n FROM auditoria

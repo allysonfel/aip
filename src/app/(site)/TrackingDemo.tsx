@@ -167,7 +167,7 @@ export default function TrackingDemo() {
           <span className="h-2.5 w-2.5 rounded-full bg-outline-variant" />
           <span className="h-2.5 w-2.5 rounded-full bg-outline-variant" />
         </div>
-        <span className="argus-status-badge argus-mono text-label-sm">
+        <span className="aip-status-badge aip-mono text-label-sm">
           <span className="h-1.5 w-1.5 rounded-full bg-tertiary" />
           Ao vivo
         </span>
@@ -185,7 +185,7 @@ export default function TrackingDemo() {
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`argus-mono relative overflow-hidden whitespace-normal px-sm py-2 text-center text-label-sm leading-snug transition-colors sm:text-left ${
+              className={`aip-mono relative overflow-hidden whitespace-normal px-sm py-2 text-center text-label-sm leading-snug transition-colors sm:text-left ${
                 index === TABS.length - 1 && TABS.length % 2 === 1 ? "col-span-2 sm:col-span-1" : ""
               } ${
                 tab === t.id
@@ -235,7 +235,7 @@ export default function TrackingDemo() {
                 local de trabalho. Aprovado sem ninguém precisar olhar.
               </p>
 
-              <DemoVideo src="/argus-ponto-ia.mp4" />
+              <DemoVideo src="/aip-ponto-ia.mp4" />
 
               <div className="mt-sm flex justify-center gap-md">
                 {CHECKS.map((c) => (
@@ -272,7 +272,7 @@ export default function TrackingDemo() {
                 Notebook e celular na última posição conhecida, com status online ou offline.
               </p>
 
-              <DemoVideo src="/argus-rastreio.mp4" />
+              <DemoVideo src="/aip-rastreio.mp4" />
 
               <div className="mx-auto mt-sm flex max-w-[19rem] flex-wrap justify-center gap-x-lg gap-y-sm text-label-sm">
                 {DEVICES_SAMPLE.map((d) => (
@@ -302,7 +302,7 @@ export default function TrackingDemo() {
                 Acompanhe situações que merecem atenção e aja no momento certo.
               </p>
 
-              <DemoVideo src="/argus-alertas.mp4" />
+              <DemoVideo src="/aip-alertas.mp4" />
 
               <div className="mt-xs flex flex-col gap-xs">
                 {ALERTS_SAMPLE.map((a) => (
@@ -331,7 +331,7 @@ export default function TrackingDemo() {
                 da jornada.
               </p>
 
-              <DemoVideo src="/argus-uso-digital.mp4" />
+              <DemoVideo src="/aip-uso-digital.mp4" />
 
               <div className="mt-xs flex flex-col gap-1">
                 {USAGE_SAMPLE.map((u) => (

@@ -1,4 +1,4 @@
-# Motor de visão para o Railway (serviço "visao-ia" no projeto argus).
+# Motor de visão para o Railway (serviço "visao-ia" no projeto aip).
 # Só CPU: torch vem do índice CPU do PyTorch para a imagem não carregar
 # as bibliotecas CUDA (vários GB). Pesos do modelo baixados no build.
 FROM python:3.11-slim
@@ -34,5 +34,5 @@ ENV OMP_NUM_THREADS=4 MKL_NUM_THREADS=4
 # CPU do servidor é mais lenta que a de desenvolvimento: as câmeras que
 # ninguém está assistindo analisam a cada 10 s, sobrando o detector para a
 # câmera aberta no painel (com intervalos longos o rastreio perde as pessoas)
-ENV ARGUS_FPS_SEM_ESPECTADOR=0.1
-CMD ["sh", "-c", "uvicorn argus_visao.api:app --host 0.0.0.0 --port ${PORT}"]
+ENV AIP_FPS_SEM_ESPECTADOR=0.1
+CMD ["sh", "-c", "uvicorn aip_visao.api:app --host 0.0.0.0 --port ${PORT}"]

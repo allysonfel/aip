@@ -1,4 +1,4 @@
--- Schema do Sistema Argus — Postgres puro, sem ORM (lib `postgres`).
+-- Schema do Sistema AIP — Postgres puro, sem ORM (lib `postgres`).
 -- Todas as tabelas de negócio (exceto `empresas` em si) carregam
 -- empresa_id — todo filtro/relatório da aplicação DEVE incluir
 -- `WHERE empresa_id = $1` (ver src/lib/tenant.ts). Não há Row Level

@@ -58,10 +58,10 @@ export default function CameraTile({
         />
       </svg>
 
-      {variant !== "compact" && <div aria-hidden className="argus-scan absolute inset-x-0 h-px bg-tertiary/40" />}
+      {variant !== "compact" && <div aria-hidden className="aip-scan absolute inset-x-0 h-px bg-tertiary/40" />}
 
       <div
-        className="argus-box-in absolute border"
+        className="aip-box-in absolute border"
         style={{
           left: `${z.anchor.left}%`,
           top: `${z.anchor.top}%`,
@@ -71,7 +71,7 @@ export default function CameraTile({
         }}
       >
         <span
-          className="argus-mono absolute -left-px -top-[15px] whitespace-nowrap px-1 text-[9px] leading-[14px]"
+          className="aip-mono absolute -left-px -top-[15px] whitespace-nowrap px-1 text-[9px] leading-[14px]"
           style={{ backgroundColor: color, color: "#0b0e12" }}
         >
           {ev.boxLabel}
@@ -79,21 +79,21 @@ export default function CameraTile({
       </div>
 
       {showTop && (
-        <span className="argus-mono absolute left-2 top-2 border border-outline-variant/60 bg-surface/80 px-1.5 py-0.5 text-[9px] text-on-surface">
+        <span className="aip-mono absolute left-2 top-2 border border-outline-variant/60 bg-surface/80 px-1.5 py-0.5 text-[9px] text-on-surface">
           {z.camera}
         </span>
       )}
       {showFull && (
-        <span className="argus-mono absolute right-2 top-2 flex items-center gap-1.5 text-[9px] text-on-surface-variant">
+        <span className="aip-mono absolute right-2 top-2 flex items-center gap-1.5 text-[9px] text-on-surface-variant">
           <span className="h-1.5 w-1.5 bg-tertiary" />
           IA ativa · 30 fps
         </span>
       )}
       {showFull && (
-        <span className="argus-mono absolute bottom-2 left-2 text-[9px] text-on-surface-variant">{z.place}</span>
+        <span className="aip-mono absolute bottom-2 left-2 text-[9px] text-on-surface-variant">{z.place}</span>
       )}
       {showTop && (
-        <span className="argus-mono absolute bottom-2 right-2 text-[9px] text-on-surface-variant">
+        <span className="aip-mono absolute bottom-2 right-2 text-[9px] text-on-surface-variant">
           {formatStamp(now)}
         </span>
       )}

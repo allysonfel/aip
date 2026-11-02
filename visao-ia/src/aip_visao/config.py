@@ -54,8 +54,8 @@ class MotorConfig:
             motor = cls(**json.loads(caminho.read_text(encoding="utf-8")))
         # Sobrescreve por ambiente (ex.: servidor com CPU mais fraca que a
         # máquina de desenvolvimento, ver Dockerfile).
-        if "ARGUS_FPS_SEM_ESPECTADOR" in os.environ:
-            motor.fps_analise_sem_espectador = float(os.environ["ARGUS_FPS_SEM_ESPECTADOR"])
+        if "AIP_FPS_SEM_ESPECTADOR" in os.environ:
+            motor.fps_analise_sem_espectador = float(os.environ["AIP_FPS_SEM_ESPECTADOR"])
         return motor
 
 

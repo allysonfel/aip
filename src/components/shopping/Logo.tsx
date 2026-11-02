@@ -1,6 +1,6 @@
 import { cn } from '@/lib/cn';
 
-// O logo original (public/argus-logo.png) é branco com transparência.
+// O logo original (public/aip-logo.png) é branco com transparência.
 // Usado como MÁSCARA, ele assume a cor que o tema mandar (fica visível
 // no claro e no escuro) sem redesenhar nada.
 function Mascara({ src, proporcao, className }: { src: string; proporcao: number; className?: string }) {
@@ -23,12 +23,12 @@ function Mascara({ src, proporcao, className }: { src: string; proporcao: number
   );
 }
 
-/** Logotipo completo "ARGUS" (o A tem o olhinho). */
-export function LogoArgus({ className }: { className?: string }) {
-  return <Mascara src="/argus-logo.png" proporcao={751 / 187} className={className} />;
+/** Logotipo completo "AIP" (o A tem o olhinho). */
+export function LogoAIP({ className }: { className?: string }) {
+  return <Mascara src="/aip-logo.png" proporcao={711 / 293} className={className} />;
 }
 
-/** Só o "A" com olhinho, recortado do logotipo (public/argus-a.png). */
+/** Só o "A" com olhinho, recortado do logotipo (public/aip-a.png). */
 export function LogoA({ className }: { className?: string }) {
-  return <Mascara src="/argus-a.png" proporcao={226 / 182} className={className} />;
+  return <Mascara src="/aip-a.png" proporcao={327 / 293} className={className} />;
 }

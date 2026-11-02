@@ -35,8 +35,8 @@ from dataclasses import replace
 from itertools import product
 from pathlib import Path
 
-from argus_visao.config import RAIZ, Linha, TrackerConfig
-from argus_visao.offline import detectar_video, rodar
+from aip_visao.config import RAIZ, Linha, TrackerConfig
+from aip_visao.offline import detectar_video, rodar
 
 CONTAGENS = RAIZ / "videos" / "contagens.json"
 

@@ -16,20 +16,20 @@ import Link from "next/link";
 // Painel renderizado via portal direto em document.body (mesmo motivo do
 // MobileNav: o cabeçalho tem backdrop-blur, que vira "containing block"
 // pra position:fixed e prendia o painel dentro da altura do cabeçalho).
-// z-20, abaixo do z-30 do cabeçalho de /argus, pra ele continuar visível
+// z-20, abaixo do z-30 do cabeçalho de /aip, pra ele continuar visível
 // por cima (só a marca e o botão de fechar, o "X"). O estado (open) vem
 // de fora (ver TrackHeaderActions.tsx), igual o Header faz com o
 // MobileNav do site: assim o "Fale Conosco Agora" some quando o menu
 // abre, ficando só a marca visível por cima, igual no site principal.
 //
 // Cores: usa bg-surface/text-on-surface (não bg-inverse-surface como no
-// MobileNav do site) de propósito. /argus já força html.dark, então
+// MobileNav do site) de propósito. /aip já força html.dark, então
 // "inverse-surface" viraria claro (o token se inverte dentro de
 // html.dark) e o painel abriria branco numa página escura. bg-surface já
 // resolve pro escuro certo aqui, sem precisar inverter nada.
 const LINKS = [
   { label: "Início", href: "/" },
-  { label: "[Argus]", href: "/argus" },
+  { label: "[AIP]", href: "/" },
   { label: "Sobre nós", href: "/sobre-nos" },
   { label: "Contate-nos", href: "/contato" },
 ];
@@ -107,7 +107,7 @@ export default function MobileMenu({
                   <Link
                     href={item.href}
                     onClick={() => onOpenChange(false)}
-                    className="argus-mono block text-title-lg text-on-surface/90 hover:text-tertiary"
+                    className="aip-mono block text-title-lg text-on-surface/90 hover:text-tertiary"
                   >
                     {item.label}
                   </Link>

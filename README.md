@@ -1,4 +1,4 @@
-# Argus — Logos Company
+# AIP — Logos Company
 
 Sistema de gestão de operação (ponto eletrônico com IA, rastreio de
 dispositivos, uso digital e alertas), multi-tenant, para clientes da
@@ -20,7 +20,7 @@ npm run db:seed              # popula dados de exemplo (empresa "Construtora Nor
 npm run dev
 ```
 
-Login de exemplo após o seed: usuário `admin`, senha `argus2026`.
+Login de exemplo após o seed: usuário `admin`, senha `aip2026`.
 
 ## Documentação
 

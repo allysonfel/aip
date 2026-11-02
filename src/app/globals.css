@@ -5,8 +5,8 @@
  * mesmo cliente) — reaproveitados aqui integralmente porque a variante
  * "admin/dashboard" descrita lá (cantos retos rounded-sm em controles,
  * hairline borders em vez de sombra, azul só em estado ativo/CTA, ícones
- * finos na sidebar) é exatamente o estilo pedido pro Argus. Ver
- * DECISIONS.md. Argus é só painel administrativo — não usamos a variante
+ * finos na sidebar) é exatamente o estilo pedido pra AIP. Ver
+ * DECISIONS.md. AIP é só painel administrativo — não usamos a variante
  * "site público" (botões em pílula) daquele arquivo.
  */
 
@@ -226,13 +226,13 @@ html.dark {
   --viz-selecao: #f0efec;
 }
 
-/* Pergunte ao Argus: painel abre crescendo a partir do botão. */
-@keyframes argus-abrir {
+/* Pergunte à AIP: painel abre crescendo a partir do botão. */
+@keyframes aip-abrir {
   from { opacity: 0; transform: translateY(12px) scale(0.92); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
 /* ...e fecha encolhendo de volta para o botão. */
-@keyframes argus-fechar {
+@keyframes aip-fechar {
   0% { opacity: 1; transform: translateY(0) scale(1); }
   35% { opacity: 1; transform: translateY(-4px) scale(1.01); }
   100% { opacity: 0; transform: translateY(24px) scale(0.6); filter: blur(2px); }

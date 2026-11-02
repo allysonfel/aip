@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import { Plus_Jakarta_Sans } from 'next/font/google';
 import { exigirSessao } from '@/lib/sessaoServidor';
 import { SidebarShopping, MenuMovelShopping } from '@/components/shopping/SidebarShopping';
-import { PergunteArgus } from '@/components/shopping/PergunteArgus';
+import { PergunteAIP } from '@/components/shopping/PergunteAIP';
 import { BotaoSimulacao } from '@/components/shopping/AlternarSimulacao';
 import { AberturaEntrada } from '@/components/shopping/AberturaEntrada';
 import { obterConfiguracoes } from '@/lib/shopping/configuracoes';
@@ -12,12 +12,12 @@ import { perguntasHoje } from '@/lib/auditoria';
 import './tema.css';
 
 export const metadata: Metadata = {
-  title: 'Argus | Shopping Caruaru',
+  title: 'AIP | Shopping Caruaru',
   description: 'Inteligência das câmeras de corredor do Shopping Caruaru: fluxo, mapa de calor, rotas e segurança.',
 };
 
 // Fonte dos títulos e números de destaque (ver tema.css). O texto corrido
-// continua na fonte do sistema, como no resto do Argus.
+// continua na fonte do sistema, como no resto da AIP.
 const fonteTitulo = Plus_Jakarta_Sans({ subsets: ['latin'], variable: '--font-titulo', display: 'swap' });
 
 // Painel EXCLUSIVO do Shopping Caruaru: menu, nome e telas próprios,
@@ -27,7 +27,7 @@ export default async function ShoppingLayout({ children }: { children: React.Rea
   const cfg = await obterConfiguracoes(sessao.empresaId);
   const menu = { nomeUsuario: sessao.nome, permissoes: { adminGeral: sessao.adminGeral, abas: sessao.abas }, nomeShopping: cfg.nome, logo: cfg.logo };
 
-  const abertura = (await cookies()).has('argus-abertura');
+  const abertura = (await cookies()).has('aip-abertura');
 
   return (
     <div className={`tema-shopping ${fonteTitulo.variable} min-h-screen bg-surface-dim`}>
@@ -38,7 +38,7 @@ export default async function ShoppingLayout({ children }: { children: React.Rea
         <div className="mx-auto max-w-7xl px-4 py-6 sm:px-8 lg:py-8">{children}</div>
       </main>
       {abertura && <AberturaEntrada nome={sessao.nome} />}
-      {cfg.pergunte_ativo && podeVer(sessao, 'pergunte') && <PergunteArgus limiteDia={cfg.pergunte_limite_dia} usadasHoje={await perguntasHoje(sessao.id, cfg.fuso)} />}
+      {cfg.pergunte_ativo && podeVer(sessao, 'pergunte') && <PergunteAIP limiteDia={cfg.pergunte_limite_dia} usadasHoje={await perguntasHoje(sessao.id, cfg.fuso)} />}
     </div>
   );
 }

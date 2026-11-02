@@ -22,7 +22,7 @@ export default function HeaderActions() {
       {!open && (
         <Link
           href="/contato"
-          className="argus-mono hidden h-9 items-center justify-center whitespace-nowrap border border-outline-variant px-4 text-label-sm text-on-surface transition-colors hover:border-on-surface hover:text-on-surface sm:inline-flex"
+          className="aip-mono hidden h-9 items-center justify-center whitespace-nowrap border border-outline-variant px-4 text-label-sm text-on-surface transition-colors hover:border-on-surface hover:text-on-surface sm:inline-flex"
         >
           Fale Conosco Agora
         </Link>

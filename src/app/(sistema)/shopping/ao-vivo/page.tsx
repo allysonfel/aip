@@ -5,7 +5,7 @@ import { AoVivoClient } from '@/components/shopping/AoVivoClient';
 
 export default async function AoVivoPage() {
   await exigirAba('cameras');
-  const urlMotor = process.env.NEXT_PUBLIC_ARGUS_VISAO_URL || 'http://localhost:8500';
+  const urlMotor = process.env.NEXT_PUBLIC_AIP_VISAO_URL || 'http://localhost:8500';
   return (
     <div>
       <TituloPagina
