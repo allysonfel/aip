@@ -26,7 +26,7 @@ const segmento: Segmento = {
   },
   faq: [
     { p: "É preciso trocar as câmeras do condomínio?", r: "Não necessariamente. Avaliamos a compatibilidade das câmeras atuais." },
-    { p: "Os moradores são identificados pelo rosto?", r: "Não. A AIP não usa reconhecimento facial." },
+    { p: "A AIP faz reconhecimento facial?", r: "Sim, como recurso sob projeto, configurado conforme a necessidade do condomínio e os requisitos legais." },
     { p: "Quem pode ver as imagens?", r: "Apenas os usuários cadastrados, com acesso definido por perfil." },
     { p: "Por quanto tempo as imagens ficam guardadas?", r: "O prazo de retenção é definido pelo condomínio." },
   ],

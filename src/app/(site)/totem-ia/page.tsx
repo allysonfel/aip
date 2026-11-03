@@ -82,6 +82,7 @@ export default function TotemIA() {
             "Contagem de pessoas",
             "Monitoramento de áreas e movimentações",
             <>Identificação de entrada em áreas restritas <span className="text-sm text-cinza">· sob projeto</span></>,
+            <>Reconhecimento facial <span className="text-sm text-cinza">· sob projeto</span></>,
             <>Leitura de placas veiculares (LPR) <span className="text-sm text-cinza">· sob projeto</span></>,
             <>Geração e encaminhamento de alertas <span className="text-sm text-cinza">· sob projeto</span></>,
             "Integração com a plataforma AIP",

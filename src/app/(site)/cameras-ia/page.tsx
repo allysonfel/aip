@@ -22,7 +22,7 @@ const APLICACOES = [
 const FAQ = [
   { p: "Preciso trocar minhas câmeras atuais?", r: "Não necessariamente. Câmeras existentes podem ser utilizadas quando compatíveis com os requisitos técnicos." },
   { p: "A solução funciona à noite?", r: "O desempenho depende da câmera, iluminação e qualidade das imagens." },
-  { p: "A AIP utiliza reconhecimento facial?", r: "Não. A busca visual utiliza características visuais para auxiliar na localização de registros." },
+  { p: "A AIP faz reconhecimento facial?", r: "Sim, como recurso sob projeto, configurado conforme a finalidade e os requisitos legais de cada projeto. A busca visual padrão utiliza características como vestimentas." },
   { p: "Posso pesquisar uma pessoa nas gravações?", r: "É possível utilizar características visuais para localizar registros. Os resultados precisam ser confirmados por um operador." },
   { p: "Quanto tempo leva a implantação?", r: "Depende da quantidade de câmeras, infraestrutura e configuração necessária." },
   { p: "Quem pode acessar o sistema?", r: "O acesso é organizado por perfis e permissões de usuários." },
@@ -128,7 +128,7 @@ export default function CamerasIA() {
             <span className="rotulo rounded-full border border-white/30 px-3 py-1.5">Sob projeto</span>
             <p className="titulo-secao mt-8 max-w-[44rem]">Algumas aplicações dependem de configuração e validação técnica específicas.</p>
             <div className="mt-8 max-w-[44rem]">
-              <Lista itens={["Leitura de placas veiculares (LPR)", "Detecção de invasão e entrada em áreas restritas", "Alertas inteligentes personalizados"]} />
+              <Lista itens={["Reconhecimento facial", "Leitura de placas veiculares (LPR)", "Detecção de invasão e entrada em áreas restritas", "Alertas inteligentes personalizados"]} />
             </div>
             <div className="mt-8">
               <Botao href={CONTATO} contorno>Consultar aplicações para meu projeto</Botao>
@@ -149,7 +149,7 @@ export default function CamerasIA() {
           <Reveal atraso={120}>
             <h2 className="titulo-secao">Segurança e controle.</h2>
             <div className="mt-8">
-              <Lista itens={["Perfis de acesso administrativos e operacionais", "Registro de atividades e auditoria", "Controle de permissões", "Configuração de retenção de dados", "Não utiliza reconhecimento facial"]} />
+              <Lista itens={["Perfis de acesso administrativos e operacionais", "Registro de atividades e auditoria", "Controle de permissões", "Configuração de retenção de dados"]} />
             </div>
           </Reveal>
         </div>

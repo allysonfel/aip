@@ -16,7 +16,7 @@ const CAMADAS = [
 const MODELOS = [
   { titulo: "Detecção", texto: "Rede neural de arquitetura transformer para detecção em tempo real. Analisa a imagem inteira de uma vez, o que favorece cenas com muitas pessoas e sobreposições." },
   { titulo: "Rastreamento", texto: "Algoritmo multiobjeto que combina a previsão do movimento de cada pessoa com a posição detectada. Isso reduz trocas de identidade quando alguém passa na frente de outra pessoa ou de um obstáculo." },
-  { titulo: "Re-identificação por aparência", texto: "Uma rede neural converte a aparência de cada pessoa (cores, roupas, silhueta) num vetor numérico. Esse vetor ajuda a manter a identidade depois de uma oclusão e é a base da busca visual. O modelo não usa o rosto, por isso a AIP não faz reconhecimento facial." },
+  { titulo: "Re-identificação por aparência", texto: "Uma rede neural converte a aparência de cada pessoa (cores, roupas, silhueta) num vetor numérico. Esse vetor ajuda a manter a identidade depois de uma oclusão e é a base da busca visual. Esse modelo não usa o rosto. O reconhecimento facial é um recurso à parte, sob projeto." },
 ];
 
 const PROCESSAMENTO = [

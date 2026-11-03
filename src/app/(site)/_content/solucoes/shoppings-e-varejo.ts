@@ -27,7 +27,7 @@ const segmento: Segmento = {
   faq: [
     { p: "Preciso trocar minhas câmeras?", r: "Não necessariamente. Câmeras compatíveis com RTSP podem ser usadas após avaliação técnica." },
     { p: "A contagem diferencia entrada e saída?", r: "Sim. As linhas de contagem registram a direção da passagem." },
-    { p: "A AIP usa reconhecimento facial?", r: "Não. A busca visual usa características como roupas e aparência geral." },
+    { p: "A AIP faz reconhecimento facial?", r: "Sim, como recurso sob projeto, configurado conforme a finalidade e os requisitos legais de cada operação. A busca visual padrão usa características como roupas e aparência geral." },
     { p: "Quem acessa os dados?", r: "Apenas usuários cadastrados, com permissões definidas por perfil." },
   ],
   encerramento: ENCERRAMENTO_PRIVADO,
