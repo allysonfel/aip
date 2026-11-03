@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { LogoAIP } from "@/components/shopping/Logo";
 import { EMAIL, WHATSAPP } from "../_config/contato";
 
 const NAVEGACAO = [
@@ -17,7 +18,7 @@ export default function Rodape() {
     <footer className="border-t border-linha">
       <div className="margem grid gap-12 py-16 md:grid-cols-[1.6fr_1fr_1fr]">
         <div>
-          <p className="font-titulo text-xl font-bold tracking-[0.42em]">A I P</p>
+          <LogoAIP className="h-8 text-white" />
           <p className="mt-5 font-medium">AIP — Agência de Inteligência Patrimonial</p>
           <p className="mt-1 text-cinza">Transformando imagens em inteligência.</p>
           {(WHATSAPP || EMAIL) && (

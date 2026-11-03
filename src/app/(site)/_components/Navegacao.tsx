@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { LogoAIP } from "@/components/shopping/Logo";
 
 export const LINKS = [
   { href: "/cameras-ia", rotulo: "Câmeras IA" },
@@ -43,8 +44,8 @@ export default function Navegacao() {
     <>
       <header className="fixed inset-x-0 top-3 z-50 px-3 sm:top-4">
         <nav aria-label="Principal" className="mx-auto flex h-14 max-w-[1120px] items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/70 pl-5 pr-2 backdrop-blur-xl">
-          <Link href="/" aria-label="AIP, página inicial" className="font-titulo text-lg font-bold tracking-[0.42em]">
-            A I P
+          <Link href="/" aria-label="AIP, página inicial" className="flex items-center">
+            <LogoAIP className="h-6 text-white" />
           </Link>
           <ul className="hidden items-center gap-6 lg:flex">
             {LINKS.map((l) => (
