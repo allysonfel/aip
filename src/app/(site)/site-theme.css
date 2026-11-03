@@ -219,6 +219,72 @@
   animation: pulso 3.2s ease-in-out infinite;
 }
 
+/* Troca de página (template.tsx): fade + subida leve. "backwards" para não
+   deixar transform no fim, o que quebraria elementos fixos/sticky. */
+@keyframes pagina-entra {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.pagina-entra {
+  animation: pagina-entra 0.4s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+/* Hero em camadas: a foto primeiro, depois título, texto e botões. */
+@keyframes entra-foto {
+  from {
+    opacity: 0;
+    transform: scale(1.035);
+  }
+}
+
+@keyframes entra-sobe {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+}
+
+.entra-foto {
+  animation: entra-foto 0.9s ease-out backwards;
+}
+
+.entra-1,
+.entra-2,
+.entra-3 {
+  animation: entra-sobe 0.6s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+}
+
+.entra-1 {
+  animation-delay: 0.12s;
+}
+
+.entra-2 {
+  animation-delay: 0.24s;
+}
+
+.entra-3 {
+  animation-delay: 0.36s;
+}
+
+/* Indicador de arrastar: a bolinha vai e volta, depois descansa. */
+@keyframes dica-arraste {
+  0%,
+  55%,
+  100% {
+    transform: translate(0, -50%);
+  }
+  25% {
+    transform: translate(1.5rem, -50%);
+  }
+}
+
+.dica-arraste-bolinha {
+  animation: dica-arraste 2.6s ease-in-out infinite;
+}
+
 .sem-barra {
   scrollbar-width: none;
 }
@@ -242,8 +308,24 @@
   .calor,
   .trajeto,
   .fluxo,
-  .pulso {
+  .pulso,
+  .dica-arraste-bolinha,
+  .entra-foto,
+  .entra-1,
+  .entra-2,
+  .entra-3 {
     animation: none;
+  }
+
+  /* Troca de página: só um fade rápido. */
+  .pagina-entra {
+    animation: aparece 0.15s linear backwards;
+  }
+
+  @keyframes aparece {
+    from {
+      opacity: 0;
+    }
   }
 
   .fluxo {

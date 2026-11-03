@@ -28,16 +28,19 @@ export function Foto({ src, alt, className = "", sizes = "(min-width: 1024px) 50
 type Midia = { foto: string; alt: string } | { video: string; poster: string };
 
 /** Hero em tela cheia: mídia escurecida, título à esquerda na metade inferior. */
-export function Hero({ sobretitulo, titulo, texto, botoes, midia, sobreposicao, legenda = false, escurecer = "bg-black/35" }: { sobretitulo?: string; titulo: string; texto: string; botoes?: ReactNode; midia?: Midia; sobreposicao?: ReactNode; legenda?: boolean | string; escurecer?: string }) {
+export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobreposicao, legenda = false, escurecer = "bg-black/35" }: { sobretitulo?: string; migalhas?: ReactNode; titulo: string; texto: string; botoes?: ReactNode; midia?: Midia; sobreposicao?: ReactNode; legenda?: boolean | string; escurecer?: string }) {
   return (
     <section className="relative isolate flex min-h-svh items-end overflow-hidden">
-      <div className="parallax absolute inset-0 -z-20">
-        {midia && "foto" in midia && <Image src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes="100vw" className="object-cover" />}
-        {midia && "video" in midia && (
-          <video autoPlay muted loop playsInline preload="metadata" poster={`${M}/${midia.poster}`} aria-hidden className="h-full w-full object-cover">
-            <source src={`${M}/${midia.video}`} type="video/mp4" />
-          </video>
-        )}
+      {/* Entrada em camadas: foto, título, texto e botões (ver .entra-* no CSS). */}
+      <div className="entra-foto absolute inset-0 -z-20">
+        <div className="parallax absolute inset-0">
+          {midia && "foto" in midia && <Image src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes="100vw" className="object-cover" />}
+          {midia && "video" in midia && (
+            <video autoPlay muted loop playsInline preload="metadata" poster={`${M}/${midia.poster}`} aria-hidden className="h-full w-full object-cover">
+              <source src={`${M}/${midia.video}`} type="video/mp4" />
+            </video>
+          )}
+        </div>
       </div>
       <div aria-hidden className={`absolute inset-0 -z-10 ${escurecer}`} />
       <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/55 to-transparent lg:bg-gradient-to-r lg:from-black/90 lg:via-black/35" />
@@ -45,11 +48,12 @@ export function Hero({ sobretitulo, titulo, texto, botoes, midia, sobreposicao, 
       {sobreposicao}
       <div className="margem pb-16 pt-32 sm:pb-24">
         <div className="max-w-[46rem]">
-          {sobretitulo && <p className="rotulo mb-5 text-white/80">{sobretitulo}</p>}
-          <h1 className="titulo-hero">{titulo}</h1>
-          <p className="mt-6 max-w-[36rem] text-lg leading-relaxed text-white/80">{texto}</p>
-          {botoes && <div className="mt-8 flex flex-wrap gap-3">{botoes}</div>}
-          {legenda && <Legenda>{typeof legenda === "string" ? legenda : undefined}</Legenda>}
+          {migalhas && <div className="entra-1 mb-6">{migalhas}</div>}
+          {sobretitulo && <p className="entra-1 rotulo mb-5 text-white/80">{sobretitulo}</p>}
+          <h1 className="entra-1 titulo-hero">{titulo}</h1>
+          <p className="entra-2 mt-6 max-w-[36rem] text-lg leading-relaxed text-white/80">{texto}</p>
+          {botoes && <div className="entra-3 mt-8 flex flex-wrap gap-3">{botoes}</div>}
+          {legenda && <div className="entra-3"><Legenda>{typeof legenda === "string" ? legenda : undefined}</Legenda></div>}
         </div>
       </div>
     </section>
@@ -138,9 +142,12 @@ export function Acordeao({ titulo = "Perguntas frequentes", itens }: { titulo?: 
         <Reveal atraso={100} className="border-t border-linha">
           {itens.map((i) => (
             <details key={i.p} className="group border-b border-linha">
-              <summary className="flex items-center justify-between gap-6 py-5 text-lg font-medium">
+              <summary className="flex items-center justify-between gap-6 py-6 font-titulo text-[1.5rem] font-semibold leading-tight sm:text-[1.75rem]">
                 {i.p}
-                <span aria-hidden className="text-2xl font-light leading-none text-cinza transition-transform group-open:rotate-45">+</span>
+                <span aria-hidden className="relative h-4 w-4 shrink-0 text-cinza">
+                  <span className="absolute left-0 top-1/2 h-px w-4 bg-current" />
+                  <span className="absolute left-0 top-1/2 h-px w-4 rotate-90 bg-current transition-transform duration-300 group-open:rotate-0" />
+                </span>
               </summary>
               <p className="corpo max-w-[44rem] pb-6">{i.r}</p>
             </details>

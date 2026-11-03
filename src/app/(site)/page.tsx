@@ -1,18 +1,12 @@
 import { metadados } from "./_config/metadados";
 import { Botao, Cabecalho, Encerramento, Foto, Hero, TelaDividida, TelaFoto, Trio } from "./_components/Base";
 import Carrossel from "./_components/Carrossel";
+import { CartaoSegmento } from "./_components/Cartoes";
+import { SEGMENTOS } from "./_content/solucoes";
 import Reveal from "./_components/Reveal";
 import VisaoIA from "./_components/VisaoIA";
 
 export const metadata = metadados("/", "Transformamos imagens em inteligência", "Soluções de inteligência artificial e visão computacional aplicadas à segurança, à operação e à gestão de ambientes.");
-
-const APLICACOES = [
-  { foto: "shopping.jpg", alt: "Escadas rolantes no interior de um shopping", titulo: "Comércio e varejo", texto: "Fluxo de pessoas, ocupação e circulação." },
-  { foto: "armazem.jpg", alt: "Corredor de prateleiras em um armazém", titulo: "Indústria e logística", texto: "Monitoramento de áreas e movimentações." },
-  { foto: "condominio.jpg", alt: "Prédios residenciais à noite", titulo: "Condomínios", texto: "Acessos, circulação e áreas comuns." },
-  { foto: "estacionamento.jpg", alt: "Estacionamento subterrâneo vazio", titulo: "Estacionamentos", texto: "Fluxo de veículos e ocupação." },
-  { foto: "praca-aerea.jpg", alt: "Parque e rotatória vistos do alto", titulo: "Setor público", texto: "Monitoramento e inteligência para gestão urbana." },
-];
 
 export default function Inicio() {
   return (
@@ -43,11 +37,11 @@ export default function Inicio() {
       <TelaFoto rotulo="Solução" foto="camera-solar.jpg" alt="Câmera com painel solar no alto de um poste, sob o céu" titulo="Totem IA" texto="Uma estrutura integrada de monitoramento inteligente para ampliar a cobertura em locais públicos e privados." acao={<Botao href="/totem-ia">Conheça o Totem IA</Botao>} legenda />
 
       <section className="secao overflow-hidden">
-        <div className="margem mb-12">
+        <div className="margem mb-10">
           <Cabecalho titulo="Diferentes ambientes. Novas possibilidades." />
         </div>
         <Reveal>
-          <Carrossel cartoes={APLICACOES} rotulo="Aplicações" />
+          <Carrossel rotulo="Soluções por segmento" largura="w-[78vw] sm:w-[360px]" itens={SEGMENTOS.map((s) => ({ chave: s.slug, conteudo: <CartaoSegmento segmento={s} linha={s.linhaCartao} cta="Ver solução" fotoDoHero /> }))} />
         </Reveal>
       </section>
 

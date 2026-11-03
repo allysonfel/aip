@@ -1,6 +1,7 @@
 import { metadados } from "../_config/metadados";
 import { Acordeao, Botao, Cabecalho, Encerramento, Foto, Legenda, Lista, TelaDividida } from "../_components/Base";
 import Carrossel from "../_components/Carrossel";
+import { CartaoFoto } from "../_components/Cartoes";
 import { TotemIlustracao } from "../_components/Diagramas";
 import Reveal from "../_components/Reveal";
 
@@ -14,7 +15,7 @@ const APLICACOES = [
   { foto: "estacionamento-aereo.jpg", alt: "Estacionamento visto do alto", titulo: "Estacionamentos", texto: "Monitoramento de movimentações, entradas, saídas e ocupação." },
   { foto: "evento.jpg", alt: "Grande evento noturno visto do alto", titulo: "Eventos", texto: "Estrutura de monitoramento para locais com grande circulação de pessoas e necessidades temporárias." },
   { foto: "obra.jpg", alt: "Guindaste em uma obra à noite", titulo: "Obras e áreas operacionais", texto: "Acompanhamento de ambientes que exigem cobertura durante períodos específicos." },
-  { foto: "condominio.jpg", alt: "Prédios residenciais à noite", titulo: "Condomínios e empreendimentos", texto: "Monitoramento de acessos, áreas externas e pontos de circulação." },
+  { foto: "condominio-noite.jpg", alt: "Torres residenciais iluminadas em volta de uma piscina, vistas do alto à noite", titulo: "Condomínios e empreendimentos", texto: "Monitoramento de acessos, áreas externas e pontos de circulação." },
 ];
 
 const ETAPAS = [
@@ -65,7 +66,7 @@ export default function TotemIA() {
           <Cabecalho titulo="Uma estrutura para diferentes cenários." />
         </div>
         <Reveal>
-          <Carrossel cartoes={APLICACOES} rotulo="Aplicações do Totem IA" />
+          <Carrossel rotulo="Aplicações do Totem IA" itens={APLICACOES.map((a) => ({ chave: a.titulo, conteudo: <CartaoFoto {...a} /> }))} />
         </Reveal>
       </section>
 

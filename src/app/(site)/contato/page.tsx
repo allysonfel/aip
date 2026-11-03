@@ -1,15 +1,17 @@
 import { EMAIL, WHATSAPP } from "../_config/contato";
 import { metadados } from "../_config/metadados";
 import FormContato from "../_components/FormContato";
+import { buscarSegmento } from "../_content/solucoes";
 
 export const metadata = metadados("/contato", "Contato", "Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.");
 
 const PRODUTOS: Record<string, string> = { "cameras-ia": "Câmeras IA", "totem-ia": "Totem IA" };
 const TIPOS: Record<string, string> = { empresa: "Empresa", publico: "Órgão público ou instituição" };
 
-export default async function Contato({ searchParams }: { searchParams: Promise<{ produto?: string; tipo?: string }> }) {
-  const { produto, tipo } = await searchParams;
-  const origem = [produto && PRODUTOS[produto] ? `produto=${produto}` : "", tipo && TIPOS[tipo] ? `tipo=${tipo}` : ""].filter(Boolean).join("&") || "direto";
+export default async function Contato({ searchParams }: { searchParams: Promise<{ produto?: string; tipo?: string; segmento?: string }> }) {
+  const { produto, tipo, segmento } = await searchParams;
+  // Origem do contato (gravada com o envio): de qual página a pessoa veio.
+  const origem = [produto && PRODUTOS[produto] ? `produto=${produto}` : "", tipo && TIPOS[tipo] ? `tipo=${tipo}` : "", segmento && buscarSegmento(segmento) ? `segmento=${segmento}` : ""].filter(Boolean).join("&") || "direto";
 
   return (
     <section className="pb-24 pt-32 sm:pt-40">

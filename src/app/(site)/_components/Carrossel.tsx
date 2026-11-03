@@ -1,15 +1,15 @@
 "use client";
 
-import { useRef } from "react";
-import Image from "next/image";
+import { useRef, useState, type ReactNode } from "react";
+import DragHint from "./DragHint";
 
-export type Cartao = { foto: string; alt: string; titulo: string; texto: string };
-
-// Cartões arrastáveis: toque nativo no celular, ponteiro no desktop, setas
-// redondas embaixo. O teclado alcança a faixa, que rola com as setas.
-export default function Carrossel({ cartoes, rotulo }: { cartoes: Cartao[]; rotulo: string }) {
+// Faixa de cartões arrastáveis: toque nativo no celular; no desktop, arrastar
+// com o mouse, rolagem horizontal do trackpad ou da roda (Shift + roda) e
+// setas redondas embaixo. O teclado alcança a faixa, que rola com as setas.
+export default function Carrossel({ itens, rotulo, largura = "w-[82vw] sm:w-[420px]" }: { itens: { chave: string; conteudo: ReactNode }[]; rotulo: string; largura?: string }) {
   const faixa = useRef<HTMLUListElement>(null);
-  const arraste = useRef<{ x: number; inicio: number } | null>(null);
+  const arraste = useRef<{ x: number; inicio: number; moveu: boolean } | null>(null);
+  const [mexeu, setMexeu] = useState(false);
 
   function mover(direcao: 1 | -1) {
     const el = faixa.current;
@@ -21,27 +21,35 @@ export default function Carrossel({ cartoes, rotulo }: { cartoes: Cartao[]; rotu
 
   return (
     <div>
+      <div className="margem mb-5">
+        <DragHint oculto={mexeu} />
+      </div>
       <ul
         ref={faixa}
         tabIndex={0}
         aria-label={rotulo}
+        onScroll={() => !mexeu && setMexeu(true)}
         onPointerDown={(e) => {
-          if (e.pointerType === "mouse") arraste.current = { x: e.clientX, inicio: faixa.current?.scrollLeft ?? 0 };
+          if (e.pointerType === "mouse") arraste.current = { x: e.clientX, inicio: faixa.current?.scrollLeft ?? 0, moveu: false };
         }}
         onPointerMove={(e) => {
-          if (arraste.current && faixa.current) faixa.current.scrollLeft = arraste.current.inicio - (e.clientX - arraste.current.x);
+          const a = arraste.current;
+          if (!a || !faixa.current) return;
+          const dx = e.clientX - a.x;
+          if (Math.abs(dx) > 5) a.moveu = true;
+          faixa.current.scrollLeft = a.inicio - dx;
         }}
-        onPointerUp={() => (arraste.current = null)}
+        onPointerUp={() => setTimeout(() => (arraste.current = null))}
         onPointerLeave={() => (arraste.current = null)}
-        className="sem-barra flex cursor-grab snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-[clamp(1.25rem,4vw,3.5rem)] px-[clamp(1.25rem,4vw,3.5rem)] active:cursor-grabbing active:snap-none"
+        // Quem arrastou não quer abrir o link do cartão.
+        onClickCapture={(e) => {
+          if (arraste.current?.moveu) e.preventDefault();
+        }}
+        className="sem-barra flex cursor-grab snap-x snap-mandatory gap-5 overflow-x-auto scroll-px-[var(--recuo)] px-[var(--recuo)] [--recuo:max(clamp(1.25rem,4vw,3.5rem),calc((100%-1320px)/2+3.5rem))] active:cursor-grabbing active:snap-none"
       >
-        {cartoes.map((c) => (
-          <li key={c.titulo} className="w-[82vw] shrink-0 snap-start sm:w-[420px]">
-            <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-painel">
-              <Image src={`/site/media/${c.foto}`} alt={c.alt} fill draggable={false} sizes="(min-width: 640px) 420px, 82vw" className="object-cover" />
-            </div>
-            <h3 className="mt-4 text-lg font-semibold">{c.titulo}</h3>
-            <p className="mt-1 leading-snug text-cinza">{c.texto}</p>
+        {itens.map((i) => (
+          <li key={i.chave} className={`shrink-0 snap-start ${largura}`}>
+            {i.conteudo}
           </li>
         ))}
       </ul>
