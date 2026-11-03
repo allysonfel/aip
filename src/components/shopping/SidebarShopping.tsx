@@ -99,11 +99,7 @@ function Navegacao({ permissoes, aoNavegar }: { permissoes: Permissoes; aoNavega
 function Cabecalho() {
   return (
     <div className="px-6 pb-4 pt-6">
-      {/* Slogan logo embaixo, alinhado à esquerda do logotipo */}
-      <div className="inline-flex flex-col items-start">
-        <LogoAIP className="h-10 text-on-surface" />
-        <span className="mt-1.5 whitespace-nowrap text-[7.5px] font-semibold uppercase tracking-[0.08em] text-on-surface-variant">Agência de Inteligência Patrimonial</span>
-      </div>
+      <LogoAIP className="h-7 text-on-surface" />
     </div>
   );
 }

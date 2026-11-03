@@ -1,14 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { LogoA, LogoAIP } from '@/components/shopping/Logo';
+import { LogoAIP } from '@/components/shopping/Logo';
 
 /** Cookie curto criado no login (ver login/actions.ts): a abertura só toca logo depois de entrar. */
 const COOKIE = 'aip-abertura';
 const DURACAO_MS = 5000;
 
-// Abertura do sistema depois do login: o "A" da AIP acende, uma linha de
-// varredura (como a de uma câmera) revela o nome, aparece o "bem-vindo" e
+// Abertura do sistema depois do login: uma linha de varredura (como a de
+// uma câmera) revela o nome, aparece o "bem-vindo" e
 // tudo se dissolve revelando o painel. Clicar pula.
 // O servidor só renderiza este componente quando o cookie existe, então a
 // abertura já vem na primeira pintura (o painel não pisca antes).
@@ -38,8 +38,6 @@ export function AberturaEntrada({ nome }: { nome: string }) {
     >
       <style>{`
         @keyframes ab-fundo { from { transform: scale(1.12); opacity: 0 } to { transform: scale(1); opacity: .28 } }
-        @keyframes ab-a { 0% { transform: scale(.6); opacity: 0; filter: blur(8px) } 60% { opacity: 1; filter: blur(0) } 100% { transform: scale(1); opacity: 1 } }
-        @keyframes ab-anel { 0% { transform: scale(.5); opacity: .8 } 100% { transform: scale(2.6); opacity: 0 } }
         @keyframes ab-revela { from { clip-path: inset(0 100% 0 0) } to { clip-path: inset(0 0 0 0) } }
         @keyframes ab-varre { 0% { left: 0; opacity: 0 } 10% { opacity: 1 } 90% { opacity: 1 } 100% { left: 100%; opacity: 0 } }
         @keyframes ab-sobe { from { transform: translateY(10px); opacity: 0 } to { transform: none; opacity: 1 } }
@@ -48,13 +46,11 @@ export function AberturaEntrada({ nome }: { nome: string }) {
         @keyframes ab-grade { from { opacity: 0 } 40% { opacity: .5 } to { opacity: .15 } }
         .abertura .fundo { animation: ab-fundo 2.6s ease-out both }
         .abertura .grade { animation: ab-grade 2s ease-out both }
-        .abertura .a { animation: ab-a .8s cubic-bezier(.2,.8,.2,1) both }
-        .abertura .anel { animation: ab-anel 1.4s ease-out .35s both }
-        .abertura .nome { animation: ab-revela .8s cubic-bezier(.6,0,.2,1) .7s both }
-        .abertura .varre { animation: ab-varre .8s cubic-bezier(.6,0,.2,1) .7s both }
-        .abertura .s1 { animation: ab-sobe .5s ease-out 1.35s both }
-        .abertura .s2 { animation: ab-sobe .5s ease-out 1.6s both }
-        .abertura .barra { animation: ab-barra 3s cubic-bezier(.4,0,.2,1) 1.7s both; transform-origin: left }
+        .abertura .nome { animation: ab-revela .8s cubic-bezier(.6,0,.2,1) .2s both }
+        .abertura .varre { animation: ab-varre .8s cubic-bezier(.6,0,.2,1) .2s both }
+        .abertura .s1 { animation: ab-sobe .5s ease-out .85s both }
+        .abertura .s2 { animation: ab-sobe .5s ease-out 1.1s both }
+        .abertura .barra { animation: ab-barra 3.5s cubic-bezier(.4,0,.2,1) 1.2s both; transform-origin: left }
         .abertura .ponto { animation: ab-ponto 1.2s ease-in-out infinite }
         @media (prefers-reduced-motion: reduce) { .abertura * { animation-duration: 1ms !important; animation-delay: 0s !important } }
       `}</style>
@@ -69,12 +65,6 @@ export function AberturaEntrada({ nome }: { nome: string }) {
       />
 
       <div className="relative flex flex-col items-center text-center">
-        <div className="relative mb-6 flex h-24 w-24 items-center justify-center">
-          <span aria-hidden className="anel absolute inset-0 rounded-full border-2 border-sky-400/70" />
-          <span aria-hidden className="absolute inset-2 rounded-full bg-sky-500/10 blur-xl" />
-          <LogoA className="a relative h-16 text-white drop-shadow-[0_0_18px_rgb(56_189_248/.55)]" />
-        </div>
-
         <div className="relative">
           <div className="nome flex flex-col items-center">
             <LogoAIP className="h-14 text-white sm:h-16" />
