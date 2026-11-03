@@ -96,18 +96,18 @@ function Option({
       role="radio"
       aria-checked={selected}
       onClick={onClick}
-      className={`flex flex-col gap-1 border px-3 py-2 text-left transition-colors ${
+      className={`flex flex-col gap-1 rounded-sm border px-3 py-2 text-left ${
         selected
-          ? "border-tertiary bg-primary-container"
-          : "border-outline-variant/60 hover:border-outline"
+          ? "border-primary bg-primary-container"
+          : "border-outline-variant hover:border-outline"
       }`}
     >
       <span className="flex items-center gap-2 text-label-md text-on-surface">
-        {icon && <span className={selected ? "text-tertiary" : "text-on-surface-variant"}>{icon}</span>}
-        {dotColor && <span className="h-2 w-2 shrink-0" style={{ backgroundColor: dotColor }} />}
+        {icon && <span className={selected ? "text-primary" : "text-on-surface-variant"}>{icon}</span>}
+        {dotColor && <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: dotColor }} />}
         {label}
       </span>
-      <span className="aip-mono text-[10px] leading-snug text-on-surface-variant">{hint}</span>
+      <span className="text-xs leading-snug text-on-surface-variant">{hint}</span>
     </button>
   );
 }
@@ -115,7 +115,7 @@ function Option({
 function Group({ title, label, children }: { title: string; label: string; children: ReactNode }) {
   return (
     <div>
-      <p className="text-label-md text-on-surface">{title}</p>
+      <p className="text-label-md font-semibold text-on-surface">{title}</p>
       <div role="radiogroup" aria-label={label} className="mt-2 grid gap-2 sm:grid-cols-3">
         {children}
       </div>
@@ -134,7 +134,7 @@ function WhatsAppGlyph() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex flex-col gap-0.5 sm:flex-row sm:gap-3">
-      <span className="aip-mono w-24 shrink-0 pt-0.5 text-[10px] text-on-surface-variant">{label}</span>
+      <span className="aip-rotulo w-24 shrink-0 pt-0.5 text-[11px] text-on-surface-variant">{label}</span>
       <span className="text-body-md text-on-surface">{value}</span>
     </div>
   );
@@ -156,33 +156,33 @@ function AlertCard({
   const isPanel = severity === "info";
 
   return (
-    <div className="border border-outline-variant bg-surface">
-      <div className="flex items-center justify-between gap-2 border-b border-outline-variant/60 px-3 py-2">
+    <div className="overflow-hidden rounded border border-outline-variant bg-surface">
+      <div className="flex items-center justify-between gap-2 border-b border-outline-variant px-3 py-2">
         <div className="flex items-center gap-2">
           {isPanel ? (
-            <span className="h-2 w-2 shrink-0 bg-tertiary" />
+            <span className="h-2 w-2 shrink-0 rounded-full bg-tertiary" />
           ) : (
             <WhatsAppGlyph />
           )}
           <div className="leading-tight">
-            <p className="text-label-md text-on-surface">{isPanel ? "Painel AIP" : "AIP Alertas"}</p>
-            <p className="aip-mono text-[10px] text-on-surface-variant">
+            <p className="text-label-md font-semibold text-on-surface">{isPanel ? "Painel AIP" : "AIP Alertas"}</p>
+            <p className="text-xs text-on-surface-variant">
               {isPanel ? "Registro de ocorrência" : "Notificação instantânea"}
             </p>
           </div>
         </div>
-        <span className="aip-mono text-[10px] text-on-surface-variant">{formatClock(now)}</span>
+        <span className="text-xs tabular-nums text-on-surface-variant">{formatClock(now)}</span>
       </div>
 
       <div className="flex flex-col gap-3 p-3">
         <div className="max-w-[300px]">
           <CameraTile event={event} zone={zone} severity={severity} variant="compact" />
-          <p className="aip-mono mt-1 text-[10px] text-on-surface-variant">
+          <p className="mt-1 text-xs text-on-surface-variant">
             {isPanel ? "Imagem salva no painel" : "Foto capturada da câmera"}
           </p>
         </div>
 
-        <p className="aip-mono text-label-sm" style={{ color: sev.color }}>
+        <p className="aip-rotulo text-label-sm" style={{ color: sev.color }}>
           {sev.tag}
         </p>
 
@@ -193,7 +193,7 @@ function AlertCard({
           <Row label="Instrução" value={sev.instruction} />
         </div>
 
-        <p className="flex items-center justify-between gap-2 border-t border-outline-variant/60 pt-2 text-body-md text-on-surface-variant">
+        <p className="flex items-center justify-between gap-2 border-t border-outline-variant pt-2 text-body-md text-on-surface-variant">
           <span>
             {isPanel
               ? "Registrado no painel. Nenhum aviso enviado."
@@ -212,7 +212,7 @@ export default function CameraSimulator() {
   const [severity, setSeverity] = useState<SeverityKey>("critico");
 
   return (
-    <div className="grid border border-outline-variant/60 bg-surface lg:grid-cols-2">
+    <div className="grid overflow-hidden rounded border border-outline-variant bg-surface lg:grid-cols-2">
       <div className="flex flex-col gap-md p-md">
         <Group title="1. O que a câmera detectou?" label="Tipo de detecção">
           {(Object.keys(EVENTS) as EventKey[]).map((key) => (
@@ -253,8 +253,8 @@ export default function CameraSimulator() {
           ))}
         </Group>
 
-        <div className="border-t border-outline-variant/60 pt-md">
-          <p className="aip-mono text-[10px] text-on-surface-variant">Cenários rápidos</p>
+        <div className="border-t border-outline-variant pt-md">
+          <p className="aip-rotulo text-[11px] text-on-surface-variant">Cenários rápidos</p>
           <div className="mt-2 flex flex-wrap gap-2">
             {SCENARIOS.map((s) => {
               const active = s.event === event && s.zone === zone && s.severity === severity;
@@ -267,9 +267,9 @@ export default function CameraSimulator() {
                     setZone(s.zone);
                     setSeverity(s.severity);
                   }}
-                  className={`aip-mono border px-3 py-1.5 text-[10px] transition-colors ${
+                  className={`rounded-sm border px-3 py-1.5 text-xs font-medium ${
                     active
-                      ? "border-tertiary text-tertiary"
+                      ? "border-primary bg-primary-container text-on-primary-container"
                       : "border-outline-variant text-on-surface-variant hover:border-outline hover:text-on-surface"
                   }`}
                 >
@@ -281,7 +281,7 @@ export default function CameraSimulator() {
         </div>
       </div>
 
-      <div className="border-t border-outline-variant/60 p-md lg:border-l lg:border-t-0">
+      <div className="border-t border-outline-variant p-md lg:border-l lg:border-t-0">
         <div
           key={`${event}-${zone}-${severity}`}
           style={{ animation: "lp-slide-up 0.35s ease-out" }}

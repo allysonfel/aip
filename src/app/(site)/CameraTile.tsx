@@ -33,7 +33,7 @@ export default function CameraTile({
   const showFull = variant === "full";
 
   return (
-    <div className="relative aspect-video w-full overflow-hidden border border-outline-variant bg-surface-dim">
+    <div className="relative aspect-video w-full overflow-hidden rounded-sm border border-outline-variant bg-surface-dim">
       <div
         aria-hidden
         className="absolute inset-0 opacity-30"
@@ -71,7 +71,7 @@ export default function CameraTile({
         }}
       >
         <span
-          className="aip-mono absolute -left-px -top-[15px] whitespace-nowrap px-1 text-[9px] leading-[14px]"
+          className="aip-rotulo absolute -left-px -top-[15px] whitespace-nowrap px-1 text-[9px] leading-[14px]"
           style={{ backgroundColor: color, color: "#0b0e12" }}
         >
           {ev.boxLabel}
@@ -79,21 +79,21 @@ export default function CameraTile({
       </div>
 
       {showTop && (
-        <span className="aip-mono absolute left-2 top-2 border border-outline-variant/60 bg-surface/80 px-1.5 py-0.5 text-[9px] text-on-surface">
+        <span className="aip-rotulo absolute left-2 top-2 rounded-sm border border-outline-variant bg-surface/80 px-1.5 py-0.5 text-[9px] text-on-surface">
           {z.camera}
         </span>
       )}
       {showFull && (
-        <span className="aip-mono absolute right-2 top-2 flex items-center gap-1.5 text-[9px] text-on-surface-variant">
-          <span className="h-1.5 w-1.5 bg-tertiary" />
+        <span className="aip-rotulo absolute right-2 top-2 flex items-center gap-1.5 text-[9px] text-on-surface-variant">
+          <span className="h-1.5 w-1.5 rounded-full bg-tertiary" />
           IA ativa · 30 fps
         </span>
       )}
       {showFull && (
-        <span className="aip-mono absolute bottom-2 left-2 text-[9px] text-on-surface-variant">{z.place}</span>
+        <span className="aip-rotulo absolute bottom-2 left-2 text-[9px] text-on-surface-variant">{z.place}</span>
       )}
       {showTop && (
-        <span className="aip-mono absolute bottom-2 right-2 text-[9px] text-on-surface-variant">
+        <span className="aip-rotulo absolute bottom-2 right-2 text-[9px] text-on-surface-variant">
           {formatStamp(now)}
         </span>
       )}

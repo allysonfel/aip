@@ -5,14 +5,11 @@ import TypingOnScroll from "./TypingOnScroll";
 import CameraSimulator from "./CameraSimulator";
 import Reveal from "./Reveal";
 
-// Título do hero em Inter (ver aip-theme.css, --font-sans dessa
-// página) — tema "Oxide" pede peso 400 fixo em tudo, hierarquia vem só
-// de tamanho/tracking, nunca de peso maior nem de fonte de destaque à
-// parte (Archivo/Alliance No.1 saíram daqui por causa disso).
+// Seções alternando claro e escuro (tema-claro/tema-escuro, ver
+// site-theme.css), com a identidade visual do painel do shopping.
 
 // Copy escrita pelo cliente pro Logos [AIP] (revisão de 11/09), adaptada
-// aqui pro formato de seções que a página já usa (cards, grids, cores
-// alternando bg-surface/bg-surface-container-lowest) — sem travessão em
+// aqui pro formato de seções que a página já usa (cards, grids) — sem travessão em
 // nenhum texto, por pedido explícito (regra já usada no resto do
 // projeto: reescrever com vírgula, ponto, ou parênteses em vez de "—").
 
@@ -246,7 +243,7 @@ export default function AIPPage() {
         pro hero, e o conteúdo (título/subtítulo/botão/quadrado) pôde
         subir e se agrupar mais.
       */}
-      <section className="relative isolate flex min-h-[100svh] items-end overflow-hidden border-b border-outline-variant/60 lg:items-center">
+      <section className="tema-escuro relative isolate flex min-h-[100svh] items-end overflow-hidden lg:items-center">
         <video
           autoPlay
           muted
@@ -261,22 +258,19 @@ export default function AIPPage() {
             qualquer vídeo. */}
         <div
           aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/40 to-black/5 lg:bg-gradient-to-r lg:from-black/80 lg:via-black/45 lg:to-transparent"
+          className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/40 to-slate-950/5 lg:bg-gradient-to-r lg:from-slate-950/85 lg:via-slate-950/50 lg:to-transparent"
         />
 
         <div className="relative mx-auto flex w-full min-w-0 max-w-[1200px] flex-col gap-md px-gutter pb-lg pt-24 lg:flex-row lg:items-center lg:justify-between lg:gap-xl lg:px-[4rem]">
           <div className="min-w-0 max-w-[30rem] text-center">
             {/*
               Título principal do hero: digita 1 vez só (TypingOnScroll,
-              sem loop) e usa a fonte Archivo (ver import acima) em vez
-              da SF Pro do resto do site, pra chegar mais perto do
-              visual da Alliance No.1 da Palantir (licenciada, sem
-              acesso) nesse tamanho grande de título.
+              sem loop).
             */}
             <TypingOnScroll
               as="h1"
               text="Controle e segurança pra sua operação, em um só sistema."
-              className="text-headline-md font-normal leading-tight tracking-tight text-white sm:text-headline-lg"
+              className="text-headline-md font-bold leading-tight text-white sm:text-headline-lg"
             />
             <p className="mt-xs text-label-md text-white/60">
               Em tempo real, jornadas, produtividade e comportamento, tudo com dados reais e IA
@@ -303,7 +297,7 @@ export default function AIPPage() {
             <div className="mt-md">
               <Link
                 href="/contato"
-                className="aip-mono inline-flex h-12 items-center justify-center border border-primary bg-primary px-6 text-label-md text-on-primary transition-colors hover:bg-primary-hover"
+                className="inline-flex h-12 items-center justify-center rounded-sm border border-primary bg-primary px-6 text-label-md font-semibold text-on-primary hover:bg-primary-hover"
               >
                 Fale Conosco Agora
               </Link>
@@ -323,9 +317,9 @@ export default function AIPPage() {
       </section>
 
       {/* VISÃO GERAL */}
-      <section className="border-b border-outline-variant/60">
+      <section className="tema-claro">
         <Reveal className="mx-auto max-w-[1200px] px-gutter py-xl">
-          <h2 className="text-center text-headline-md font-normal sm:text-[32px]">
+          <h2 className="text-center text-headline-md font-bold sm:text-[32px]">
             Uma visão completa da sua operação.
           </h2>
           <p className="mx-auto mt-xs max-w-[36rem] text-center text-body-md text-on-surface-variant">
@@ -337,7 +331,7 @@ export default function AIPPage() {
             {OVERVIEW.map((o, index) => (
               <div
                 key={o.title}
-                className={`border border-outline-variant/60 bg-surface p-md text-center ${
+                className={`rounded border border-outline-variant bg-surface p-md text-center ${
                   index < 3
                     ? "lg:col-span-2"
                     : index === OVERVIEW.length - 1
@@ -345,25 +339,25 @@ export default function AIPPage() {
                       : "lg:col-span-3"
                 }`}
               >
-                <div className="mx-auto flex h-10 w-10 items-center justify-center border border-outline-variant/60 bg-primary-container text-on-primary-container">
+                <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-sm border border-outline-variant bg-primary-container text-on-primary-container">
                   <o.icon />
                 </div>
-                <p className="aip-mono mt-sm text-label-md text-on-surface">{o.title}</p>
+                <h3 className="mt-sm text-base font-bold text-on-surface">{o.title}</h3>
                 <p className="mt-xs text-body-md text-on-surface-variant">{o.body}</p>
               </div>
             ))}
           </div>
 
-          <p className="mt-lg text-center text-title-lg font-medium text-on-surface">Tudo em um só lugar.</p>
+          <p className="mt-lg aip-titulo text-center text-title-lg font-semibold text-on-surface">Tudo em um só lugar.</p>
         </Reveal>
       </section>
 
       {/* CÂMERAS IA */}
-      <section className="border-b border-outline-variant/60 bg-surface-container-lowest">
+      <section className="tema-escuro">
         <Reveal className="mx-auto max-w-[1200px] px-gutter py-xl">
           <div className="mx-auto max-w-[36rem] text-center">
-            <p className="aip-mono text-label-sm text-on-surface-variant">Câmeras IA</p>
-            <h2 className="mt-xs text-headline-md font-normal sm:text-[32px]">
+            <p className="aip-rotulo text-label-sm text-on-surface-variant">Câmeras IA</p>
+            <h2 className="mt-xs text-headline-md font-bold sm:text-[32px]">
               Aproveite as câmeras que você já tem.
             </h2>
             <p className="mt-xs text-body-md text-on-surface-variant">
@@ -372,35 +366,35 @@ export default function AIPPage() {
             </p>
           </div>
 
-          <div className="mt-lg grid grid-cols-2 gap-px border border-outline-variant/60 bg-outline-variant lg:grid-cols-4">
+          <div className="mt-lg grid grid-cols-2 gap-px overflow-hidden rounded border border-outline-variant bg-outline-variant lg:grid-cols-4">
             {CAMERA_STATS.map((stat) => (
               <div key={stat.label} className="bg-surface p-sm text-center">
-                <p className="text-title-lg text-on-surface">{stat.value}</p>
-                <p className="aip-mono mt-1 text-[10px] text-on-surface-variant">{stat.label}</p>
+                <p className="aip-titulo text-2xl font-bold tabular-nums text-on-surface">{stat.value}</p>
+                <p className="aip-rotulo mt-1 text-[11px] text-on-surface-variant">{stat.label}</p>
               </div>
             ))}
           </div>
 
           <div className="mt-md grid gap-md md:grid-cols-3">
             {CAMERA_STEPS.map((step, index) => (
-              <div key={step.title} className="border border-outline-variant/60 bg-surface p-md">
+              <div key={step.title} className="rounded border border-outline-variant bg-surface p-md">
                 <div className="flex items-center justify-between gap-sm">
-                  <span className="flex h-10 w-10 items-center justify-center border border-outline-variant/60 bg-primary-container text-on-primary-container">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-sm border border-outline-variant bg-primary-container text-on-primary-container">
                     <step.icon />
                   </span>
-                  <span className="aip-mono text-label-sm text-on-surface-variant">
+                  <span className="aip-rotulo text-label-sm text-on-surface-variant">
                     Passo {String(index + 1).padStart(2, "0")}
                   </span>
                 </div>
-                <p className="mt-sm text-title-lg text-on-surface">{step.title}</p>
+                <h3 className="mt-sm text-title-lg font-bold text-on-surface">{step.title}</h3>
                 <p className="mt-xs text-body-md text-on-surface-variant">{step.body}</p>
               </div>
             ))}
           </div>
 
           <div className="mx-auto mt-xl max-w-[36rem] text-center">
-            <p className="aip-mono text-label-sm text-on-surface-variant">Simulador interativo</p>
-            <h3 className="mt-xs text-headline-md font-normal sm:text-[32px]">Teste você mesmo.</h3>
+            <p className="aip-rotulo text-label-sm text-on-surface-variant">Simulador interativo</p>
+            <h3 className="mt-xs text-headline-md font-bold sm:text-[32px]">Teste você mesmo.</h3>
             <p className="mt-xs text-body-md text-on-surface-variant">
               Escolha o evento, o local e a severidade. Veja a AIP detectar a ocorrência e montar o
               aviso que chega no WhatsApp.
@@ -414,10 +408,10 @@ export default function AIPPage() {
       </section>
 
       {/* ALERTAS */}
-      <section className="border-b border-outline-variant/60">
+      <section className="tema-claro">
         <Reveal className="mx-auto max-w-[1200px] px-gutter py-xl">
           <div className="mx-auto max-w-[36rem] text-center">
-            <h2 className="text-headline-md font-normal sm:text-[32px]">
+            <h2 className="text-headline-md font-bold sm:text-[32px]">
               Nem todo problema aparece de uma vez. Primeiro, ele foge do padrão.
             </h2>
             <p className="mt-xs text-body-lg text-on-surface-variant">
@@ -427,12 +421,12 @@ export default function AIPPage() {
 
           <div className="mt-lg grid gap-md sm:grid-cols-2">
             {ALERTS.map((alert) => (
-              <div key={alert.title} className="flex gap-sm border border-outline-variant/60 p-md">
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center border border-outline-variant/60 bg-primary-container text-on-primary-container">
+              <div key={alert.title} className="flex gap-sm rounded border border-outline-variant bg-surface p-md">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-sm border border-outline-variant bg-primary-container text-on-primary-container">
                   <IconBell />
                 </span>
                 <div>
-                  <p className="font-medium text-on-surface">{alert.title}</p>
+                  <h3 className="font-bold text-on-surface">{alert.title}</h3>
                   <p className="mt-xs text-body-md text-on-surface-variant">{alert.body}</p>
                 </div>
               </div>
@@ -442,9 +436,9 @@ export default function AIPPage() {
       </section>
 
       {/* VISÃO CENTRALIZADA */}
-      <section className="border-b border-outline-variant/60 bg-surface-container-lowest">
+      <section className="tema-escuro">
         <Reveal className="mx-auto max-w-[1200px] px-gutter py-xl text-center">
-          <h2 className="text-headline-md font-normal sm:text-[32px]">
+          <h2 className="text-headline-md font-bold sm:text-[32px]">
             Você não precisa estar em todos os lugares.
           </h2>
           <p className="mx-auto mt-xs max-w-[36rem] text-body-lg text-on-surface-variant">
@@ -460,23 +454,23 @@ export default function AIPPage() {
             {["Jornadas", "Check-ins", "Localização", "Dispositivos", "Câmeras", "Alertas", "Uso Digital"].map((item) => (
               <span
                 key={item}
-                className="aip-mono border border-outline-variant px-3 py-1 text-label-sm text-on-surface"
+                className="rounded-full border border-outline-variant bg-surface px-3 py-1 text-label-sm font-medium text-on-surface"
               >
                 {item}
               </span>
             ))}
           </div>
 
-          <p className="mt-lg text-title-lg font-medium text-on-surface">
+          <p className="aip-titulo mt-lg text-title-lg font-semibold text-on-surface">
             Tudo conectado em uma única plataforma.
           </p>
         </Reveal>
       </section>
 
       {/* CONFORMIDADE */}
-      <section className="border-b border-outline-variant/60">
+      <section className="tema-claro">
         <Reveal className="mx-auto max-w-[1200px] px-gutter py-xl text-center">
-          <h2 className="text-headline-md font-normal sm:text-[32px]">
+          <h2 className="text-headline-md font-bold sm:text-[32px]">
             Segurança, rastreabilidade e conformidade.
           </h2>
           <p className="mx-auto mt-md max-w-[36rem] text-body-md text-on-surface-variant">
@@ -489,7 +483,7 @@ export default function AIPPage() {
             sobre cada registro.
           </p>
 
-          <div className="mt-lg flex flex-col items-center gap-xs text-title-lg font-medium text-on-surface">
+          <div className="aip-titulo mt-lg flex flex-col items-center gap-xs text-title-lg font-semibold text-on-surface">
             <p>Mais informação para decidir.</p>
             <p>Mais rastreabilidade para acompanhar.</p>
           </div>
@@ -497,9 +491,9 @@ export default function AIPPage() {
       </section>
 
       {/* FAQ */}
-      <section className="border-b border-outline-variant/60 bg-surface-container-lowest">
+      <section className="tema-escuro">
         <Reveal className="mx-auto max-w-[800px] px-gutter py-xl">
-          <h2 className="text-center text-headline-md font-normal sm:text-[32px]">
+          <h2 className="text-center text-headline-md font-bold sm:text-[32px]">
             Perguntas frequentes
           </h2>
 
@@ -507,9 +501,9 @@ export default function AIPPage() {
             {FAQ.map((item) => (
               <details
                 key={item.q}
-                className="group border border-outline-variant/60 bg-surface p-md open:bg-surface-container-lowest"
+                className="group rounded border border-outline-variant bg-surface p-md"
               >
-                <summary className="flex cursor-pointer list-none items-center justify-between gap-sm font-medium text-on-surface">
+                <summary className="flex cursor-pointer list-none items-center justify-between gap-sm font-semibold text-on-surface">
                   {item.q}
                   <span className="shrink-0 text-on-surface-variant transition-transform group-open:rotate-45">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" className="h-4 w-4">
@@ -525,9 +519,9 @@ export default function AIPPage() {
       </section>
 
       {/* CTA FINAL */}
-      <section>
+      <section className="tema-claro">
         <Reveal className="mx-auto max-w-[1200px] px-gutter py-xl text-center">
-          <p className="mx-auto max-w-2xl text-[26px] font-normal leading-snug text-on-surface">
+          <p className="mx-auto max-w-2xl aip-titulo text-[26px] font-bold leading-snug text-on-surface">
             O que acontece na sua operação quando você não está olhando? Agora você pode
             saber.
           </p>
@@ -537,7 +531,7 @@ export default function AIPPage() {
           </p>
           <Link
             href="/contato"
-            className="aip-mono mt-lg inline-flex h-12 items-center justify-center border border-primary bg-primary px-6 text-label-md text-on-primary transition-colors hover:bg-primary-hover"
+            className="mt-lg inline-flex h-12 items-center justify-center rounded-sm border border-primary bg-primary px-6 text-label-md font-semibold text-on-primary hover:bg-primary-hover"
           >
             Fale Conosco Agora
           </Link>
@@ -546,10 +540,10 @@ export default function AIPPage() {
 
       {/* FOOTER — mesmo padrão do rodapé institucional do site (ver
           Footer.tsx), sem nada a mais. */}
-      <footer className="border-t border-outline-variant/60 bg-surface-container-lowest">
+      <footer className="tema-escuro border-t border-outline-variant">
         <div className="mx-auto flex max-w-[1200px] flex-col gap-lg px-gutter py-xl text-label-md">
           <div>
-            <h3 className="mb-sm text-title-lg font-medium text-on-surface">Empresa</h3>
+            <h3 className="mb-sm text-title-lg font-bold text-on-surface">Empresa</h3>
             <ul className="space-y-sm text-on-surface-variant">
               <li>
                 <Link href="/sobre-nos" className="hover:text-primary">
@@ -559,7 +553,7 @@ export default function AIPPage() {
             </ul>
           </div>
           <div>
-            <h3 className="mb-sm text-title-lg font-medium text-on-surface">Suporte</h3>
+            <h3 className="mb-sm text-title-lg font-bold text-on-surface">Suporte</h3>
             <ul className="space-y-sm text-on-surface-variant">
               <li>
                 <Link href="/contato" className="hover:text-primary">

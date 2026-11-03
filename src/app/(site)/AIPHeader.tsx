@@ -34,9 +34,9 @@ export default function AIPHeader() {
 
   return (
     <header
-      className={`fixed inset-x-0 top-0 z-30 transition-all duration-300 ${
+      className={`tema-escuro fixed inset-x-0 top-0 z-30 transition-all duration-300 ${
         scrolled
-          ? "border-b border-outline-variant/60 bg-surface/80 backdrop-blur-md"
+          ? "border-b border-outline-variant bg-surface/80 backdrop-blur-md"
           : "border-b border-transparent bg-transparent"
       }`}
     >

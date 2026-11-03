@@ -22,11 +22,8 @@ import Link from "next/link";
 // MobileNav do site: assim o "Fale Conosco Agora" some quando o menu
 // abre, ficando só a marca visível por cima, igual no site principal.
 //
-// Cores: usa bg-surface/text-on-surface (não bg-inverse-surface como no
-// MobileNav do site) de propósito. /aip já força html.dark, então
-// "inverse-surface" viraria claro (o token se inverte dentro de
-// html.dark) e o painel abriria branco numa página escura. bg-surface já
-// resolve pro escuro certo aqui, sem precisar inverter nada.
+// Cores: o portal fica fora das seções, então leva tema-escuro próprio,
+// igual ao cabeçalho que aparece por cima dele.
 const LINKS = [
   { label: "Início", href: "/" },
   { label: "[AIP]", href: "/" },
@@ -91,14 +88,14 @@ export default function MobileMenu({
         createPortal(
           <div
             aria-hidden={!open}
-            className={`fixed inset-0 z-20 flex flex-col overflow-hidden bg-surface pt-24 transition-opacity duration-300 ease-out ${
+            className={`tema-escuro fixed inset-0 z-20 flex flex-col overflow-hidden bg-surface pt-24 transition-opacity duration-300 ease-out ${
               open ? "opacity-100" : "pointer-events-none opacity-0"
             }`}
           >
             <ul className="flex flex-col gap-lg px-gutter">
               {LINKS.map((item, i) => (
                 <li
-                  key={item.href}
+                  key={item.label}
                   className={`transition-all duration-300 ease-out ${
                     open ? "translate-y-0 opacity-100" : "-translate-y-2 opacity-0"
                   }`}
@@ -107,7 +104,7 @@ export default function MobileMenu({
                   <Link
                     href={item.href}
                     onClick={() => onOpenChange(false)}
-                    className="aip-mono block text-title-lg text-on-surface/90 hover:text-tertiary"
+                    className="aip-titulo block text-title-lg font-semibold text-on-surface/90 hover:text-primary"
                   >
                     {item.label}
                   </Link>

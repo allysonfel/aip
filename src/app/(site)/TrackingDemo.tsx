@@ -93,7 +93,7 @@ const USAGE_SAMPLE = [
 // (bg-surface-container-high) no lugar de vídeo quebrado.
 function DemoVideo({ src }: { src: string }) {
   return (
-    <div className="mt-md aspect-video w-full overflow-hidden rounded-sm border border-outline-variant/60 bg-surface-container-high">
+    <div className="mt-md aspect-video w-full overflow-hidden rounded-sm border border-outline-variant bg-surface-container-high">
       <video autoPlay muted loop playsInline className="h-full w-full object-cover">
         <source src={src} type="video/mp4" />
       </video>
@@ -120,7 +120,7 @@ function CamerasTab() {
 
   return (
     <div>
-      <p className="font-medium text-on-surface">Câmeras IA</p>
+      <p className="font-bold text-on-surface">Câmeras IA</p>
       <p className="mt-xs text-body-md text-on-surface-variant">
         Use as câmeras que você já tem. A IA detecta pessoas e veículos em áreas restritas e avisa no
         WhatsApp com foto.
@@ -130,8 +130,8 @@ function CamerasTab() {
         <CameraTile event={s.event} zone={s.zone} severity={s.severity} variant="mini" />
       </div>
 
-      <div className="mt-xs flex items-center gap-sm border border-outline-variant/60 bg-surface p-xs">
-        <span className="h-2 w-2 shrink-0" style={{ backgroundColor: sev.color }} />
+      <div className="mt-xs flex items-center gap-sm rounded-sm border border-outline-variant bg-surface p-xs">
+        <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: sev.color }} />
         <p className="text-body-md text-on-surface">
           <span className="font-medium">{zone.place}:</span> {ev.detected.toLowerCase()}, {sev.short}
         </p>
@@ -159,15 +159,15 @@ export default function TrackingDemo() {
   }, [tab]);
 
   return (
-    <div className="overflow-hidden rounded-lg border border-outline-variant/60 bg-surface-container-lowest shadow-lg">
+    <div className="tema-claro overflow-hidden rounded-lg border border-outline-variant bg-surface shadow-[0_24px_64px_rgb(0_0_0/0.35)]">
       {/* Barra de título, estilo janela */}
-      <div className="flex items-center justify-between border-b border-outline-variant/60 px-md py-sm">
+      <div className="flex items-center justify-between border-b border-outline-variant px-md py-sm">
         <div className="flex items-center gap-1.5">
           <span className="h-2.5 w-2.5 rounded-full bg-outline-variant" />
           <span className="h-2.5 w-2.5 rounded-full bg-outline-variant" />
           <span className="h-2.5 w-2.5 rounded-full bg-outline-variant" />
         </div>
-        <span className="aip-status-badge aip-mono text-label-sm">
+        <span className="aip-status-badge aip-rotulo text-label-sm">
           <span className="h-1.5 w-1.5 rounded-full bg-tertiary" />
           Ao vivo
         </span>
@@ -179,18 +179,18 @@ export default function TrackingDemo() {
             Real" é grande demais pra dividir espaço com as outras 3 numa
             fileira só). A partir de sm: volta a ser a lista vertical de
             sempre (sm:flex-col), uma por linha, texto à esquerda. */}
-        <div className="grid grid-cols-2 gap-1 border-b border-outline-variant/60 p-xs sm:flex sm:w-[200px] sm:flex-col sm:border-b-0 sm:border-r sm:p-sm">
+        <div className="grid grid-cols-2 gap-1 border-b border-outline-variant p-xs sm:flex sm:w-[200px] sm:flex-col sm:border-b-0 sm:border-r sm:p-sm">
           {TABS.map((t, index) => (
             <button
               key={t.id}
               type="button"
               onClick={() => setTab(t.id)}
-              className={`aip-mono relative overflow-hidden whitespace-normal px-sm py-2 text-center text-label-sm leading-snug transition-colors sm:text-left ${
+              className={`relative overflow-hidden whitespace-normal rounded-sm px-sm py-2 text-center text-label-sm font-medium leading-snug sm:text-left ${
                 index === TABS.length - 1 && TABS.length % 2 === 1 ? "col-span-2 sm:col-span-1" : ""
               } ${
                 tab === t.id
-                  ? "bg-primary-container text-on-primary-container"
-                  : "text-on-surface-variant hover:bg-surface-container"
+                  ? "bg-primary-container font-semibold text-on-primary-container"
+                  : "text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface"
               }`}
             >
               {t.label}
@@ -229,7 +229,7 @@ export default function TrackingDemo() {
         <div className="h-[475px] min-h-0 overflow-hidden p-md sm:flex-1">
           {tab === "ponto" && (
             <div>
-              <p className="font-medium text-on-surface">Ponto IA</p>
+              <p className="font-bold text-on-surface">Ponto IA</p>
               <p className="mt-xs text-body-md text-on-surface-variant">
                 Para equipes internas e externas, no check-in a IA confere uniforme, crachá e
                 local de trabalho. Aprovado sem ninguém precisar olhar.
@@ -246,7 +246,7 @@ export default function TrackingDemo() {
                           overflow-hidden fica só aqui dentro, pra recortar a
                           foto em círculo sem cortar junto o selo de check
                           (que precisa ficar por FORA do círculo). */}
-                      <div className="h-full w-full overflow-hidden rounded-full bg-surface-container-high">
+                      <div className="relative h-full w-full overflow-hidden rounded-full bg-surface-container-high">
                         <Image src={c.img} alt={c.label} fill sizes="40px" priority className="object-cover" />
                       </div>
                       <span className="absolute -bottom-0.5 -right-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-tertiary text-on-tertiary">
@@ -265,7 +265,7 @@ export default function TrackingDemo() {
           {tab === "dispositivos" && (
             <div>
               <div className="flex items-center justify-between">
-                <p className="font-medium text-on-surface">Rastreio em tempo real</p>
+                <p className="font-bold text-on-surface">Rastreio em tempo real</p>
                 <span className="text-label-sm text-on-surface-variant">6 online</span>
               </div>
               <p className="mt-xs text-body-md text-on-surface-variant">
@@ -297,7 +297,7 @@ export default function TrackingDemo() {
 
           {tab === "alertas" && (
             <div>
-              <p className="font-medium text-on-surface">Alertas de ponto e dispositivos</p>
+              <p className="font-bold text-on-surface">Alertas de ponto e dispositivos</p>
               <p className="mt-xs text-body-md text-on-surface-variant">
                 Acompanhe situações que merecem atenção e aja no momento certo.
               </p>
@@ -308,7 +308,7 @@ export default function TrackingDemo() {
                 {ALERTS_SAMPLE.map((a) => (
                   <div
                     key={a.text}
-                    className="flex items-center gap-sm rounded-sm border border-outline-variant/60 bg-surface p-xs shadow-sm"
+                    className="flex items-center gap-sm rounded-sm border border-outline-variant bg-surface p-xs"
                   >
                     <span className="relative flex h-2 w-2 shrink-0">
                       <span className={`absolute inset-0 -m-1 animate-ping rounded-full ${a.ring}`} />
@@ -325,7 +325,7 @@ export default function TrackingDemo() {
 
           {tab === "uso" && (
             <div>
-              <p className="font-medium text-on-surface">Uso Digital</p>
+              <p className="font-bold text-on-surface">Uso Digital</p>
               <p className="mt-xs text-body-md text-on-surface-variant">
                 Descubra em quais sistemas e sites o tempo da equipe é mais investido ao longo
                 da jornada.
