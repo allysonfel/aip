@@ -1,298 +1,192 @@
 @import "tailwindcss";
 
 /*
- * Identidade visual do site: a mesma do painel do shopping (ver
- * globals.css e shopping/tema.css). Tons, azul de destaque, cantos de 6px
- * em controles e 12px em cartões, títulos em Plus Jakarta Sans e texto
- * corrido na fonte do sistema.
- *
- * As seções alternam entre claro e escuro: .tema-claro e .tema-escuro
- * redefinem os tokens, e tudo dentro delas herda. Fica isolado aqui, com
- * <html> própria (ver layout.tsx), sem vazar para o sistema.
+ * Site institucional: fundo preto, texto branco e um único acento de cor,
+ * só nos elementos de "visão da IA". Para trocar a identidade, mexa aqui.
+ * Fica isolado do sistema, com <html> própria (ver layout.tsx).
  */
 
-:root,
-.tema-claro {
-  --color-surface: #ffffff;
-  --color-surface-dim: #f9f9f9;
-  --color-surface-bright: #ffffff;
-  --color-surface-container-lowest: #f4f7f6;
-  --color-surface-container-low: #f3f3f3;
-  --color-surface-container: #efefef;
-  --color-surface-container-high: #e8e8e8;
-  --color-surface-container-highest: #dcdcdc;
-  --color-on-surface: #1e2124;
-  --color-on-surface-variant: #636363;
-  --color-outline: #767676;
-  --color-outline-variant: #e4e4e7;
-  --color-inverse-surface: #202426;
-  --color-inverse-on-surface: #f3f3f3;
-
-  --color-primary: #2563eb;
-  --color-on-primary: #ffffff;
-  --color-primary-container: #eff6ff;
-  --color-on-primary-container: #1d4ed8;
-  --color-primary-hover: #1d4ed8;
-  --color-primary-active: #1e40af;
-
-  --color-secondary: #4e8af7;
-  --color-on-secondary: #ffffff;
-  --color-secondary-container: #e8f1ff;
-  --color-on-secondary-container: #4e8af7;
-
-  /* Status "ao vivo" e confirmações: o verde de sucesso do painel. */
-  --color-tertiary: #16a34a;
-  --color-on-tertiary: #ffffff;
-  --color-tertiary-container: #dcfce7;
-  --color-on-tertiary-container: #15803d;
-
-  --color-error: #ff4136;
-  --color-on-error: #ffffff;
-  --color-error-container: #ffe8e6;
-  --color-on-error-container: #ff4136;
-
-  /* Severidade do módulo Câmeras IA */
-  --aip-sev-critical: #ff4136;
-  --aip-sev-attention: #f59e0b;
-  --aip-sev-info: #16a34a;
-
-  --anel-foco: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
-}
-
-.tema-escuro {
-  --color-surface: #1a1c1e;
-  --color-surface-dim: #131415;
-  --color-surface-bright: #26282b;
-  --color-surface-container-lowest: #131415;
-  --color-surface-container-low: #202225;
-  --color-surface-container: #26282b;
-  --color-surface-container-high: #2f3134;
-  --color-surface-container-highest: #3a3c40;
-  --color-on-surface: #e7e7e7;
-  --color-on-surface-variant: #a3a3a3;
-  --color-outline: #6b6b6b;
-  --color-outline-variant: #303236;
-  --color-inverse-surface: #f3f3f3;
-  --color-inverse-on-surface: #1e2124;
-
-  --color-primary: #5b8cf5;
-  --color-on-primary: #06132c;
-  --color-primary-container: #16233f;
-  --color-on-primary-container: #a9c6ff;
-  --color-primary-hover: #7ba1f7;
-  --color-primary-active: #416ecf;
-
-  --color-secondary: #5b8cf5;
-  --color-on-secondary: #06132c;
-  --color-secondary-container: #16233f;
-  --color-on-secondary-container: #a9c6ff;
-
-  --color-tertiary: #4ade80;
-  --color-on-tertiary: #06280f;
-  --color-tertiary-container: #0f3a1e;
-  --color-on-tertiary-container: #86efac;
-
-  --color-error: #ff6b61;
-  --color-on-error: #3a0a06;
-  --color-error-container: #4a120d;
-  --color-on-error-container: #ffb4ac;
-
-  --aip-sev-critical: #ff6b61;
-  --aip-sev-attention: #fbbf24;
-  --aip-sev-info: #4ade80;
-
-  --anel-foco: 0 0 0 3px color-mix(in srgb, var(--color-primary) 18%, transparent);
-}
-
 :root {
-  --color-background: var(--color-surface-dim);
-  --color-foreground: var(--color-on-surface);
-
-  --font-sans:
-    -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", system-ui, "Segoe UI", Roboto, sans-serif;
-
-  /* Espaçamento semântico (unidade base 8px). */
-  --spacing-xs: 4px;
-  --spacing-sm: 12px;
-  --spacing-md: 24px;
-  --spacing-lg: 40px;
-  --spacing-xl: 64px;
-  --spacing-gutter: 24px;
-
-  /* 6px em controles, 12px em cartões. */
-  --radius-sm: 6px;
-  --radius: 12px;
-  --radius-md: 6px;
-  --radius-lg: 12px;
-  --radius-xl: 12px;
+  --aip-fundo: #000000;
+  --aip-painel: #0d0d0d;
+  --aip-texto: #ffffff;
+  --aip-cinza: #9a9a9a;
+  --aip-linha: rgb(255 255 255 / 0.14);
+  /* Acento provisório: caixas de detecção, trajetos e linhas de contagem. */
+  --aip-visao: #5ce1e6;
 }
 
 @theme inline {
-  --color-surface: var(--color-surface);
-  --color-surface-dim: var(--color-surface-dim);
-  --color-surface-bright: var(--color-surface-bright);
-  --color-surface-container-lowest: var(--color-surface-container-lowest);
-  --color-surface-container-low: var(--color-surface-container-low);
-  --color-surface-container: var(--color-surface-container);
-  --color-surface-container-high: var(--color-surface-container-high);
-  --color-surface-container-highest: var(--color-surface-container-highest);
-  --color-on-surface: var(--color-on-surface);
-  --color-on-surface-variant: var(--color-on-surface-variant);
-  --color-outline: var(--color-outline);
-  --color-outline-variant: var(--color-outline-variant);
-  --color-inverse-surface: var(--color-inverse-surface);
-  --color-inverse-on-surface: var(--color-inverse-on-surface);
-
-  --color-primary: var(--color-primary);
-  --color-on-primary: var(--color-on-primary);
-  --color-primary-container: var(--color-primary-container);
-  --color-on-primary-container: var(--color-on-primary-container);
-  --color-primary-hover: var(--color-primary-hover);
-  --color-primary-active: var(--color-primary-active);
-
-  --color-secondary: var(--color-secondary);
-  --color-on-secondary: var(--color-on-secondary);
-  --color-secondary-container: var(--color-secondary-container);
-  --color-on-secondary-container: var(--color-on-secondary-container);
-
-  --color-tertiary: var(--color-tertiary);
-  --color-on-tertiary: var(--color-on-tertiary);
-  --color-tertiary-container: var(--color-tertiary-container);
-  --color-on-tertiary-container: var(--color-on-tertiary-container);
-
-  --color-error: var(--color-error);
-  --color-on-error: var(--color-on-error);
-  --color-error-container: var(--color-error-container);
-  --color-on-error-container: var(--color-on-error-container);
-
-  --color-background: var(--color-background);
-  --color-foreground: var(--color-foreground);
-
-  --font-sans: var(--font-sans);
-
-  /* Tamanhos de texto: aqui no @theme, senão o Tailwind não gera os text-*. */
-  --text-headline-lg: 48px;
-  --text-headline-lg--line-height: 56px;
-  --text-headline-lg--letter-spacing: -0.01em;
-
-  --text-headline-md: 40px;
-  --text-headline-md--line-height: 46px;
-  --text-headline-md--letter-spacing: -0.01em;
-
-  --text-title-lg: 20px;
-  --text-title-lg--line-height: 28px;
-
-  --text-body-lg: 18px;
-  --text-body-lg--line-height: 28px;
-
-  --text-body-md: 16px;
-  --text-body-md--line-height: 24px;
-
-  --text-label-md: 14px;
-  --text-label-md--line-height: 20px;
-  --text-label-md--letter-spacing: 0.01em;
-
-  --text-label-sm: 12px;
-  --text-label-sm--line-height: 16px;
-  --text-label-sm--letter-spacing: 0.02em;
-
-  --spacing-xs: var(--spacing-xs);
-  --spacing-sm: var(--spacing-sm);
-  --spacing-md: var(--spacing-md);
-  --spacing-lg: var(--spacing-lg);
-  --spacing-xl: var(--spacing-xl);
-  --spacing-gutter: var(--spacing-gutter);
-
-  --radius-sm: var(--radius-sm);
-  --radius: var(--radius);
-  --radius-md: var(--radius-md);
-  --radius-lg: var(--radius-lg);
-  --radius-xl: var(--radius-xl);
+  --color-fundo: var(--aip-fundo);
+  --color-painel: var(--aip-painel);
+  --color-texto: var(--aip-texto);
+  --color-cinza: var(--aip-cinza);
+  --color-linha: var(--aip-linha);
+  --color-visao: var(--aip-visao);
+  --font-sans: var(--font-barlow), system-ui, sans-serif;
+  --font-titulo: var(--font-barlow-condensed), var(--font-barlow), system-ui, sans-serif;
 }
 
 @layer base {
-  body {
-    background: var(--color-background);
-    color: var(--color-foreground);
-    font-family: var(--font-sans);
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+  html {
+    scroll-behavior: smooth;
+    background: var(--aip-fundo);
   }
 
-  /* Em camada, para bg-* e text-* de cada elemento continuarem valendo. */
-  .tema-claro,
-  .tema-escuro {
-    background-color: var(--color-surface-dim);
-    color: var(--color-on-surface);
+  body {
+    background: var(--aip-fundo);
+    color: var(--aip-texto);
+    font-family: var(--font-sans);
+    font-weight: 400;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--aip-texto);
+    outline-offset: 3px;
+  }
+
+  summary {
+    cursor: pointer;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
   }
 }
 
 /* ---------- tipografia ---------- */
 
-h1,
-h2,
-h3,
-.aip-titulo {
-  font-family: var(--font-titulo), var(--font-sans);
-  letter-spacing: -0.01em;
-  /* a Plus Jakarta tem espaço entre palavras estreito; com letras juntas, as palavras emendavam */
-  word-spacing: 0.06em;
+.titulo-hero,
+.titulo-secao,
+.titulo-tela {
+  font-family: var(--font-titulo);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
 }
 
-h1 {
-  letter-spacing: -0.02em;
+.titulo-hero {
+  font-size: clamp(2.875rem, 7vw, 5.5rem);
 }
 
-/* Rótulo curto em maiúsculas, como os títulos de grupo e de tabela do painel. */
-.aip-rotulo {
+.titulo-tela {
+  font-size: clamp(2.5rem, 6vw, 4.75rem);
+}
+
+.titulo-secao {
+  font-size: clamp(2.25rem, 4.4vw, 3.75rem);
+  line-height: 1.02;
+}
+
+.titulo-coluna {
+  font-family: var(--font-titulo);
+  font-size: 1.75rem;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  line-height: 1.1;
+}
+
+.rotulo {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
-  font-variant-numeric: tabular-nums;
+  color: var(--aip-cinza);
 }
 
-/* ---------- superfícies e controles ---------- */
-
-.rounded {
-  border-radius: var(--radius);
+.corpo {
+  font-size: 1.0625rem;
+  line-height: 1.6;
+  color: var(--aip-cinza);
 }
 
-:is(button, a).rounded-sm {
+/* ---------- ritmo ---------- */
+
+.secao {
+  padding-block: clamp(5rem, 11vw, 10rem);
+}
+
+.margem {
+  width: 100%;
+  max-width: 1320px;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 4vw, 3.5rem);
+}
+
+/* Âncoras não ficam escondidas atrás da navegação e do menu fixo. */
+[id] {
+  scroll-margin-top: 8.5rem;
+}
+
+/* ---------- movimento ---------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(18px);
   transition:
-    transform 150ms ease,
-    box-shadow 150ms ease,
-    background-color 150ms ease,
-    border-color 150ms ease,
-    color 150ms ease;
+    opacity 0.9s ease,
+    transform 0.9s cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-a.rounded-sm:hover {
-  transform: translateY(-1px);
+.reveal.visivel {
+  opacity: 1;
+  transform: none;
 }
 
-a.bg-primary:hover {
-  box-shadow: 0 4px 12px color-mix(in srgb, var(--color-primary) 35%, transparent);
+@supports (animation-timeline: scroll()) {
+  .parallax {
+    animation: parallax linear both;
+    animation-timeline: scroll(root);
+    animation-range: 0 100vh;
+  }
+
+  @keyframes parallax {
+    to {
+      transform: translateY(9vh) scale(1.04);
+    }
+  }
 }
 
-:is(button, a).rounded-sm:focus-visible {
-  outline: none;
-  box-shadow: var(--anel-foco);
+/* Mapa de calor: focos pulsando em ritmos diferentes. */
+@keyframes calor {
+  0%,
+  100% {
+    opacity: 0.35;
+    transform: scale(0.86);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
 }
 
-/* Badge de status (ex.: "AO VIVO") */
-.aip-status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--color-tertiary-container);
-  color: var(--color-on-tertiary-container);
-  padding: 2px 10px;
-  border-radius: 999px;
+.calor {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: calor 7s ease-in-out infinite;
 }
 
-/* Linha de varredura do quadro de câmera e entrada da caixa de detecção. */
-@keyframes aip-scan {
-  0% {
+/* Trajeto que se desenha e some. */
+@keyframes trajeto {
+  from {
+    stroke-dashoffset: 1;
+  }
+  70%,
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.trajeto {
+  stroke-dasharray: 1;
+  animation: trajeto 8s ease-in-out infinite;
+}
+
+/* Fluxo descendo pelas camadas do diagrama. */
+@keyframes fluxo {
+  from {
     top: 0;
     opacity: 0;
   }
@@ -300,61 +194,59 @@ a.bg-primary:hover {
   90% {
     opacity: 1;
   }
-  100% {
+  to {
     top: 100%;
     opacity: 0;
   }
 }
 
-@keyframes aip-box-in {
-  from {
-    opacity: 0;
-    transform: scale(0.94);
+.fluxo {
+  animation: fluxo 6s linear infinite;
+}
+
+/* Pontos do "Pergunte" e varredura do totem. */
+@keyframes pulso {
+  0%,
+  100% {
+    opacity: 0.25;
   }
-  to {
+  50% {
     opacity: 1;
-    transform: scale(1);
   }
 }
 
-.aip-scan {
-  animation: aip-scan 3.2s linear infinite;
+.pulso {
+  animation: pulso 3.2s ease-in-out infinite;
 }
 
-.aip-box-in {
-  animation: aip-box-in 0.3s ease-out both;
+.sem-barra {
+  scrollbar-width: none;
 }
 
-/* Entrada "subindo" do conteúdo de cada aba/cenário (TrackingDemo, CameraSimulator). */
-@keyframes lp-slide-up {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Barrinha de progresso da aba ativa do widget do hero (TrackingDemo):
-   enche da esquerda pra direita no tempo do ciclo automático. */
-@keyframes tab-fill {
-  from {
-    width: 0%;
-  }
-  to {
-    width: 100%;
-  }
+.sem-barra::-webkit-scrollbar {
+  display: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .aip-scan,
-  .aip-box-in {
+  html {
+    scroll-behavior: auto;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .parallax,
+  .calor,
+  .trajeto,
+  .fluxo,
+  .pulso {
     animation: none;
   }
 
-  a.rounded-sm:hover {
-    transform: none;
+  .fluxo {
+    display: none;
   }
 }

@@ -1,24 +1,33 @@
 import type { Metadata } from "next";
-import { Plus_Jakarta_Sans } from "next/font/google";
+import { Barlow, Barlow_Condensed } from "next/font/google";
+import { SITE_URL } from "./_config/contato";
+import Navegacao from "./_components/Navegacao";
+import Rodape from "./_components/Rodape";
 import "./site-theme.css";
 
-// Fonte dos títulos e números de destaque, a mesma do painel do shopping. O
-// texto corrido fica na fonte do sistema (ver site-theme.css).
-const fonteTitulo = Plus_Jakarta_Sans({ subsets: ["latin"], variable: "--font-titulo", display: "swap" });
+const barlow = Barlow({ subsets: ["latin"], weight: ["300", "400", "500", "600"], variable: "--font-barlow", display: "swap" });
+const barlowCondensed = Barlow_Condensed({ subsets: ["latin"], weight: ["500", "600", "700"], variable: "--font-barlow-condensed", display: "swap" });
 
-// "/" é a LP institucional da AIP, com seções alternando claro e escuro
-// (ver site-theme.css), isolada do sistema em /painel: por isso tem <html> própria aqui, sem compartilhar layout com o
-// resto do app (ver Next.js "multiple root layouts").
 export const metadata: Metadata = {
-  title: "AIP | Logos Company",
-  description:
-    "Ponto com IA, dispositivos no mapa, câmeras com IA e alertas em tempo real, numa única plataforma.",
+  metadataBase: new URL(SITE_URL),
+  title: { default: "AIP — Agência de Inteligência Patrimonial", template: "%s | AIP" },
+  icons: { icon: "/aip-a.png" },
+  description: "Soluções de inteligência artificial e visão computacional aplicadas à segurança, à operação e à gestão de ambientes.",
 };
 
+// Site institucional, com <html> própria: não compartilha layout nem tema
+// com o sistema em /painel e /shopping (Next.js "multiple root layouts").
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt-BR" className={`${fonteTitulo.variable} h-full antialiased`}>
-      <body className="min-h-full">{children}</body>
+    <html lang="pt-BR" className={`${barlow.variable} ${barlowCondensed.variable}`}>
+      <body className="min-h-full">
+        <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-black">
+          Ir para o conteúdo
+        </a>
+        <Navegacao />
+        <main id="conteudo">{children}</main>
+        <Rodape />
+      </body>
     </html>
   );
 }
