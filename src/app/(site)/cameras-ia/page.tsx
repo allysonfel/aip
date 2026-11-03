@@ -1,23 +1,15 @@
 import { metadados } from "../_config/metadados";
 import { Acordeao, Botao, Cabecalho, Encerramento, Hero, Legenda, Lista, TelaDividida } from "../_components/Base";
 import MapaCalor from "../_components/MapaCalor";
-import MenuAncoras from "../_components/MenuAncoras";
 import Reveal from "../_components/Reveal";
 import VisaoIA from "../_components/VisaoIA";
-import { MockBusca, MockChat, MockMosaico, MockPlanta, MockSaude } from "../_components/mockups";
+import Economia from "../_components/Economia";
+import { MockBusca, MockChat, MockMosaico, MockPlanta } from "../_components/mockups";
+import { ECONOMIA } from "../_config/economia";
 
 export const metadata = metadados("/cameras-ia", "Câmeras IA", "Transforme sua estrutura de monitoramento em uma ferramenta de análise, identificação e acompanhamento operacional.");
 
 const CONTATO = "/contato?produto=cameras-ia";
-
-const ANCORAS = [
-  { id: "monitoramento", rotulo: "Monitoramento" },
-  { id: "fluxo", rotulo: "Fluxo" },
-  { id: "busca-visual", rotulo: "Busca visual" },
-  { id: "integridade", rotulo: "Integridade" },
-  { id: "assistente", rotulo: "Assistente" },
-  { id: "sob-projeto", rotulo: "Sob projeto" },
-];
 
 const APLICACOES = [
   { titulo: "Localização de pessoas e acontecimentos", texto: "Encontre registros nas imagens utilizando características visuais, como vestimentas e outras informações disponíveis. Os resultados auxiliam a localização e exigem confirmação humana." },
@@ -48,7 +40,6 @@ export default function CamerasIA() {
         legenda="Imagem ilustrativa, com detecções simuladas"
         escurecer="bg-black/55"
       />
-      <MenuAncoras itens={ANCORAS} />
 
       <section className="secao">
         <div className="margem">
@@ -79,19 +70,40 @@ export default function CamerasIA() {
         </div>
       </section>
 
-      <TelaDividida id="monitoramento" rotulo="Monitoramento" titulo="Muitas câmeras, uma única visão." visual={<MockMosaico />}>
-        <Lista itens={["Visualização simultânea de câmeras", "Rastreamento visual", "Exportação de trechos de vídeo"]} />
+      <TelaDividida
+        rotulo="Monitoramento"
+        titulo="Muitas câmeras, uma única visão. Agora com IA."
+        texto="Cada câmera conectada à AIP passa a contar com inteligência artificial. Ela deixa de apenas gravar e começa a identificar pessoas, acompanhar movimentações e marcar o que importa, em tempo real."
+        visual={<MockMosaico />}
+      >
+        <Lista itens={["Todas as câmeras numa única tela, com a IA analisando cada uma ao mesmo tempo.", "Pessoas detectadas e rastreadas automaticamente na imagem.", "Trechos de vídeo exportados já com as marcações da IA."]} />
       </TelaDividida>
-      <TelaDividida id="fluxo" rotulo="Análise de fluxo" titulo="Como as pessoas usam os espaços." lado="direita" visual={<MockPlanta />}>
+
+      <section className="secao border-y border-linha">
+        <div className="margem grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-20">
+          <Reveal>
+            <p className="rotulo mb-4">Economia</p>
+            <h2 className="titulo-secao">A inteligência de uma câmera com IA, sem trocar as suas.</h2>
+            <p className="corpo mt-6">
+              Uma câmera com inteligência artificial embarcada custa hoje entre R$ {ECONOMIA.precoMinimo.toLocaleString("pt-BR")} e R$ {ECONOMIA.precoMaximo.toLocaleString("pt-BR")} por unidade. A AIP leva a mesma inteligência para as câmeras que você já tem, com economia de aproximadamente {ECONOMIA.economiaPercentual}% em relação à troca dos equipamentos.
+            </p>
+            <div className="mt-8">
+              <Botao href={CONTATO}>Calcular a economia para minha operação</Botao>
+            </div>
+          </Reveal>
+          <Reveal atraso={120}>
+            <Economia />
+            <p className="mt-4 text-xs leading-relaxed text-white/55">{ECONOMIA.nota}</p>
+          </Reveal>
+        </div>
+      </section>
+      <TelaDividida rotulo="Análise de fluxo" titulo="Como as pessoas usam os espaços." lado="direita" visual={<MockPlanta />}>
         <Lista itens={["Contagem de pessoas por entrada, corredor ou área", "Indicadores de ocupação", "Mapas de calor e rotas de circulação", "Comparação de períodos", "Identificação de áreas pouco utilizadas", "Visualização em planta, mapa ou formato híbrido"]} />
       </TelaDividida>
-      <TelaDividida id="busca-visual" rotulo="Busca visual" titulo="Localize registros por características." visual={<MockBusca />}>
+      <TelaDividida rotulo="Busca visual" titulo="Localize registros por características." visual={<MockBusca />}>
         <Lista itens={["Pesquisa por características visuais", "Localização de registros e movimentações", "Resultados sujeitos à confirmação humana"]} />
       </TelaDividida>
-      <TelaDividida id="integridade" rotulo="Integridade das câmeras" titulo="Saiba quando uma câmera falha." lado="direita" visual={<MockSaude />}>
-        <Lista itens={["Identificação de câmeras sem conexão", "Detecção de ausência ou comprometimento da imagem"]} />
-      </TelaDividida>
-      <TelaDividida id="assistente" rotulo="Assistente de IA" titulo="Pergunte aos seus dados." visual={<MockChat />}>
+      <TelaDividida rotulo="Assistente de IA" titulo="Pergunte aos seus dados." lado="direita" visual={<MockChat />}>
         <Lista itens={["Consultas em linguagem natural sobre os dados disponíveis", "Perguntas sobre horários de maior movimento, áreas menos utilizadas e indicadores da operação", "Limite diário de utilização por usuário e registro de consultas"]} />
       </TelaDividida>
 
@@ -110,7 +122,7 @@ export default function CamerasIA() {
         </div>
       </section>
 
-      <section id="sob-projeto" className="secao">
+      <section className="secao">
         <div className="margem">
           <Reveal className="rounded-2xl border border-dashed border-white/30 p-8 md:p-14">
             <span className="rotulo rounded-full border border-white/30 px-3 py-1.5">Sob projeto</span>

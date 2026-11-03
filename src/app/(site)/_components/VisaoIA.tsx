@@ -17,7 +17,8 @@ function sorteador(semente: number) {
   };
 }
 
-export default function VisaoIA({ semente = 7, quantidade = 11 }: { semente?: number; quantidade?: number }) {
+// compacto: quadro pequeno (mosaico), pessoas na imagem inteira e rótulos menores.
+export default function VisaoIA({ semente = 7, quantidade = 11, compacto = false }: { semente?: number; quantidade?: number; compacto?: boolean }) {
   const ref = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export default function VisaoIA({ semente = 7, quantidade = 11 }: { semente?: nu
     let retrato = false;
 
     // Região onde as pessoas aparecem: livre do texto do hero.
-    const regiao = () => (retrato ? { x0: 0.05, x1: 0.95, y0: 0.12, y1: 0.46, linha: 0.3 } : { x0: 0.46, x1: 0.97, y0: 0.14, y1: 0.92, linha: 0.56 });
+    const regiao = () => (compacto ? { x0: 0.06, x1: 0.94, y0: 0.18, y1: 0.96, linha: 0.62 } : retrato ? { x0: 0.05, x1: 0.95, y0: 0.12, y1: 0.46, linha: 0.3 } : { x0: 0.46, x1: 0.97, y0: 0.14, y1: 0.92, linha: 0.56 });
 
     function nova(meio = false): Pessoa {
       const r = regiao();
@@ -95,14 +96,14 @@ export default function VisaoIA({ semente = 7, quantidade = 11 }: { semente?: nu
       g.lineTo(xb, yl);
       g.stroke();
       g.fillStyle = acento;
-      g.font = `600 ${retrato ? 11 : 12}px ${fonte}`;
-      g.fillText(`LINHA DE CONTAGEM  ${String(contagem).padStart(4, "0")}`, xa, yl - 8);
+      g.font = `600 ${compacto ? 8 : retrato ? 11 : 12}px ${fonte}`;
+      g.fillText(compacto ? String(contagem).padStart(4, "0") : `LINHA DE CONTAGEM  ${String(contagem).padStart(4, "0")}`, xa, yl - (compacto ? 4 : 8));
 
       for (const p of pessoas) {
         const px = p.x * largura;
         const py = p.y * altura;
         const esc = Math.min(largura, altura * 1.6) / 1000;
-        const h = (26 + p.y * 20) * esc + 10;
+        const h = compacto ? altura * (0.2 + p.y * 0.14) : (26 + p.y * 20) * esc + 10;
         const w = h * 0.46;
 
         if (p.rastro.length > 1) {
@@ -119,12 +120,13 @@ export default function VisaoIA({ semente = 7, quantidade = 11 }: { semente?: nu
         g.strokeStyle = acento;
         g.strokeRect(px - w / 2, py - h, w, h);
         const rotulo = `ID ${p.id}`;
-        g.font = `600 10px ${fonte}`;
-        const lt = g.measureText(rotulo).width + 8;
+        const ft = compacto ? 7 : 10;
+        g.font = `600 ${ft}px ${fonte}`;
+        const lt = g.measureText(rotulo).width + (compacto ? 4 : 8);
         g.fillStyle = acento;
-        g.fillRect(px - w / 2, py - h - 14, lt, 14);
+        g.fillRect(px - w / 2, py - h - ft - 4, lt, ft + 4);
         g.fillStyle = "#000";
-        g.fillText(rotulo, px - w / 2 + 4, py - h - 3.5);
+        g.fillText(rotulo, px - w / 2 + (compacto ? 2 : 4), py - h - (compacto ? 2.5 : 3.5));
       }
     }
 
@@ -165,7 +167,7 @@ export default function VisaoIA({ semente = 7, quantidade = 11 }: { semente?: nu
       obs.disconnect();
       window.removeEventListener("resize", redimensionar);
     };
-  }, [semente, quantidade]);
+  }, [semente, quantidade, compacto]);
 
   return <canvas ref={ref} aria-hidden className="absolute inset-0 -z-10 h-full w-full" />;
 }
