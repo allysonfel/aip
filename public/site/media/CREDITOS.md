@@ -1,6 +1,6 @@
 # Créditos das imagens e vídeos do site
 
-Todos os arquivos vêm do Pexels, sob a [Licença Pexels](https://www.pexels.com/license/): uso comercial livre, sem atribuição obrigatória. Otimizados (redimensionados e recomprimidos) para o site.
+Todos os arquivos vêm do Pexels (um deles publicado lá a partir do Pixabay), sob a [Licença Pexels](https://www.pexels.com/license/): uso comercial livre, sem atribuição obrigatória. Otimizados (redimensionados e recomprimidos) para o site.
 
 | Arquivo | Tema | Autor | Fonte |
 |---|---|---|---|
@@ -11,7 +11,6 @@ Todos os arquivos vêm do Pexels, sob a [Licença Pexels](https://www.pexels.com
 | `camera-solar.jpg` | Câmera com painel solar | Will Freeman | https://www.pexels.com/photo/solar-powered-cctv-camera-on-blue-sky-background-31970049/ |
 | `shopping.jpg` | Escada rolante em shopping | Andrew Patrick | https://www.pexels.com/photo/an-escalator-in-a-shopping-mall-with-glass-floors-27452439/ |
 | `armazem.jpg` | Interior de armazém | On Shot | https://www.pexels.com/photo/interior-of-warehouse-10697106/ |
-| `condominio.jpg` | Prédios residenciais à noite | Варда Склир | https://www.pexels.com/photo/view-of-apartment-blocks-in-city-at-night-16127140/ |
 | `estacionamento.jpg` | Estacionamento subterrâneo | Adem Percem | https://www.pexels.com/photo/spacious-urban-underground-parking-garage-35548884/ |
 | `estacionamento-aereo.jpg` | Estacionamento visto do alto | Kindel Media | https://www.pexels.com/photo/aerial-photo-of-a-parking-lot-9716297/ |
 | `praca-aerea.jpg` | Parque e rotatória vistos do alto | jason hu | https://www.pexels.com/photo/aerial-view-of-a-city-park-and-roundabout-31722205/ |
@@ -21,3 +20,11 @@ Todos os arquivos vêm do Pexels, sob a [Licença Pexels](https://www.pexels.com
 | `obra.jpg` | Obra à noite | Erik Mclean | https://www.pexels.com/photo/cranes-working-at-building-site-at-night-12689699/ |
 | `servidores.jpg` | Sala de servidores | panumas nikhomkhai | https://www.pexels.com/photo/network-rack-17323801/ |
 | `cidade-aerea.jpg` | Ruas da cidade à noite, vistas do alto | Yura Forrat | https://www.pexels.com/photo/aerial-view-of-city-streets-at-night-29737076/ |
+| `condominio-noite.jpg` | Torres residenciais em volta de uma piscina, vistas do alto à noite | Tom Fisk | https://www.pexels.com/photo/high-angle-photography-of-rectangular-green-swimming-pool-in-between-high-rise-buildings-2986231/ |
+| `condominio-piscina.jpg` | Edifício residencial de alto padrão com piscina | não confirmado¹ | https://www.pexels.com/photo/luxury-apartment-with-swimming-pool-15994062/ |
+| `shopping-alto.jpg` | Escadas rolantes e lojas de shopping vistas do alto | Pixabay (via Pexels) | https://www.pexels.com/photo/aerial-photography-of-building-264507/ |
+| `industria-patio.jpg` | Empilhadeiras em pátio operacional, vistas do alto | não confirmado¹ | https://www.pexels.com/photo/forklifts-in-the-warehouse-11500419/ |
+
+¹ A página do Pexels não pôde ser consultada automaticamente para confirmar o nome do autor. A Licença Pexels não exige atribuição; confira o nome na página se quiser creditar.
+
+A antiga `condominio.jpg` (prédios residenciais comuns à noite) foi removida e substituída pelas duas fotos de condomínio de alto padrão acima.
