@@ -279,3 +279,22 @@ CREATE TABLE IF NOT EXISTS configuracoes_shopping (
   bloqueio_minutos              INT NOT NULL DEFAULT 15,
   atualizado_em                 TIMESTAMPTZ NOT NULL DEFAULT now()
 );
+
+-- Pedidos de contato do site institucional (ver (site)/contato/acoes.ts)
+CREATE TABLE IF NOT EXISTS contatos_site (
+  id                  SERIAL PRIMARY KEY,
+  nome                TEXT NOT NULL,
+  email               TEXT NOT NULL,
+  whatsapp            TEXT NOT NULL,
+  empresa             TEXT NOT NULL,
+  cargo               TEXT,
+  cidade_estado       TEXT NOT NULL,
+  tipo_organizacao    TEXT NOT NULL,
+  solucao             TEXT NOT NULL,
+  quantidade_cameras  TEXT NOT NULL,
+  mensagem            TEXT NOT NULL,
+  aceite_privacidade  BOOLEAN NOT NULL,
+  origem              TEXT,
+  criado_em           TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_contatos_site_criado ON contatos_site(criado_em DESC);

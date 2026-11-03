@@ -1,0 +1,31 @@
+import { EMAIL, WHATSAPP } from "../_config/contato";
+import { metadados } from "../_config/metadados";
+import FormContato from "../_components/FormContato";
+
+export const metadata = metadados("/contato", "Contato", "Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.");
+
+const PRODUTOS: Record<string, string> = { "cameras-ia": "Câmeras IA", "totem-ia": "Totem IA" };
+const TIPOS: Record<string, string> = { empresa: "Empresa", publico: "Órgão público ou instituição" };
+
+export default async function Contato({ searchParams }: { searchParams: Promise<{ produto?: string; tipo?: string }> }) {
+  const { produto, tipo } = await searchParams;
+  const origem = [produto && PRODUTOS[produto] ? `produto=${produto}` : "", tipo && TIPOS[tipo] ? `tipo=${tipo}` : ""].filter(Boolean).join("&") || "direto";
+
+  return (
+    <section className="pb-24 pt-32 sm:pt-40">
+      <div className="margem grid gap-12 lg:grid-cols-[1fr_1.6fr] lg:gap-20">
+        <div>
+          <h1 className="titulo-hero">Fale com a AIP.</h1>
+          <p className="mt-6 max-w-[28rem] text-lg leading-relaxed text-white/80">Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.</p>
+          {(WHATSAPP || EMAIL) && (
+            <div className="mt-8 flex flex-wrap gap-3">
+              {WHATSAPP && <a href={`https://wa.me/${WHATSAPP}`} className="inline-flex min-h-12 items-center rounded-xl border border-white/40 px-6 hover:bg-white/10">WhatsApp</a>}
+              {EMAIL && <a href={`mailto:${EMAIL}`} className="inline-flex min-h-12 items-center rounded-xl border border-white/40 px-6 hover:bg-white/10">E-mail</a>}
+            </div>
+          )}
+        </div>
+        <FormContato solucao={produto ? PRODUTOS[produto] : undefined} tipo={tipo ? TIPOS[tipo] : undefined} origem={origem} />
+      </div>
+    </section>
+  );
+}
