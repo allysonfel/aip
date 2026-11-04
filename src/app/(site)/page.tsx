@@ -6,7 +6,7 @@ import { SEGMENTOS } from "./_content/solucoes";
 import Reveal from "./_components/Reveal";
 import VisaoIA from "./_components/VisaoIA";
 
-export const metadata = metadados("/", "Transformamos imagens em inteligência", "Soluções de inteligência artificial e visão computacional aplicadas à segurança, à operação e à gestão de ambientes.");
+export const metadata = metadados("/", "Transformamos imagens em inteligência", "Inteligência artificial nas câmeras que você já tem: identificação de pessoas, análise de fluxos e acompanhamento da operação, sem trocar equipamento.");
 
 export default function Inicio() {
   return (
@@ -14,7 +14,7 @@ export default function Inicio() {
       <Hero
         sobretitulo="AIP — Agência de Inteligência Patrimonial"
         titulo="Transformamos imagens em inteligência."
-        texto="Soluções de inteligência artificial e visão computacional aplicadas à segurança, à operação e à gestão de ambientes."
+        texto="Inteligência artificial nas câmeras que você já tem. Sem trocar equipamento, elas passam a identificar pessoas, analisar fluxos e marcar o que importa para a segurança e a gestão."
         botoes={<Botao href="#produtos">Conheça nossos produtos</Botao>}
         midia={{ video: "praca-hero.mp4", poster: "praca-hero.jpg" }}
         sobreposicao={<VisaoIA />}
@@ -33,7 +33,7 @@ export default function Inicio() {
           <Cabecalho titulo="Inteligência aplicada ao seu ambiente." />
         </div>
       </section>
-      <TelaFoto rotulo="Produto" foto="via-noite.jpg" alt="Avenida com trânsito à noite vista do alto" titulo="Câmeras IA" texto="Aproveite sua estrutura de câmeras para identificar movimentações, analisar fluxos, localizar registros e acompanhar sua operação." acao={<Botao href="/cameras-ia">Conheça as Câmeras IA</Botao>} />
+      <TelaFoto rotulo="Produto" foto="via-noite.jpg" alt="Avenida com trânsito à noite vista do alto" titulo="Câmeras IA" texto="Não são câmeras novas: é a inteligência artificial levada às câmeras que você já tem, para identificar movimentações, analisar fluxos, localizar registros e acompanhar sua operação." acao={<Botao href="/cameras-ia">Conheça as Câmeras IA</Botao>} />
       <TelaFoto rotulo="Produto" foto="camera-solar.jpg" alt="Câmera com painel solar no alto de um poste, sob o céu" titulo="Totem IA" texto="Uma estrutura integrada de monitoramento inteligente para ampliar a cobertura em locais públicos e privados." acao={<Botao href="/totem-ia">Conheça o Totem IA</Botao>} legenda />
 
       <section className="secao overflow-hidden">

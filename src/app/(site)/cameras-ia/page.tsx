@@ -7,7 +7,7 @@ import Economia from "../_components/Economia";
 import { MockBusca, MockChat, MockMosaico, MockPlanta } from "../_components/mockups";
 import { ECONOMIA } from "../_config/economia";
 
-export const metadata = metadados("/cameras-ia", "Câmeras IA", "Transforme sua estrutura de monitoramento em uma ferramenta de análise, identificação e acompanhamento operacional.");
+export const metadata = metadados("/cameras-ia", "Câmeras IA", "Inteligência artificial nas câmeras que você já tem, sem trocar equipamento: identificação de pessoas, análise de fluxos e busca de registros.");
 
 const CONTATO = "/contato?produto=cameras-ia";
 
@@ -32,8 +32,8 @@ export default function CamerasIA() {
   return (
     <>
       <Hero
-        titulo="Suas câmeras mais inteligentes."
-        texto="Transforme sua estrutura de monitoramento em uma ferramenta de análise, identificação e acompanhamento operacional."
+        titulo="As câmeras que você já tem, agora com IA."
+        texto="Sem trocar equipamento: a AIP conecta a inteligência artificial à sua estrutura atual, que passa a identificar pessoas, analisar fluxos e localizar registros."
         botoes={<Botao href={CONTATO}>Solicitar demonstração</Botao>}
         midia={{ video: "praca-hero.mp4", poster: "praca-hero.jpg" }}
         sobreposicao={<VisaoIA semente={21} quantidade={14} />}
