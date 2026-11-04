@@ -13,8 +13,8 @@ export default function Inicio() {
     <>
       <Hero
         sobretitulo="AIP — Agência de Inteligência Patrimonial"
-        titulo="Transformamos imagens em inteligência."
-        texto="Inteligência artificial nas câmeras que você já tem. Sem trocar equipamento, elas passam a identificar pessoas, analisar fluxos e marcar o que importa para a segurança e a gestão."
+        titulo="Inteligência Patrimonial para gestão e segurança."
+        texto="Soluções de inteligência artificial que interpretam o que as câmeras registram e transformam imagens em informações úteis para ambientes públicos e privados."
         botoes={<Botao href="#produtos">Conheça nossos produtos</Botao>}
         midia={{ video: "praca-hero.mp4", poster: "praca-hero.jpg" }}
         sobreposicao={<VisaoIA />}
