@@ -15,7 +15,7 @@ export default function Inicio() {
         sobretitulo="AIP — Agência de Inteligência Patrimonial"
         titulo="Transformamos imagens em inteligência."
         texto="Soluções de inteligência artificial e visão computacional aplicadas à segurança, à operação e à gestão de ambientes."
-        botoes={<Botao href="#solucoes">Conheça nossas soluções</Botao>}
+        botoes={<Botao href="#produtos">Conheça nossos produtos</Botao>}
         midia={{ video: "praca-hero.mp4", poster: "praca-hero.jpg" }}
         sobreposicao={<VisaoIA />}
         legenda="Imagem ilustrativa, com detecções simuladas"
@@ -28,13 +28,13 @@ export default function Inicio() {
         visual={<Foto src="camera-poste.jpg" alt="Câmera de monitoramento instalada em um poste" className="aspect-[4/5] lg:aspect-[5/6]" />}
       />
 
-      <section id="solucoes" className="pb-16 pt-8">
+      <section id="produtos" className="pb-16 pt-8">
         <div className="margem">
           <Cabecalho titulo="Inteligência aplicada ao seu ambiente." />
         </div>
       </section>
-      <TelaFoto rotulo="Solução" foto="via-noite.jpg" alt="Avenida com trânsito à noite vista do alto" titulo="Câmeras IA" texto="Aproveite sua estrutura de câmeras para identificar movimentações, analisar fluxos, localizar registros e acompanhar sua operação." acao={<Botao href="/cameras-ia">Conheça as Câmeras IA</Botao>} />
-      <TelaFoto rotulo="Solução" foto="camera-solar.jpg" alt="Câmera com painel solar no alto de um poste, sob o céu" titulo="Totem IA" texto="Uma estrutura integrada de monitoramento inteligente para ampliar a cobertura em locais públicos e privados." acao={<Botao href="/totem-ia">Conheça o Totem IA</Botao>} legenda />
+      <TelaFoto rotulo="Produto" foto="via-noite.jpg" alt="Avenida com trânsito à noite vista do alto" titulo="Câmeras IA" texto="Aproveite sua estrutura de câmeras para identificar movimentações, analisar fluxos, localizar registros e acompanhar sua operação." acao={<Botao href="/cameras-ia">Conheça as Câmeras IA</Botao>} />
+      <TelaFoto rotulo="Produto" foto="camera-solar.jpg" alt="Câmera com painel solar no alto de um poste, sob o céu" titulo="Totem IA" texto="Uma estrutura integrada de monitoramento inteligente para ampliar a cobertura em locais públicos e privados." acao={<Botao href="/totem-ia">Conheça o Totem IA</Botao>} legenda />
 
       <section className="secao overflow-hidden">
         <div className="margem mb-10">
