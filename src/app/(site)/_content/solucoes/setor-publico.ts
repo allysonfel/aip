@@ -35,7 +35,7 @@ const segmento: Segmento = {
   },
   faq: [
     { p: "Como o órgão contrata a AIP?", r: "As modalidades são definidas com as equipes técnicas e jurídicas do órgão, conforme a legislação aplicável." },
-    { p: "É possível aproveitar as câmeras que a cidade já tem?", r: "Sim, mediante validação técnica de compatibilidade." },
+    { p: "É possível aproveitar as câmeras que a cidade já tem?", r: "Sim. A IA é aplicada em qualquer câmera, inclusive nas que a cidade já tem." },
     { p: "A AIP faz reconhecimento facial?", r: "Sim, como recurso sob projeto, definido com o órgão conforme a finalidade pública e a legislação aplicável." },
     { p: "Quem acessa as informações?", r: "Servidores autorizados, com acesso por perfil e registro em auditoria." },
   ],

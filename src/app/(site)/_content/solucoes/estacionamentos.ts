@@ -26,7 +26,7 @@ const segmento: Segmento = {
   faq: [
     { p: "A leitura de placas já está disponível?", r: "É um recurso sob projeto, configurado conforme cada estacionamento." },
     { p: "Funciona à noite?", r: "Depende da câmera e da iluminação de cada ponto." },
-    { p: "Preciso de câmeras novas?", r: "Câmeras compatíveis podem ser aproveitadas após avaliação técnica." },
+    { p: "Preciso de câmeras novas?", r: "Não. A IA é aplicada em qualquer câmera, inclusive nas que o estacionamento já tem." },
   ],
   encerramento: ENCERRAMENTO_PRIVADO,
 };

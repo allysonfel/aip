@@ -20,7 +20,7 @@ const APLICACOES = [
 ];
 
 const FAQ = [
-  { p: "Preciso trocar minhas câmeras atuais?", r: "Não necessariamente. Câmeras existentes podem ser utilizadas quando compatíveis com os requisitos técnicos." },
+  { p: "Preciso trocar minhas câmeras atuais?", r: "Não. A IA é aplicada em qualquer câmera, inclusive nas que você já tem." },
   { p: "A solução funciona à noite?", r: "O desempenho depende da câmera, iluminação e qualidade das imagens." },
   { p: "A AIP faz reconhecimento facial?", r: "Sim, como recurso sob projeto, configurado conforme a finalidade e os requisitos legais de cada projeto. A busca visual padrão utiliza características como vestimentas." },
   { p: "Posso pesquisar uma pessoa nas gravações?", r: "É possível utilizar características visuais para localizar registros. Os resultados precisam ser confirmados por um operador." },

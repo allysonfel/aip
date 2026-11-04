@@ -27,7 +27,7 @@ const segmento: Segmento = {
   faq: [
     { p: "Funciona em galpões com pouca iluminação?", r: "O desempenho depende da câmera e da iluminação. Avaliamos cada ponto antes da implantação." },
     { p: "A leitura de placas já está disponível?", r: "É um recurso sob projeto, definido conforme a necessidade de cada operação." },
-    { p: "Dá para integrar com o sistema de câmeras atual?", r: "Sim, quando as câmeras ou o gravador são compatíveis com RTSP." },
+    { p: "Dá para integrar com o sistema de câmeras atual?", r: "Sim. A IA é aplicada em qualquer câmera, inclusive nas que a operação já tem." },
     { p: "Os dados ficam disponíveis para quem?", r: "Apenas para os perfis autorizados pela empresa." },
   ],
   encerramento: ENCERRAMENTO_PRIVADO,

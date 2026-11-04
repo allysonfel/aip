@@ -25,7 +25,7 @@ const segmento: Segmento = {
     passos: passosPadrao({ titulo: "Decisão", texto: "A gestão usa os dados para organizar equipes, espaços e ações comerciais." }),
   },
   faq: [
-    { p: "Preciso trocar minhas câmeras?", r: "Não necessariamente. Câmeras compatíveis com RTSP podem ser usadas após avaliação técnica." },
+    { p: "Preciso trocar minhas câmeras?", r: "Não. A IA é aplicada em qualquer câmera, inclusive nas que você já tem." },
     { p: "A contagem diferencia entrada e saída?", r: "Sim. As linhas de contagem registram a direção da passagem." },
     { p: "A AIP faz reconhecimento facial?", r: "Sim, como recurso sob projeto, configurado conforme a finalidade e os requisitos legais de cada operação. A busca visual padrão usa características como roupas e aparência geral." },
     { p: "Quem acessa os dados?", r: "Apenas usuários cadastrados, com permissões definidas por perfil." },
