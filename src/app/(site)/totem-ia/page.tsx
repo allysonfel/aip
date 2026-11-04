@@ -64,15 +64,6 @@ export default function TotemIA() {
         visual={<Foto src="praca-aerea.jpg" alt="Parque urbano e rotatória vistos do alto" className="aspect-[4/3]" />}
       />
 
-      <section className="secao overflow-hidden border-t border-linha">
-        <div className="margem mb-12">
-          <Cabecalho titulo="Uma estrutura para diferentes cenários." />
-        </div>
-        <Reveal>
-          <Carrossel rotulo="Aplicações do Totem IA" itens={APLICACOES.map((a) => ({ chave: a.titulo, conteudo: <CartaoFoto {...a} /> }))} />
-        </Reveal>
-      </section>
-
       <TelaDividida
         titulo="Mais do que captar imagens."
         texto="Conforme a configuração de cada projeto, o Totem IA pode incorporar:"
@@ -111,6 +102,15 @@ export default function TotemIA() {
               <Botao href={CONTATO}>Solicitar avaliação técnica</Botao>
             </div>
           </div>
+        </Reveal>
+      </section>
+
+      <section className="secao overflow-hidden border-t border-linha">
+        <div className="margem mb-12">
+          <Cabecalho titulo="Uma estrutura para diferentes cenários." />
+        </div>
+        <Reveal>
+          <Carrossel rotulo="Aplicações do Totem IA" itens={APLICACOES.map((a) => ({ chave: a.titulo, conteudo: <CartaoFoto {...a} /> }))} />
         </Reveal>
       </section>
 
