@@ -32,7 +32,7 @@ export default function Inicio() {
           <Cabecalho titulo="Inteligência aplicada ao seu ambiente." />
         </div>
       </section>
-      <TelaFoto rotulo="Produto" foto="via-noite.jpg" alt="Avenida com trânsito à noite vista do alto" titulo="Câmeras IA" texto="Não são câmeras novas: é a inteligência artificial levada às câmeras que você já tem, para identificar movimentações, analisar fluxos, localizar registros e acompanhar sua operação." acao={<Botao href="/cameras-ia">Conheça as Câmeras IA</Botao>} />
+      <TelaFoto rotulo="Produto" foto="via-noite.jpg" alt="Avenida com trânsito à noite vista do alto" titulo="Câmeras IA" texto="Inteligência artificial aplicada às câmeras que você já tem ou a uma nova estrutura planejada com a AIP, para identificar movimentações, analisar fluxos, localizar registros e acompanhar sua operação." acao={<Botao href="/cameras-ia">Conheça as Câmeras IA</Botao>} />
       <TelaFoto rotulo="Produto" foto="camera-solar.jpg" alt="Câmera com painel solar no alto de um poste, sob o céu" titulo="Totem IA" texto="Uma estrutura integrada de monitoramento inteligente para ampliar a cobertura em locais públicos e privados." acao={<Botao href="/totem-ia">Conheça o Totem IA</Botao>} />
 
       <section className="secao overflow-hidden">
