@@ -24,7 +24,6 @@ export default function Rodape() {
         <div>
           <LogoAIP className="h-8 text-white" />
           <p className="mt-5 font-medium">AIP — Agência de Inteligência Patrimonial</p>
-          <p className="mt-1 text-cinza">Transformando imagens em inteligência.</p>
           {(WHATSAPP || EMAIL) && (
             <div className="mt-5 flex flex-col gap-1 text-sm text-cinza">
               {WHATSAPP && <a href={`https://wa.me/${WHATSAPP}`} className="hover:text-white">WhatsApp</a>}
@@ -45,7 +44,10 @@ export default function Rodape() {
           </div>
         ))}
       </div>
-      <div className="margem pb-10 text-sm text-cinza">Uma empresa do ecossistema Logos Company.</div>
+      <div className="margem pb-10 text-sm text-cinza">
+        Uma empresa do ecossistema{" "}
+        <a href="https://logoscompany.io" target="_blank" rel="noopener noreferrer" className="text-white/75 underline-offset-4 hover:text-white hover:underline">Logos Company</a>.
+      </div>
     </footer>
   );
 }
