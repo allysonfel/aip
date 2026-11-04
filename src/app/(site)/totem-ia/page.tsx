@@ -1,3 +1,4 @@
+import Image from "next/image";
 import { metadados } from "../_config/metadados";
 import { Acordeao, Botao, Cabecalho, Encerramento, Foto, Lista, TelaDividida } from "../_components/Base";
 import Carrossel from "../_components/Carrossel";
@@ -8,6 +9,11 @@ import Reveal from "../_components/Reveal";
 export const metadata = metadados("/totem-ia", "Totem IA", "Monitoramento inteligente para locais que precisam de cobertura adicional ou não possuem infraestrutura convencional.");
 
 const CONTATO = "/contato?produto=totem-ia";
+
+// Fundo da seção "Feito para resistir ao tempo". Coloque a imagem em
+// public/site/media/ e troque null pelo nome do arquivo (ex.: "totem-chuva.jpg").
+// Enquanto for null, a seção usa um fundo escuro com chuva desenhada.
+const FOTO_CLIMA: string | null = null;
 
 const APLICACOES = [
   { foto: "praca-aerea-2.jpg", alt: "Praça e ruas vistas do alto", titulo: "Espaços públicos", texto: "Monitoramento de praças, parques, áreas de convivência e espaços de circulação." },
@@ -87,6 +93,26 @@ export default function TotemIA() {
         />
         <p className="mt-5 text-sm text-cinza">A disponibilidade depende dos equipamentos, das condições do ambiente e do escopo contratado.</p>
       </TelaDividida>
+
+      <section className="relative isolate flex min-h-svh items-center overflow-hidden">
+        {FOTO_CLIMA ? (
+          <Image src={`/site/media/${FOTO_CLIMA}`} alt="Totem IA instalado ao ar livre sob chuva" fill sizes="100vw" className="-z-20 object-cover" />
+        ) : (
+          <div aria-hidden className="absolute inset-0 -z-20 bg-[linear-gradient(160deg,#1b2733_0%,#0d141b_55%,#05080b_100%)]">
+            <div className="absolute inset-0 opacity-25 [background-image:repeating-linear-gradient(105deg,transparent_0_22px,rgba(255,255,255,0.35)_22px_23px,transparent_23px_61px)]" />
+          </div>
+        )}
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/40 to-black/20 lg:bg-gradient-to-r lg:from-black/80 lg:via-black/35 lg:to-transparent" />
+        <Reveal className="margem py-28">
+          <div className="max-w-[38rem]">
+            <h2 className="titulo-tela">Feito para resistir ao tempo.</h2>
+            <p className="mt-6 text-lg leading-relaxed text-white/80">Chuva forte, sol, vento e variações de temperatura fazem parte da rotina de quem fica na rua. O Totem IA é projetado para operar ao ar livre, com estrutura e equipamentos preparados para as condições de cada local, para que o monitoramento continue quando o tempo muda.</p>
+            <div className="mt-8">
+              <Botao href={CONTATO}>Solicitar avaliação técnica</Botao>
+            </div>
+          </div>
+        </Reveal>
+      </section>
 
       <section className="secao border-t border-linha">
         <div className="margem">
