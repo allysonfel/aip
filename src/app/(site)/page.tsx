@@ -18,7 +18,6 @@ export default function Inicio() {
         botoes={<Botao href="#produtos">Conheça nossos produtos</Botao>}
         midia={{ video: "praca-hero.mp4", poster: "praca-hero.jpg" }}
         sobreposicao={<VisaoIA />}
-        legenda="Imagem ilustrativa, com detecções simuladas"
         escurecer="bg-black/50"
       />
 
@@ -34,7 +33,7 @@ export default function Inicio() {
         </div>
       </section>
       <TelaFoto rotulo="Produto" foto="via-noite.jpg" alt="Avenida com trânsito à noite vista do alto" titulo="Câmeras IA" texto="Não são câmeras novas: é a inteligência artificial levada às câmeras que você já tem, para identificar movimentações, analisar fluxos, localizar registros e acompanhar sua operação." acao={<Botao href="/cameras-ia">Conheça as Câmeras IA</Botao>} />
-      <TelaFoto rotulo="Produto" foto="camera-solar.jpg" alt="Câmera com painel solar no alto de um poste, sob o céu" titulo="Totem IA" texto="Uma estrutura integrada de monitoramento inteligente para ampliar a cobertura em locais públicos e privados." acao={<Botao href="/totem-ia">Conheça o Totem IA</Botao>} legenda />
+      <TelaFoto rotulo="Produto" foto="camera-solar.jpg" alt="Câmera com painel solar no alto de um poste, sob o céu" titulo="Totem IA" texto="Uma estrutura integrada de monitoramento inteligente para ampliar a cobertura em locais públicos e privados." acao={<Botao href="/totem-ia">Conheça o Totem IA</Botao>} />
 
       <section className="secao overflow-hidden">
         <div className="margem mb-10">

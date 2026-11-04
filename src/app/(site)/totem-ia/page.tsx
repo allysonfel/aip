@@ -1,5 +1,5 @@
 import { metadados } from "../_config/metadados";
-import { Acordeao, Botao, Cabecalho, Encerramento, Foto, Legenda, Lista, TelaDividida } from "../_components/Base";
+import { Acordeao, Botao, Cabecalho, Encerramento, Foto, Lista, TelaDividida } from "../_components/Base";
 import Carrossel from "../_components/Carrossel";
 import { CartaoFoto } from "../_components/Cartoes";
 import { TotemIlustracao } from "../_components/Diagramas";
@@ -47,9 +47,6 @@ export default function TotemIA() {
           </div>
           <figure className="order-1 mx-auto w-full max-w-[20rem] lg:order-2 lg:max-w-[28rem]">
             <TotemIlustracao className="w-full" />
-            <figcaption className="text-center">
-              <Legenda />
-            </figcaption>
           </figure>
         </div>
       </section>

@@ -13,10 +13,6 @@ export function Botao({ href, children, contorno = false }: { href: string; chil
   );
 }
 
-export function Legenda({ children = "Imagem ilustrativa" }: { children?: ReactNode }) {
-  return <p className="mt-3 text-xs text-white/55">{children}</p>;
-}
-
 export function Foto({ src, alt, className = "", sizes = "(min-width: 1024px) 50vw, 100vw" }: { src: string; alt: string; className?: string; sizes?: string }) {
   return (
     <div className={`relative overflow-hidden rounded-2xl bg-painel ${className}`}>
@@ -28,7 +24,7 @@ export function Foto({ src, alt, className = "", sizes = "(min-width: 1024px) 50
 type Midia = { foto: string; alt: string } | { video: string; poster: string };
 
 /** Hero em tela cheia: mídia escurecida, título à esquerda na metade inferior. */
-export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobreposicao, legenda = false, escurecer = "bg-black/35" }: { sobretitulo?: string; migalhas?: ReactNode; titulo: string; texto: string; botoes?: ReactNode; midia?: Midia; sobreposicao?: ReactNode; legenda?: boolean | string; escurecer?: string }) {
+export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobreposicao, escurecer = "bg-black/35" }: { sobretitulo?: string; migalhas?: ReactNode; titulo: string; texto: string; botoes?: ReactNode; midia?: Midia; sobreposicao?: ReactNode; escurecer?: string }) {
   return (
     <section className="relative isolate flex min-h-svh items-end overflow-hidden">
       {/* Entrada em camadas: foto, título, texto e botões (ver .entra-* no CSS). */}
@@ -53,7 +49,6 @@ export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobr
           <h1 className="entra-1 titulo-hero">{titulo}</h1>
           <p className="entra-2 mt-6 max-w-[36rem] text-lg leading-relaxed text-white/80">{texto}</p>
           {botoes && <div className="entra-3 mt-8 flex flex-wrap gap-3">{botoes}</div>}
-          {legenda && <div className="entra-3"><Legenda>{typeof legenda === "string" ? legenda : undefined}</Legenda></div>}
         </div>
       </div>
     </section>
@@ -79,7 +74,7 @@ export function TelaDividida({ id, rotulo, titulo, texto, visual, lado = "esquer
 }
 
 /** Tela inteira com foto de fundo (Soluções, exemplos). */
-export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo, legenda }: { foto: string; alt: string; titulo: string; texto: string; acao?: ReactNode; rotulo?: string; legenda?: boolean }) {
+export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo }: { foto: string; alt: string; titulo: string; texto: string; acao?: ReactNode; rotulo?: string }) {
   return (
     <section className="relative isolate flex min-h-svh items-end overflow-hidden">
       <Image src={`${M}/${foto}`} alt={alt} fill sizes="100vw" className="-z-20 object-cover" />
@@ -90,7 +85,6 @@ export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo, legenda }: { 
           <h2 className="titulo-tela">{titulo}</h2>
           <p className="mt-5 text-lg leading-relaxed text-white/80">{texto}</p>
           {acao && <div className="mt-8">{acao}</div>}
-          {legenda && <Legenda />}
         </div>
       </Reveal>
     </section>

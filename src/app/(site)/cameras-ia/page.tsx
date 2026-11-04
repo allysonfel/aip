@@ -1,5 +1,5 @@
 import { metadados } from "../_config/metadados";
-import { Acordeao, Botao, Cabecalho, Encerramento, Hero, Legenda, Lista, TelaDividida } from "../_components/Base";
+import { Acordeao, Botao, Cabecalho, Encerramento, Hero, Lista, TelaDividida } from "../_components/Base";
 import MapaCalor from "../_components/MapaCalor";
 import Reveal from "../_components/Reveal";
 import VisaoIA from "../_components/VisaoIA";
@@ -37,7 +37,6 @@ export default function CamerasIA() {
         botoes={<Botao href={CONTATO}>Solicitar demonstração</Botao>}
         midia={{ video: "praca-hero.mp4", poster: "praca-hero.jpg" }}
         sobreposicao={<VisaoIA semente={21} quantidade={14} />}
-        legenda="Imagem ilustrativa, com detecções simuladas"
         escurecer="bg-black/55"
       />
 
@@ -117,7 +116,6 @@ export default function CamerasIA() {
           </Reveal>
           <Reveal atraso={120}>
             <MapaCalor className="w-full" />
-            <Legenda>Imagem ilustrativa: planta genérica, com dados simulados</Legenda>
           </Reveal>
         </div>
       </section>

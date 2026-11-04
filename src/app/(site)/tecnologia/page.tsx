@@ -1,5 +1,5 @@
 import { metadados } from "../_config/metadados";
-import { Cabecalho, Encerramento, Foto, Hero, Legenda, Lista, TelaDividida, Trio } from "../_components/Base";
+import { Cabecalho, Encerramento, Foto, Hero, Lista, TelaDividida, Trio } from "../_components/Base";
 import { CalibracaoIlustracao, DiagramaCamadas } from "../_components/Diagramas";
 import Reveal from "../_components/Reveal";
 
@@ -53,9 +53,6 @@ export default function Tecnologia() {
         visual={
           <figure>
             <CalibracaoIlustracao />
-            <figcaption>
-              <Legenda />
-            </figcaption>
           </figure>
         }
       />
