@@ -25,10 +25,10 @@ function Mascara({ src, proporcao, className }: { src: string; proporcao: number
 
 /** Logotipo completo "AIP" (o A tem o olhinho). */
 export function LogoAIP({ className }: { className?: string }) {
-  return <Mascara src="/aip-logo.png" proporcao={711 / 293} className={className} />;
+  return <Mascara src="/aip-logo.png" proporcao={2238 / 586} className={className} />;
 }
 
 /** Só o "A" com olhinho, recortado do logotipo (public/aip-a.png). */
 export function LogoA({ className }: { className?: string }) {
-  return <Mascara src="/aip-a.png" proporcao={327 / 293} className={className} />;
+  return <Mascara src="/aip-a.png" proporcao={1090 / 586} className={className} />;
 }
