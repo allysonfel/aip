@@ -25,7 +25,8 @@ export function Foto({ src, alt, className = "", sizes = "(min-width: 1024px) 60
   );
 }
 
-type Midia = { foto: string; alt: string } | { video: string; poster: string };
+// `videoCelular`: versão mais leve do vídeo para telas pequenas (opcional).
+type Midia = { foto: string; alt: string } | { video: string; videoCelular?: string; poster: string };
 
 /** Hero em tela cheia: mídia escurecida, título à esquerda na metade inferior. */
 export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobreposicao, escurecer = "bg-black/35" }: { sobretitulo?: string; migalhas?: ReactNode; titulo: string; texto: string; botoes?: ReactNode; midia?: Midia; sobreposicao?: ReactNode; escurecer?: string }) {
@@ -37,6 +38,7 @@ export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobr
           {midia && "foto" in midia && <Image src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes={CAPA} quality={85} className="object-cover" />}
           {midia && "video" in midia && (
             <video autoPlay muted loop playsInline preload="metadata" poster={`${M}/${midia.poster}`} aria-hidden className="h-full w-full object-cover">
+              {midia.videoCelular && <source src={`${M}/${midia.videoCelular}`} type="video/mp4" media="(max-width: 767px)" />}
               <source src={`${M}/${midia.video}`} type="video/mp4" />
             </video>
           )}

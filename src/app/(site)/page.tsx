@@ -16,6 +16,8 @@ export default function Inicio() {
         titulo="Inteligência Patrimonial para gestão e segurança."
         texto="Soluções de inteligência artificial que interpretam o que as câmeras registram e transformam imagens em informações úteis para ambientes públicos e privados."
         botoes={<Botao href="#produtos">Conheça nossos produtos</Botao>}
+        midia={{ video: "hero-inicio.mp4", videoCelular: "hero-inicio-720.mp4", poster: "hero-inicio.jpg" }}
+        escurecer="bg-black/45"
       />
 
       <TelaDividida
