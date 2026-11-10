@@ -26,7 +26,7 @@ export default async function Contato({ searchParams }: { searchParams: Promise<
             </div>
           )}
         </div>
-        <FormContato solucao={produto ? PRODUTOS[produto] : undefined} tipo={tipo ? TIPOS[tipo] : undefined} origem={origem} />
+        <FormContato tipo={tipo ? TIPOS[tipo] : undefined} origem={origem} />
       </div>
     </section>
   );

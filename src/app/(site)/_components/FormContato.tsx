@@ -3,7 +3,7 @@
 import { useActionState, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { enviarContato, type EstadoContato } from "../contato/acoes";
-import { CANAIS, SOLUCOES, TIPOS } from "../contato/opcoes";
+import { CANAIS, TIPOS } from "../contato/opcoes";
 import { bandeira, PAIS_PADRAO, PAISES } from "../_config/paises";
 import Escolha, { type OpcaoEscolha } from "./Escolha";
 
@@ -115,7 +115,7 @@ function Telefone({ valores, erro }: { valores: Record<string, string>; erro?: s
   );
 }
 
-export default function FormContato({ solucao, tipo, origem }: { solucao?: string; tipo?: string; origem: string }) {
+export default function FormContato({ tipo, origem }: { tipo?: string; origem: string }) {
   const [estado, acao, enviando] = useActionState<EstadoContato, FormData>(enviarContato, { ok: false });
 
   if (estado.ok) {
@@ -151,7 +151,6 @@ export default function FormContato({ solucao, tipo, origem }: { solucao?: strin
       <Telefone valores={v} erro={e.telefone} />
 
       <Opcoes nome="tipo_organizacao" legenda="Tipo de organização" opcoes={TIPOS} marcados={lista("tipo_organizacao", tipo)} multiplo erro={e.tipo_organizacao} />
-      <Opcoes nome="solucao" legenda="Solução de interesse" opcoes={SOLUCOES} marcados={lista("solucao", solucao)} multiplo erro={e.solucao} />
 
       <div className="sm:col-span-2">
         <Rotulo nome="mensagem" rotulo="Mensagem" erro={e.mensagem}>
