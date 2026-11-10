@@ -4,7 +4,7 @@ Exceto `totem-aip.jpg`, todos os arquivos vêm do Pexels (um deles publicado lá
 
 | Arquivo | Tema | Autor | Fonte |
 |---|---|---|---|
-| `praca-hero.mp4`, `praca-hero.jpg`, `og.jpg` | Praça com pessoas, vista do alto (vídeo) | Shruthi Pradeep | https://www.pexels.com/video/aerial-view-of-busy-urban-plaza-with-people-37439460/ |
+| `praca-hero.jpg`, `og.jpg` | Praça com pessoas, vista do alto (quadro de vídeo) | Shruthi Pradeep | https://www.pexels.com/video/aerial-view-of-busy-urban-plaza-with-people-37439460/ |
 | `cidade-noite.mp4`, `cidade-noite.jpg` | Luzes da cidade à noite (vídeo) | melbourne ross | https://www.pexels.com/video/aerial-nighttime-cityscape-with-lights-30070091/ |
 | `camera-poste.jpg` | Câmera em poste | Johny Goh | https://www.pexels.com/photo/cctv-cameras-on-metal-pole-14773064/ |
 | `camera-poste-2.jpg` | Câmeras em poste | Kriss L | https://www.pexels.com/photo/cctv-on-pole-13168513/ |

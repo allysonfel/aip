@@ -2,7 +2,6 @@ import { metadados } from "../_config/metadados";
 import { Acordeao, Botao, Cabecalho, Encerramento, Hero, Lista, TelaDividida } from "../_components/Base";
 import MapaCalor from "../_components/MapaCalor";
 import Reveal from "../_components/Reveal";
-import VisaoIA from "../_components/VisaoIA";
 import Economia from "../_components/Economia";
 import { MockBusca, MockChat, MockMosaico, MockPlanta } from "../_components/mockups";
 import { ECONOMIA } from "../_config/economia";
@@ -35,9 +34,6 @@ export default function CamerasIA() {
         titulo="As câmeras que você já tem, agora com IA."
         texto="Sem trocar equipamento: a AIP conecta a inteligência artificial à sua estrutura atual, que passa a identificar pessoas, analisar fluxos e localizar registros."
         botoes={<Botao href={CONTATO}>Solicitar demonstração</Botao>}
-        midia={{ video: "praca-hero.mp4", poster: "praca-hero.jpg" }}
-        sobreposicao={<VisaoIA semente={21} quantidade={14} />}
-        escurecer="bg-black/55"
       />
 
       <section className="secao">
