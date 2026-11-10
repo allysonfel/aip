@@ -74,10 +74,11 @@ export function TelaDividida({ id, rotulo, titulo, texto, visual, lado = "esquer
 }
 
 /** Tela inteira com foto de fundo (Soluções, exemplos). */
-export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo }: { foto: string; alt: string; titulo: string; texto: string; acao?: ReactNode; rotulo?: string }) {
+/** `original`: serve o arquivo como está, sem a recompressão do Next (fotos próprias da AIP). */
+export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo, original = false }: { foto: string; alt: string; titulo: string; texto: string; acao?: ReactNode; rotulo?: string; original?: boolean }) {
   return (
     <section className="relative isolate flex min-h-svh items-end overflow-hidden">
-      <Image src={`${M}/${foto}`} alt={alt} fill sizes="100vw" className="-z-20 object-cover" />
+      <Image src={`${M}/${foto}`} alt={alt} fill sizes="100vw" unoptimized={original} className="-z-20 object-cover" />
       <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/55 to-black/20" />
       <Reveal className="margem pb-16 sm:pb-24">
         <div className="max-w-[40rem]">
