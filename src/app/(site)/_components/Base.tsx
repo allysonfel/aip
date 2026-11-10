@@ -13,8 +13,8 @@ const CAPA = "(max-aspect-ratio: 3/2) 150vh, 100vw";
 export function SetaBotao() {
   return (
     <span aria-hidden className="botao-seta">
-      <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 8h10M9 4l4 4-4 4" />
+      <svg viewBox="0 0 18 12" className="h-3 w-[1.125rem]" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M1 6h15M11.5 1.5 16 6l-4.5 4.5" />
       </svg>
     </span>
   );
