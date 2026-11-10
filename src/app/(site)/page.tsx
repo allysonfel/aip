@@ -12,7 +12,6 @@ export default function Inicio() {
   return (
     <>
       <Hero
-        sobretitulo="AIP — Agência de Inteligência Patrimonial"
         titulo="Inteligência Patrimonial para gestão e segurança."
         texto="Soluções de inteligência artificial que interpretam o que as câmeras registram e transformam imagens em informações úteis para ambientes públicos e privados."
         botoes={<Botao href="/contato">Solicitar uma consulta</Botao>}

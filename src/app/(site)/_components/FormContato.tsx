@@ -2,6 +2,7 @@
 
 import { useActionState, useState, type ReactNode } from "react";
 import Link from "next/link";
+import { SetaBotao } from "./Base";
 import { enviarContato, type EstadoContato } from "../contato/acoes";
 import { CANAIS, TIPOS } from "../contato/opcoes";
 import { bandeira, PAIS_PADRAO, PAISES } from "../_config/paises";
@@ -172,8 +173,9 @@ export default function FormContato({ tipo, origem }: { tipo?: string; origem: s
       {estado.erro && <p role="alert" className="font-medium sm:col-span-2">{estado.erro}</p>}
 
       <div className="sm:col-span-2">
-        <button type="submit" disabled={enviando} className="inline-flex min-h-12 items-center justify-center rounded-xl bg-white px-7 font-medium text-black transition-colors hover:bg-white/85 disabled:opacity-60">
+        <button type="submit" disabled={enviando} className="botao botao-claro">
           {enviando ? "Enviando..." : "Enviar"}
+          <SetaBotao />
         </button>
       </div>
     </form>

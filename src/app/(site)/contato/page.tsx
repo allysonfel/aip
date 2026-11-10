@@ -21,8 +21,8 @@ export default async function Contato({ searchParams }: { searchParams: Promise<
           <p className="mt-6 max-w-[28rem] text-lg leading-relaxed text-white/80">Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.</p>
           {(WHATSAPP || EMAIL) && (
             <div className="mt-8 flex flex-wrap gap-3">
-              {WHATSAPP && <a href={`https://wa.me/${WHATSAPP}`} className="inline-flex min-h-12 items-center rounded-xl border border-white/40 px-6 hover:bg-white/10">WhatsApp</a>}
-              {EMAIL && <a href={`mailto:${EMAIL}`} className="inline-flex min-h-12 items-center rounded-xl border border-white/40 px-6 hover:bg-white/10">E-mail</a>}
+              {WHATSAPP && <a href={`https://wa.me/${WHATSAPP}`} className="botao botao-contorno botao-simples">WhatsApp</a>}
+              {EMAIL && <a href={`mailto:${EMAIL}`} className="botao botao-contorno botao-simples">E-mail</a>}
             </div>
           )}
         </div>

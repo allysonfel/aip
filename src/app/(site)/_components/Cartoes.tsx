@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { hrefSegmento, type Segmento } from "../_content/solucoes";
+import { SetaBotao } from "./Base";
 
 const M = "/site/media";
 
@@ -37,9 +38,12 @@ export function CartaoSegmento({ segmento, linha, cta = "Ver", fotoDoHero = fals
       <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
       <h3 className="font-titulo text-[2rem] font-bold leading-none">{segmento.nome}</h3>
       {linha && <p className="mt-2 leading-snug text-white/80">{linha}</p>}
-      <Link href={hrefSegmento(segmento)} draggable={false} className="mt-5 inline-flex min-h-11 w-fit items-center rounded-xl bg-white px-5 text-sm font-medium text-black transition-colors hover:bg-white/85">
-        {cta}
-        <span className="sr-only">: {segmento.nome}</span>
+      <Link href={hrefSegmento(segmento)} draggable={false} className="botao botao-claro botao-pequeno mt-5 w-fit">
+        <span>
+          {cta}
+          <span className="sr-only">: {segmento.nome}</span>
+        </span>
+        <SetaBotao />
       </Link>
     </div>
   );

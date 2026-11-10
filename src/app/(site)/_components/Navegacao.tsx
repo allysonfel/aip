@@ -159,7 +159,7 @@ export default function Navegacao() {
           </ul>
 
           <div className="flex items-center gap-2">
-            <Link href="/contato" className="inline-flex h-10 items-center rounded-xl bg-white px-4 text-sm font-medium text-black transition-colors hover:bg-white/85">
+            <Link href="/contato" className="botao botao-claro botao-pequeno botao-simples min-h-10">
               Fale conosco
             </Link>
             <button ref={botao} type="button" aria-label={aberto ? "Fechar menu" : "Abrir menu"} aria-expanded={aberto} aria-controls="menu-movel" onClick={() => setAberto(!aberto)} className="-mr-2 flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden">

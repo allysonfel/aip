@@ -9,10 +9,22 @@ const M = "/site/media";
 // notebook) ela é escalada pela altura, então precisa de 150vh de largura.
 const CAPA = "(max-aspect-ratio: 3/2) 150vh, 100vw";
 
+/** Seta dentro do círculo dos botões (ver .botao no CSS). */
+export function SetaBotao() {
+  return (
+    <span aria-hidden className="botao-seta">
+      <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 8h10M9 4l4 4-4 4" />
+      </svg>
+    </span>
+  );
+}
+
 export function Botao({ href, children, contorno = false }: { href: string; children: ReactNode; contorno?: boolean }) {
   return (
-    <Link href={href} className={`inline-flex min-h-12 items-center justify-center rounded-xl px-6 text-[0.95rem] font-medium transition-colors ${contorno ? "border border-white/40 text-white hover:border-white hover:bg-white/10" : "bg-white text-black hover:bg-white/85"}`}>
+    <Link href={href} className={`botao ${contorno ? "botao-contorno" : "botao-claro"}`}>
       {children}
+      <SetaBotao />
     </Link>
   );
 }
