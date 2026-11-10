@@ -26,14 +26,17 @@ function Seta({ aberto }: { aberto: boolean }) {
   );
 }
 
-// Cápsula flutuante, fixa ao rolar. Produtos e Soluções abrem um painel
-// suspenso (fecha ao clicar fora, com Esc ou quando o foco sai do menu).
-// No celular, menu em tela cheia com os grupos expansíveis.
+// Barra transparente, fixa no topo: some ao rolar para baixo e volta ao rolar
+// para cima. Produtos e Soluções abrem um painel suspenso (fecha ao clicar
+// fora, com Esc ou quando o foco sai do menu). No celular, menu em tela cheia
+// com os grupos expansíveis.
 export default function Navegacao() {
   const caminho = usePathname();
   const [aberto, setAberto] = useState(false);
   const [suspenso, setSuspenso] = useState<Grupo | null>(null);
   const [expandido, setExpandido] = useState<Grupo | null>(null);
+  const [escondido, setEscondido] = useState(false);
+  const [noTopo, setNoTopo] = useState(true);
   const botao = useRef<HTMLButtonElement>(null);
   const nav = useRef<HTMLElement>(null);
   const gatilhos = useRef<Partial<Record<Grupo, HTMLButtonElement | null>>>({});
@@ -43,6 +46,30 @@ export default function Navegacao() {
     setSuspenso(null);
     setExpandido(null);
   }, [caminho]);
+
+  // Some ao rolar para baixo, volta ao rolar para cima. Pequenos movimentos
+  // (menos de 6px) são ignorados para a barra não piscar.
+  useEffect(() => {
+    let anterior = window.scrollY;
+    let quadro = 0;
+    function rolar() {
+      cancelAnimationFrame(quadro);
+      quadro = requestAnimationFrame(() => {
+        const y = window.scrollY;
+        setNoTopo(y < 24);
+        if (y < 80) setEscondido(false);
+        else if (y - anterior > 6) setEscondido(true);
+        else if (anterior - y > 6) setEscondido(false);
+        if (Math.abs(y - anterior) > 6 || y < 80) anterior = y;
+      });
+    }
+    rolar();
+    window.addEventListener("scroll", rolar, { passive: true });
+    return () => {
+      cancelAnimationFrame(quadro);
+      window.removeEventListener("scroll", rolar);
+    };
+  }, []);
 
   // Painel suspenso do desktop
   useEffect(() => {
@@ -80,19 +107,25 @@ export default function Navegacao() {
     };
   }, [aberto]);
 
+  const oculta = escondido && !aberto && !suspenso;
   const ativo = (href: string) => caminho === href;
   const grupoAtivo = (itens: readonly Item[]) => itens.some((i) => ativo(i.href));
 
   return (
     <>
-      <header className="fixed inset-x-0 top-3 z-50 px-3 sm:top-4">
+      <header
+        onFocus={() => setEscondido(false)}
+        className={`fixed inset-x-0 top-0 z-50 transition-[opacity,visibility] duration-500 ease-out motion-reduce:transition-none ${oculta ? "invisible opacity-0" : "visible opacity-100"}`}
+      >
+        {/* Sombra suave atrás da barra quando a página já rolou, só para o texto ler bem. */}
+        <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/70 via-black/30 to-transparent transition-opacity duration-500 ${noTopo || aberto ? "opacity-0" : "opacity-100"}`} />
         <nav
           ref={nav}
           aria-label="Principal"
           onBlur={(e) => {
             if (!e.currentTarget.contains(e.relatedTarget as Node)) setSuspenso(null);
           }}
-          className="relative mx-auto flex h-14 max-w-[1120px] items-center justify-between gap-4 rounded-2xl border border-white/10 bg-neutral-900/70 pl-5 pr-2 backdrop-blur-xl"
+          className="margem relative flex h-20 items-center justify-between gap-4"
         >
           <Link href="/" aria-label="AIP, página inicial" className="flex items-center">
             <LogoAIP className="h-6 text-white" />
@@ -125,13 +158,14 @@ export default function Navegacao() {
             ))}
           </ul>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-2">
             <Link href="/contato" className="inline-flex h-10 items-center rounded-xl bg-white px-4 text-sm font-medium text-black transition-colors hover:bg-white/85">
               Fale conosco
             </Link>
-            <button ref={botao} type="button" aria-label={aberto ? "Fechar menu" : "Abrir menu"} aria-expanded={aberto} aria-controls="menu-movel" onClick={() => setAberto(!aberto)} className="flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden">
-              <span className={`h-px w-5 bg-white transition-transform ${aberto ? "translate-y-[3.5px] rotate-45" : ""}`} />
-              <span className={`h-px w-5 bg-white transition-transform ${aberto ? "-translate-y-[3.5px] -rotate-45" : ""}`} />
+            <button ref={botao} type="button" aria-label={aberto ? "Fechar menu" : "Abrir menu"} aria-expanded={aberto} aria-controls="menu-movel" onClick={() => setAberto(!aberto)} className="-mr-2 flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden">
+              <span className={`h-px w-6 bg-white transition-transform duration-300 ${aberto ? "translate-y-[7px] rotate-45" : ""}`} />
+              <span className={`h-px w-6 bg-white transition-opacity duration-200 ${aberto ? "opacity-0" : ""}`} />
+              <span className={`h-px w-6 bg-white transition-transform duration-300 ${aberto ? "-translate-y-[7px] -rotate-45" : ""}`} />
             </button>
           </div>
 
