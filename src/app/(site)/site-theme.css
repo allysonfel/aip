@@ -31,6 +31,9 @@
   html {
     scroll-behavior: smooth;
     background: var(--aip-fundo);
+    /* Reserva o espaço da barra de rolagem: ao abrir o menu (rolagem travada)
+       a página e o botão "Fale conosco" não pulam para o lado. */
+    scrollbar-gutter: stable;
   }
 
   body {
