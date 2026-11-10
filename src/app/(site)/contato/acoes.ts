@@ -2,6 +2,8 @@
 
 import { headers } from "next/headers";
 import { sql } from "@/lib/db";
+import { PAISES } from "../_config/paises";
+import { CANAIS, SOLUCOES, TIPOS, UFS } from "./opcoes";
 
 export type EstadoContato = {
   ok: boolean;
@@ -10,9 +12,6 @@ export type EstadoContato = {
   valores?: Record<string, string>;
 };
 
-const TIPOS = ["Empresa", "Órgão público ou instituição"];
-const SOLUCOES = ["Câmeras IA", "Totem IA", "Ainda não sei"];
-const QUANTIDADES = ["Ainda não possuo câmeras", "Até 10", "De 11 a 30", "De 31 a 100", "Mais de 100", "Não sei informar"];
 
 // Limite simples por IP, em memória: o serviço roda em uma instância só e o
 // IP não precisa ficar guardado no banco.
@@ -35,18 +34,29 @@ function excedeuLimite(ip: string) {
 
 export async function enviarContato(_anterior: EstadoContato, dados: FormData): Promise<EstadoContato> {
   const campo = (nome: string, max = 200) => String(dados.get(nome) ?? "").trim().slice(0, max);
+  // Escolhas múltiplas: só as opções conhecidas, na ordem do formulário.
+  const marcadas = (nome: string, opcoes: readonly string[]) => {
+    const escolhidas = dados.getAll(nome).map(String);
+    return opcoes.filter((o) => escolhidas.includes(o));
+  };
+  const tipos = marcadas("tipo_organizacao", TIPOS);
+  const solucoes = marcadas("solucao", SOLUCOES);
   const valores = {
     nome: campo("nome"),
     email: campo("email"),
-    whatsapp: campo("whatsapp", 40),
-    empresa: campo("empresa"),
-    cargo: campo("cargo"),
-    cidade_estado: campo("cidade_estado"),
-    tipo_organizacao: campo("tipo_organizacao"),
-    solucao: campo("solucao"),
-    quantidade_cameras: campo("quantidade_cameras"),
+    canal: campo("canal", 20),
+    ddi_pais: campo("ddi_pais", 2),
+    telefone: campo("telefone", 30),
+    pais: campo("pais", 2),
+    uf: campo("uf", 2),
+    cidade: campo("cidade", 120),
+    tipo_organizacao: tipos.join("|"),
+    solucao: solucoes.join("|"),
     mensagem: campo("mensagem", 4000),
   };
+  const paisTelefone = PAISES.find((p) => p.iso === valores.ddi_pais);
+  const pais = PAISES.find((p) => p.iso === valores.pais);
+  const uf = UFS.find(([sigla]) => sigla === valores.uf);
 
   // Honeypot preenchido: robô. Responde como sucesso e não grava nada.
   if (campo("site_web")) return { ok: true };
@@ -54,12 +64,14 @@ export async function enviarContato(_anterior: EstadoContato, dados: FormData): 
   const erros: Record<string, string> = {};
   if (valores.nome.length < 2) erros.nome = "Informe seu nome.";
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(valores.email)) erros.email = "Informe um e-mail válido.";
-  if (valores.whatsapp.replace(/\D/g, "").length < 10) erros.whatsapp = "Informe o WhatsApp com DDD.";
-  if (!valores.empresa) erros.empresa = "Informe a empresa ou o órgão.";
-  if (!valores.cidade_estado) erros.cidade_estado = "Informe a cidade e o estado.";
-  if (!TIPOS.includes(valores.tipo_organizacao)) erros.tipo_organizacao = "Selecione o tipo de organização.";
-  if (!SOLUCOES.includes(valores.solucao)) erros.solucao = "Selecione a solução de interesse.";
-  if (!QUANTIDADES.includes(valores.quantidade_cameras)) erros.quantidade_cameras = "Selecione a quantidade de câmeras.";
+  const digitos = valores.telefone.replace(/\D/g, "");
+  if (!(CANAIS as readonly string[]).includes(valores.canal) || !paisTelefone) erros.telefone = "Escolha o canal e o código do país.";
+  else if (digitos.length < (paisTelefone.iso === "BR" ? 10 : 6)) erros.telefone = paisTelefone.iso === "BR" ? "Informe o número com DDD." : "Informe o número.";
+  if (!pais) erros.pais = "Selecione o país.";
+  if (pais?.iso === "BR" && !uf) erros.uf = "Selecione o estado.";
+  if (!valores.cidade) erros.cidade = "Informe a cidade.";
+  if (!tipos.length) erros.tipo_organizacao = "Selecione o tipo de organização.";
+  if (!solucoes.length) erros.solucao = "Selecione a solução de interesse.";
   if (!valores.mensagem) erros.mensagem = "Escreva uma mensagem.";
   if (dados.get("aceite") !== "on") erros.aceite = "É preciso aceitar a Política de Privacidade.";
   if (Object.keys(erros).length) return { ok: false, erros, valores };
@@ -68,10 +80,15 @@ export async function enviarContato(_anterior: EstadoContato, dados: FormData): 
   const ip = cabecalhos.get("x-forwarded-for")?.split(",")[0].trim() || "desconhecido";
   if (excedeuLimite(ip)) return { ok: false, erro: "Muitos envios em pouco tempo. Tente novamente mais tarde.", valores };
 
+  // Grava nas colunas que já existem: o telefone vai com o canal e o código
+  // do país; cidade_estado leva cidade, estado e país. Empresa e quantidade
+  // de câmeras não são mais perguntadas e ficam vazias.
+  const contato = `${valores.canal}: +${paisTelefone!.ddi} ${valores.telefone}`;
+  const local = uf ? `${valores.cidade} - ${uf[0]}, ${pais!.nome}` : `${valores.cidade}, ${pais!.nome}`;
   try {
     await sql`
       INSERT INTO contatos_site (nome, email, whatsapp, empresa, cargo, cidade_estado, tipo_organizacao, solucao, quantidade_cameras, mensagem, aceite_privacidade, origem)
-      VALUES (${valores.nome}, ${valores.email}, ${valores.whatsapp}, ${valores.empresa}, ${valores.cargo || null}, ${valores.cidade_estado}, ${valores.tipo_organizacao}, ${valores.solucao}, ${valores.quantidade_cameras}, ${valores.mensagem}, true, ${campo("origem") || null})
+      VALUES (${valores.nome}, ${valores.email}, ${contato}, '', ${null}, ${local}, ${tipos.join(", ")}, ${solucoes.join(", ")}, '', ${valores.mensagem}, true, ${campo("origem") || null})
     `;
   } catch (e) {
     console.error("Falha ao gravar contato do site:", e);

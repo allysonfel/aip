@@ -3,7 +3,7 @@ import { metadados } from "../_config/metadados";
 import FormContato from "../_components/FormContato";
 import { buscarSegmento } from "../_content/solucoes";
 
-export const metadata = metadados("/contato", "Contato", "Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.");
+export const metadata = metadados("/contato", "Solicite uma consulta", "Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.");
 
 const PRODUTOS: Record<string, string> = { "cameras-ia": "Câmeras IA", "totem-ia": "Totem IA" };
 const TIPOS: Record<string, string> = { empresa: "Empresa", publico: "Órgão público ou instituição" };
@@ -17,7 +17,7 @@ export default async function Contato({ searchParams }: { searchParams: Promise<
     <section className="pb-24 pt-32 sm:pt-40">
       <div className="margem grid gap-12 lg:grid-cols-[1fr_1.6fr] lg:gap-20">
         <div>
-          <h1 className="titulo-hero">Fale com a AIP.</h1>
+          <h1 className="titulo-hero">Solicite uma consulta.</h1>
           <p className="mt-6 max-w-[28rem] text-lg leading-relaxed text-white/80">Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.</p>
           {(WHATSAPP || EMAIL) && (
             <div className="mt-8 flex flex-wrap gap-3">
