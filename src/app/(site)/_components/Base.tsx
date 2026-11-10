@@ -92,13 +92,22 @@ export function TelaDividida({ id, rotulo, titulo, texto, visual, lado = "esquer
 }
 
 /** Tela inteira com foto de fundo (Soluções, exemplos). */
-/** `original`: serve o arquivo como está, sem a recompressão do Next (fotos próprias da AIP). */
-export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo, original = false }: { foto: string; alt: string; titulo: string; texto: string; acao?: ReactNode; rotulo?: string; original?: boolean }) {
+/**
+ * `original`: serve o arquivo como está, sem a recompressão do Next (fotos próprias da AIP).
+ * `lateral`: para fotos com o lado esquerdo escuro e o assunto à direita. No
+ * desktop o texto fica centralizado nesse lado escuro, quase sem película; no
+ * celular a foto é enquadrada no assunto (`foco`) e o texto vai embaixo.
+ */
+export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo, original = false, lateral = false, foco = "50% 50%" }: { foto: string; alt: string; titulo: string; texto: string; acao?: ReactNode; rotulo?: string; original?: boolean; lateral?: boolean; foco?: string }) {
   return (
-    <section className="relative isolate flex min-h-svh items-end overflow-hidden">
-      <Image src={`${M}/${foto}`} alt={alt} fill sizes={CAPA} quality={85} unoptimized={original} className="-z-20 object-cover" />
-      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/55 to-black/20" />
-      <Reveal className="margem pb-16 sm:pb-24">
+    <section className={`relative isolate flex min-h-svh overflow-hidden ${lateral ? "items-end lg:items-center" : "items-end"}`}>
+      <Image src={`${M}/${foto}`} alt={alt} fill sizes={CAPA} quality={85} unoptimized={original} style={{ objectPosition: foco }} className="-z-20 object-cover" />
+      {lateral ? (
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/40 to-transparent lg:bg-gradient-to-r lg:from-black/60 lg:via-transparent lg:to-transparent" />
+      ) : (
+        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/55 to-black/20" />
+      )}
+      <Reveal className={`margem ${lateral ? "pb-16 sm:pb-24 lg:py-24" : "pb-16 sm:pb-24"}`}>
         <div className="max-w-[40rem]">
           {rotulo && <p className="rotulo mb-4 text-white/80">{rotulo}</p>}
           <h2 className="titulo-tela">{titulo}</h2>

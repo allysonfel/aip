@@ -32,3 +32,5 @@ A antiga `condominio.jpg` (prédios residenciais comuns à noite) foi removida e
 `totem-aip.jpg`: imagem do Totem IA fornecida pela AIP (2026-11-10), usada na página inicial.
 
 `hero-inicio.mp4`, `hero-inicio-720.mp4`, `hero-inicio.jpg`: vídeo do topo da página inicial, produzido pela AIP (2026-11-10). Reencodado sem áudio, em 1080p e 720p (celular).
+
+`camera-ia-lente.jpg`: lente de câmera com detecções da IA, fornecida pela AIP (2026-11-10), usada no bloco Câmeras IA da página inicial.
