@@ -281,10 +281,9 @@ CREATE TABLE IF NOT EXISTS configuracoes_shopping (
 );
 
 -- Pedidos de contato do site institucional (ver (site)/contato/acoes.ts)
--- Desde 2026-11-10: whatsapp guarda "Canal: +DDI número", cidade_estado guarda
--- "Cidade - UF, País"; tipo_organizacao e solucao podem ter várias opções
--- separadas por vírgula; empresa e quantidade_cameras não são mais perguntadas
--- (gravadas vazias).
+-- Desde 2026-11-10: whatsapp guarda "Canal: +DDI número"; tipo_organizacao e
+-- solucao podem ter várias opções separadas por vírgula; empresa, cidade_estado
+-- e quantidade_cameras não são mais perguntadas (gravadas vazias).
 CREATE TABLE IF NOT EXISTS contatos_site (
   id                  SERIAL PRIMARY KEY,
   nome                TEXT NOT NULL,

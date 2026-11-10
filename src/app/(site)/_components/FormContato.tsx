@@ -1,15 +1,13 @@
 "use client";
 
-import { useActionState, useEffect, useState, type ReactNode } from "react";
+import { useActionState, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { enviarContato, type EstadoContato } from "../contato/acoes";
-import { CANAIS, SOLUCOES, TIPOS, UFS } from "../contato/opcoes";
+import { CANAIS, SOLUCOES, TIPOS } from "../contato/opcoes";
 import { bandeira, PAIS_PADRAO, PAISES } from "../_config/paises";
 import Escolha, { type OpcaoEscolha } from "./Escolha";
 
-const OPCOES_PAIS: OpcaoEscolha[] = PAISES.map((p) => ({ valor: p.iso, rotulo: p.nome, icone: bandeira(p.iso) }));
 const OPCOES_DDI: OpcaoEscolha[] = PAISES.map((p) => ({ valor: p.iso, rotulo: p.nome, detalhe: `+${p.ddi}`, icone: bandeira(p.iso) }));
-const OPCOES_UF: OpcaoEscolha[] = UFS.map(([sigla, nome]) => ({ valor: sigla, rotulo: nome }));
 
 // Ícones dos canais de contato (traço simples, na cor do texto).
 const ICONES: Record<string, ReactNode> = {
@@ -117,72 +115,6 @@ function Telefone({ valores, erro }: { valores: Record<string, string>; erro?: s
   );
 }
 
-/** País (padrão Brasil). No Brasil, estado e cidade em listas; fora, cidade digitada. */
-function Local({ valores, erros }: { valores: Record<string, string>; erros: Record<string, string> }) {
-  const [pais, setPais] = useState(valores.pais || PAIS_PADRAO);
-  const [uf, setUf] = useState(valores.uf || "");
-  const [cidade, setCidade] = useState(valores.cidade || "");
-  const [municipios, setMunicipios] = useState<Record<string, string[]> | null>(null);
-  const brasil = pais === "BR";
-
-  useEffect(() => {
-    if (!brasil || municipios) return;
-    fetch("/site/dados/municipios.json")
-      .then((r) => r.json())
-      .then(setMunicipios)
-      .catch(() => setMunicipios({}));
-  }, [brasil, municipios]);
-
-  const cidades = uf && municipios ? municipios[uf] ?? [] : [];
-  return (
-    <>
-      <Rotulo nome="pais" rotulo="País" erro={erros.pais}>
-        <Escolha id="pais" nome="pais" opcoes={OPCOES_PAIS} valor={pais} aoMudar={setPais} busca invalido={!!erros.pais} />
-      </Rotulo>
-      {brasil ? (
-        <>
-          <Rotulo nome="uf" rotulo="Estado" erro={erros.uf}>
-            <Escolha
-              id="uf"
-              nome="uf"
-              opcoes={OPCOES_UF}
-              valor={uf}
-              aoMudar={(novo) => {
-                setUf(novo);
-                if (novo !== uf) setCidade("");
-              }}
-              busca
-              invalido={!!erros.uf}
-            />
-          </Rotulo>
-          <Rotulo nome="cidade" rotulo="Cidade" erro={erros.cidade}>
-            {/* Se a lista não carregar, a pessoa digita a cidade. */}
-            {municipios && uf && cidades.length === 0 ? (
-              <input id="cidade" name="cidade" defaultValue={valores.cidade} className={CAMPO} />
-            ) : (
-              <Escolha
-                id="cidade"
-                nome="cidade"
-                opcoes={cidades.map((c) => ({ valor: c, rotulo: c }))}
-                valor={cidade}
-                aoMudar={setCidade}
-                busca
-                desativado={!uf || !municipios}
-                marcador={uf ? (municipios ? "Selecione" : "Carregando...") : "Escolha o estado primeiro"}
-                invalido={!!erros.cidade}
-              />
-            )}
-          </Rotulo>
-        </>
-      ) : (
-        <Rotulo nome="cidade" rotulo="Cidade" erro={erros.cidade}>
-          <input id="cidade" name="cidade" defaultValue={valores.cidade} aria-invalid={erros.cidade ? true : undefined} className={CAMPO} />
-        </Rotulo>
-      )}
-    </>
-  );
-}
-
 export default function FormContato({ solucao, tipo, origem }: { solucao?: string; tipo?: string; origem: string }) {
   const [estado, acao, enviando] = useActionState<EstadoContato, FormData>(enviarContato, { ok: false });
 
@@ -217,7 +149,6 @@ export default function FormContato({ solucao, tipo, origem }: { solucao?: strin
       {texto("email", "E-mail", { type: "email", autoComplete: "email", required: true })}
 
       <Telefone valores={v} erro={e.telefone} />
-      <Local valores={v} erros={e} />
 
       <Opcoes nome="tipo_organizacao" legenda="Tipo de organização" opcoes={TIPOS} marcados={lista("tipo_organizacao", tipo)} multiplo erro={e.tipo_organizacao} />
       <Opcoes nome="solucao" legenda="Solução de interesse" opcoes={SOLUCOES} marcados={lista("solucao", solucao)} multiplo erro={e.solucao} />

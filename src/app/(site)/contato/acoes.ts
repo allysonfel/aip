@@ -3,7 +3,7 @@
 import { headers } from "next/headers";
 import { sql } from "@/lib/db";
 import { PAISES } from "../_config/paises";
-import { CANAIS, SOLUCOES, TIPOS, UFS } from "./opcoes";
+import { CANAIS, SOLUCOES, TIPOS } from "./opcoes";
 
 export type EstadoContato = {
   ok: boolean;
@@ -47,16 +47,11 @@ export async function enviarContato(_anterior: EstadoContato, dados: FormData): 
     canal: campo("canal", 20),
     ddi_pais: campo("ddi_pais", 2),
     telefone: campo("telefone", 30),
-    pais: campo("pais", 2),
-    uf: campo("uf", 2),
-    cidade: campo("cidade", 120),
     tipo_organizacao: tipos.join("|"),
     solucao: solucoes.join("|"),
     mensagem: campo("mensagem", 4000),
   };
   const paisTelefone = PAISES.find((p) => p.iso === valores.ddi_pais);
-  const pais = PAISES.find((p) => p.iso === valores.pais);
-  const uf = UFS.find(([sigla]) => sigla === valores.uf);
 
   // Honeypot preenchido: robô. Responde como sucesso e não grava nada.
   if (campo("site_web")) return { ok: true };
@@ -67,9 +62,6 @@ export async function enviarContato(_anterior: EstadoContato, dados: FormData): 
   const digitos = valores.telefone.replace(/\D/g, "");
   if (!(CANAIS as readonly string[]).includes(valores.canal) || !paisTelefone) erros.telefone = "Escolha o canal e o código do país.";
   else if (digitos.length < (paisTelefone.iso === "BR" ? 10 : 6)) erros.telefone = paisTelefone.iso === "BR" ? "Informe o número com DDD." : "Informe o número.";
-  if (!pais) erros.pais = "Selecione o país.";
-  if (pais?.iso === "BR" && !uf) erros.uf = "Selecione o estado.";
-  if (!valores.cidade) erros.cidade = "Informe a cidade.";
   if (!tipos.length) erros.tipo_organizacao = "Selecione o tipo de organização.";
   if (!solucoes.length) erros.solucao = "Selecione a solução de interesse.";
   if (!valores.mensagem) erros.mensagem = "Escreva uma mensagem.";
@@ -81,14 +73,13 @@ export async function enviarContato(_anterior: EstadoContato, dados: FormData): 
   if (excedeuLimite(ip)) return { ok: false, erro: "Muitos envios em pouco tempo. Tente novamente mais tarde.", valores };
 
   // Grava nas colunas que já existem: o telefone vai com o canal e o código
-  // do país; cidade_estado leva cidade, estado e país. Empresa e quantidade
-  // de câmeras não são mais perguntadas e ficam vazias.
+  // do país. Empresa, cidade e quantidade de câmeras não são mais
+  // perguntadas e ficam vazias.
   const contato = `${valores.canal}: +${paisTelefone!.ddi} ${valores.telefone}`;
-  const local = uf ? `${valores.cidade} - ${uf[0]}, ${pais!.nome}` : `${valores.cidade}, ${pais!.nome}`;
   try {
     await sql`
       INSERT INTO contatos_site (nome, email, whatsapp, empresa, cargo, cidade_estado, tipo_organizacao, solucao, quantidade_cameras, mensagem, aceite_privacidade, origem)
-      VALUES (${valores.nome}, ${valores.email}, ${contato}, '', ${null}, ${local}, ${tipos.join(", ")}, ${solucoes.join(", ")}, '', ${valores.mensagem}, true, ${campo("origem") || null})
+      VALUES (${valores.nome}, ${valores.email}, ${contato}, '', ${null}, '', ${tipos.join(", ")}, ${solucoes.join(", ")}, '', ${valores.mensagem}, true, ${campo("origem") || null})
     `;
   } catch (e) {
     console.error("Falha ao gravar contato do site:", e);
