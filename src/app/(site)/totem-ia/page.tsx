@@ -87,7 +87,7 @@ export default function TotemIA() {
 
       <section className="relative isolate flex min-h-svh items-center overflow-hidden">
         {FOTO_CLIMA ? (
-          <Image src={`/site/media/${FOTO_CLIMA}`} alt="Totem IA instalado ao ar livre sob chuva" fill sizes="100vw" className="-z-20 object-cover" />
+          <Image src={`/site/media/${FOTO_CLIMA}`} alt="Totem IA instalado ao ar livre sob chuva" fill sizes="(max-aspect-ratio: 3/2) 150vh, 100vw" quality={85} className="-z-20 object-cover" />
         ) : (
           <div aria-hidden className="absolute inset-0 -z-20 bg-[linear-gradient(160deg,#1b2733_0%,#0d141b_55%,#05080b_100%)]">
             <div className="absolute inset-0 opacity-25 [background-image:repeating-linear-gradient(105deg,transparent_0_22px,rgba(255,255,255,0.35)_22px_23px,transparent_23px_61px)]" />

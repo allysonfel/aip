@@ -5,6 +5,10 @@ import Reveal from "./Reveal";
 
 const M = "/site/media";
 
+// Foto 3:2 cobrindo a tela inteira: em telas mais altas que 3:2 (celular,
+// notebook) ela é escalada pela altura, então precisa de 150vh de largura.
+const CAPA = "(max-aspect-ratio: 3/2) 150vh, 100vw";
+
 export function Botao({ href, children, contorno = false }: { href: string; children: ReactNode; contorno?: boolean }) {
   return (
     <Link href={href} className={`inline-flex min-h-12 items-center justify-center rounded-xl px-6 text-[0.95rem] font-medium transition-colors ${contorno ? "border border-white/40 text-white hover:border-white hover:bg-white/10" : "bg-white text-black hover:bg-white/85"}`}>
@@ -13,10 +17,10 @@ export function Botao({ href, children, contorno = false }: { href: string; chil
   );
 }
 
-export function Foto({ src, alt, className = "", sizes = "(min-width: 1024px) 50vw, 100vw" }: { src: string; alt: string; className?: string; sizes?: string }) {
+export function Foto({ src, alt, className = "", sizes = "(min-width: 1024px) 60vw, 130vw" }: { src: string; alt: string; className?: string; sizes?: string }) {
   return (
     <div className={`relative overflow-hidden rounded-2xl bg-painel ${className}`}>
-      <Image src={`${M}/${src}`} alt={alt} fill sizes={sizes} className="object-cover" />
+      <Image src={`${M}/${src}`} alt={alt} fill sizes={sizes} quality={85} className="object-cover" />
     </div>
   );
 }
@@ -30,7 +34,7 @@ export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobr
       {/* Entrada em camadas: foto, título, texto e botões (ver .entra-* no CSS). */}
       <div className="entra-foto absolute inset-0 -z-20">
         <div className="parallax absolute inset-0">
-          {midia && "foto" in midia && <Image src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes="100vw" className="object-cover" />}
+          {midia && "foto" in midia && <Image src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes={CAPA} quality={85} className="object-cover" />}
           {midia && "video" in midia && (
             <video autoPlay muted loop playsInline preload="metadata" poster={`${M}/${midia.poster}`} aria-hidden className="h-full w-full object-cover">
               <source src={`${M}/${midia.video}`} type="video/mp4" />
@@ -78,7 +82,7 @@ export function TelaDividida({ id, rotulo, titulo, texto, visual, lado = "esquer
 export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo, original = false }: { foto: string; alt: string; titulo: string; texto: string; acao?: ReactNode; rotulo?: string; original?: boolean }) {
   return (
     <section className="relative isolate flex min-h-svh items-end overflow-hidden">
-      <Image src={`${M}/${foto}`} alt={alt} fill sizes="100vw" unoptimized={original} className="-z-20 object-cover" />
+      <Image src={`${M}/${foto}`} alt={alt} fill sizes={CAPA} quality={85} unoptimized={original} className="-z-20 object-cover" />
       <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/55 to-black/20" />
       <Reveal className="margem pb-16 sm:pb-24">
         <div className="max-w-[40rem]">

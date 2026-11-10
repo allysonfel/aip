@@ -9,7 +9,7 @@ export function CartaoFoto({ foto, alt, titulo, texto }: { foto: string; alt: st
   return (
     <>
       <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-painel">
-        <Image src={`${M}/${foto}`} alt={alt} fill draggable={false} sizes="(min-width: 640px) 420px, 82vw" className="object-cover" />
+        <Image src={`${M}/${foto}`} alt={alt} fill draggable={false} sizes="(min-width: 640px) 420px, 82vw" quality={85} className="object-cover" />
       </div>
       <h3 className="mt-4 text-lg font-semibold">{titulo}</h3>
       <p className="mt-1 leading-snug text-cinza">{texto}</p>
@@ -33,7 +33,7 @@ export function CartaoSegmento({ segmento, linha, cta = "Ver", fotoDoHero = fals
   const foto = fotoDoHero ? segmento.hero : segmento.cartao;
   return (
     <div className="relative isolate flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-2xl bg-painel p-6 sm:p-7">
-      <Image src={`${M}/${foto.foto}`} alt={foto.alt} fill draggable={false} sizes="(min-width: 640px) 360px, 75vw" className="-z-20 object-cover" />
+      <Image src={`${M}/${foto.foto}`} alt={foto.alt} fill draggable={false} sizes="(min-width: 640px) 600px, 130vw" className="-z-20 object-cover" />
       <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
       <h3 className="font-titulo text-[2rem] font-bold leading-none">{segmento.nome}</h3>
       {linha && <p className="mt-2 leading-snug text-white/80">{linha}</p>}
