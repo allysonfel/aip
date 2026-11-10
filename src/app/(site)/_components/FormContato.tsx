@@ -70,7 +70,7 @@ function Telefone({ valores, erro }: { valores: Record<string, string>; erro?: s
   const pais = PAISES.find((p) => p.iso === ddi) ?? PAISES[0];
   return (
     <fieldset className="sm:col-span-2">
-      <legend className="mb-2 text-sm text-white/85">Telefone para contato</legend>
+      <legend className="mb-2 text-sm text-white/85">Telefone</legend>
       <div className="mb-3 flex flex-wrap gap-0.5 min-[380px]:gap-1 sm:gap-2">
         {CANAIS.map((c) => (
           <label key={c} className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-transparent px-2 py-1.5 text-sm min-[380px]:px-2.5 sm:gap-2 sm:px-3 text-white/70 transition-colors hover:text-white has-checked:border-white/40 has-checked:bg-white/10 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-white">
