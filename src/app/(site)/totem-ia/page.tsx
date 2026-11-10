@@ -18,7 +18,7 @@ const FOTO_CLIMA: string | null = null;
 const APLICACOES = [
   { foto: "praca-aerea-2.jpg", alt: "Praça e ruas vistas do alto", titulo: "Espaços públicos", texto: "Monitoramento de praças, parques, áreas de convivência e espaços de circulação." },
   { foto: "via-noite.jpg", alt: "Avenida com trânsito à noite", titulo: "Vias e mobilidade", texto: "Acompanhamento de ruas, cruzamentos, acessos e pontos estratégicos." },
-  { foto: "estacionamento-aereo.jpg", alt: "Estacionamento visto do alto", titulo: "Estacionamentos", texto: "Monitoramento de movimentações, entradas, saídas e ocupação." },
+  { foto: "estacionamento-aereo.jpg", alt: "Estacionamento com carros nas vagas, visto do alto", titulo: "Estacionamentos", texto: "Monitoramento de movimentações, entradas, saídas e ocupação." },
   { foto: "evento.jpg", alt: "Grande evento noturno visto do alto", titulo: "Eventos", texto: "Estrutura de monitoramento para locais com grande circulação de pessoas e necessidades temporárias." },
   { foto: "obra.jpg", alt: "Guindaste em uma obra à noite", titulo: "Obras e áreas operacionais", texto: "Acompanhamento de ambientes que exigem cobertura durante períodos específicos." },
   { foto: "condominio-noite.jpg", alt: "Torres residenciais iluminadas em volta de uma piscina, vistas do alto à noite", titulo: "Condomínios e empreendimentos", texto: "Monitoramento de acessos, áreas externas e pontos de circulação." },

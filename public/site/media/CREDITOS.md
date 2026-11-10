@@ -12,7 +12,7 @@ Exceto `totem-aip.jpg`, todos os arquivos vêm do Pexels (um deles publicado lá
 | `shopping.jpg` | Escada rolante em shopping | Andrew Patrick | https://www.pexels.com/photo/an-escalator-in-a-shopping-mall-with-glass-floors-27452439/ |
 | `armazem.jpg` | Interior de armazém | On Shot | https://www.pexels.com/photo/interior-of-warehouse-10697106/ |
 | `estacionamento.jpg` | Estacionamento subterrâneo | Adem Percem | https://www.pexels.com/photo/spacious-urban-underground-parking-garage-35548884/ |
-| `estacionamento-aereo.jpg` | Estacionamento visto do alto | Kindel Media | https://www.pexels.com/photo/aerial-photo-of-a-parking-lot-9716297/ |
+| `estacionamento-aereo.jpg` | Estacionamento com carros, visto do alto | não confirmado¹ | https://www.pexels.com/photo/aerial-view-of-cars-on-the-parking-lot-9083321/ |
 | `praca-aerea.jpg` | Parque e rotatória vistos do alto | jason hu | https://www.pexels.com/photo/aerial-view-of-a-city-park-and-roundabout-31722205/ |
 | `praca-aerea-2.jpg` | Praça e ruas vistas do alto | jason hu | https://www.pexels.com/photo/top-view-of-park-and-streets-in-city-21918297/ |
 | `via-noite.jpg` | Avenida com trânsito à noite | Kaique Rocha | https://www.pexels.com/photo/aerial-view-of-city-street-during-nighttime-53756/ |

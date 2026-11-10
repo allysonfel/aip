@@ -269,22 +269,6 @@
   animation-delay: 0.36s;
 }
 
-/* Indicador de arrastar: a bolinha vai e volta, depois descansa. */
-@keyframes dica-arraste {
-  0%,
-  55%,
-  100% {
-    transform: translate(0, -50%);
-  }
-  25% {
-    transform: translate(1.5rem, -50%);
-  }
-}
-
-.dica-arraste-bolinha {
-  animation: dica-arraste 2.6s ease-in-out infinite;
-}
-
 .sem-barra {
   scrollbar-width: none;
 }
@@ -309,7 +293,6 @@
   .trajeto,
   .fluxo,
   .pulso,
-  .dica-arraste-bolinha,
   .entra-foto,
   .entra-1,
   .entra-2,

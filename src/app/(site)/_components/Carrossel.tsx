@@ -1,7 +1,6 @@
 "use client";
 
-import { useRef, useState, type ReactNode } from "react";
-import DragHint from "./DragHint";
+import { useRef, type ReactNode } from "react";
 
 // Faixa de cartões arrastáveis: toque nativo no celular; no desktop, arrastar
 // com o mouse, rolagem horizontal do trackpad ou da roda (Shift + roda) e
@@ -9,7 +8,6 @@ import DragHint from "./DragHint";
 export default function Carrossel({ itens, rotulo, largura = "w-[82vw] sm:w-[420px]" }: { itens: { chave: string; conteudo: ReactNode }[]; rotulo: string; largura?: string }) {
   const faixa = useRef<HTMLUListElement>(null);
   const arraste = useRef<{ x: number; inicio: number; moveu: boolean } | null>(null);
-  const [mexeu, setMexeu] = useState(false);
 
   function mover(direcao: 1 | -1) {
     const el = faixa.current;
@@ -21,14 +19,10 @@ export default function Carrossel({ itens, rotulo, largura = "w-[82vw] sm:w-[420
 
   return (
     <div>
-      <div className="margem mb-5">
-        <DragHint oculto={mexeu} />
-      </div>
       <ul
         ref={faixa}
         tabIndex={0}
         aria-label={rotulo}
-        onScroll={() => !mexeu && setMexeu(true)}
         onPointerDown={(e) => {
           if (e.pointerType === "mouse") arraste.current = { x: e.clientX, inicio: faixa.current?.scrollLeft ?? 0, moveu: false };
         }}

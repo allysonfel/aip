@@ -10,7 +10,7 @@ const segmento: Segmento = {
     titulo: "Fluxo e ocupação do estacionamento em tempo real.",
     texto: "Acompanhe entradas, saídas e uso das vagas com inteligência artificial.",
     foto: "estacionamento-aereo.jpg",
-    alt: "Estacionamento visto do alto",
+    alt: "Estacionamento com carros nas vagas, visto do alto",
   },
   cartao: { foto: "estacionamento.jpg", alt: "Estacionamento subterrâneo vazio" },
   usos: [
