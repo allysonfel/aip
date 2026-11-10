@@ -1,6 +1,6 @@
 # Créditos das imagens e vídeos do site
 
-Todos os arquivos vêm do Pexels (um deles publicado lá a partir do Pixabay), sob a [Licença Pexels](https://www.pexels.com/license/): uso comercial livre, sem atribuição obrigatória. Otimizados (redimensionados e recomprimidos) para o site.
+Exceto `totem-aip.jpg`, todos os arquivos vêm do Pexels (um deles publicado lá a partir do Pixabay), sob a [Licença Pexels](https://www.pexels.com/license/): uso comercial livre, sem atribuição obrigatória. Otimizados (redimensionados e recomprimidos) para o site.
 
 | Arquivo | Tema | Autor | Fonte |
 |---|---|---|---|
@@ -28,3 +28,5 @@ Todos os arquivos vêm do Pexels (um deles publicado lá a partir do Pixabay), s
 ¹ A página do Pexels não pôde ser consultada automaticamente para confirmar o nome do autor. A Licença Pexels não exige atribuição; confira o nome na página se quiser creditar.
 
 A antiga `condominio.jpg` (prédios residenciais comuns à noite) foi removida e substituída pelas duas fotos de condomínio de alto padrão acima.
+
+`totem-aip.jpg`: imagem do Totem IA fornecida pela AIP (2026-11-10), usada na página inicial.
