@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { metadados } from "../_config/metadados";
-import { Acordeao, Botao, Cabecalho, Encerramento, Foto, Lista, TelaDividida } from "../_components/Base";
+import { Acordeao, Botao, Cabecalho, DegradeLateral, Encerramento, Foto, Lista, TelaDividida } from "../_components/Base";
 import Carrossel from "../_components/Carrossel";
 import { CartaoFoto } from "../_components/Cartoes";
 import { TotemIlustracao } from "../_components/Diagramas";
@@ -93,7 +93,7 @@ export default function TotemIA() {
             <div className="absolute inset-0 opacity-25 [background-image:repeating-linear-gradient(105deg,transparent_0_22px,rgba(255,255,255,0.35)_22px_23px,transparent_23px_61px)]" />
           </div>
         )}
-        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black/85 via-black/40 to-black/20 lg:bg-gradient-to-r lg:from-black/80 lg:via-black/35 lg:to-transparent" />
+        <DegradeLateral />
         <Reveal className="margem py-28">
           <div className="max-w-[38rem]">
             <h2 className="titulo-tela">Feito para resistir ao tempo.</h2>

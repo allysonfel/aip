@@ -1,30 +1,28 @@
 import Image from "next/image";
 import MapaCalor from "../MapaCalor";
-import VisaoIA from "../VisaoIA";
 import Janela from "./Janela";
 
-function Quadro({ foto, nome, semente, pessoas }: { foto: string; nome: string; semente: number; pessoas: number }) {
+function Quadro({ foto, nome }: { foto: string; nome: string }) {
   return (
     <div className="relative isolate aspect-video overflow-hidden rounded-lg bg-black">
       <Image src={`/site/media/${foto}`} alt="" fill sizes="240px" className="-z-20 object-cover brightness-75" />
-      <VisaoIA compacto semente={semente} quantidade={pessoas} />
       <span className="absolute bottom-1 left-1.5 text-[10px] text-white/85">{nome}</span>
       <span className="absolute right-1.5 top-1 rounded-sm bg-black/60 px-1 text-[9px] font-semibold tracking-wide text-visao">IA</span>
     </div>
   );
 }
 
-// Mosaico de câmeras com a detecção da IA ativa em todas (dados simulados).
+// Mosaico de câmeras com a IA ativa em todas (imagens ilustrativas, sem marcações).
 export function MockMosaico() {
   return (
     <Janela titulo="Câmeras ao vivo · IA ativa">
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-        <Quadro foto="praca-hero.jpg" nome="Câmera 01" semente={3} pessoas={4} />
-        <Quadro foto="shopping.jpg" nome="Câmera 02" semente={8} pessoas={3} />
-        <Quadro foto="estacionamento.jpg" nome="Câmera 03" semente={13} pessoas={2} />
-        <Quadro foto="armazem.jpg" nome="Câmera 04" semente={17} pessoas={2} />
-        <Quadro foto="via-noite.jpg" nome="Câmera 05" semente={24} pessoas={3} />
-        <Quadro foto="praca-aerea-2.jpg" nome="Câmera 06" semente={31} pessoas={3} />
+        <Quadro foto="praca-hero.jpg" nome="Câmera 01" />
+        <Quadro foto="shopping.jpg" nome="Câmera 02" />
+        <Quadro foto="estacionamento.jpg" nome="Câmera 03" />
+        <Quadro foto="armazem.jpg" nome="Câmera 04" />
+        <Quadro foto="via-noite.jpg" nome="Câmera 05" />
+        <Quadro foto="praca-aerea-2.jpg" nome="Câmera 06" />
       </div>
     </Janela>
   );

@@ -18,7 +18,7 @@ function Frase({ rotulo, texto }: { rotulo: string; texto: string }) {
 export default function Sobre() {
   return (
     <>
-      <Hero titulo="Toda imagem carrega informações." texto="A AIP desenvolve soluções de inteligência artificial e visão computacional para transformar imagens em informações úteis para a proteção, compreensão e melhoria de ambientes e operações." midia={{ foto: "cidade-aerea.jpg", alt: "Ruas de uma cidade à noite, vistas do alto" }} escurecer="bg-black/45" />
+      <Hero titulo="Toda imagem carrega informações." texto="A AIP desenvolve soluções de inteligência artificial e visão computacional para transformar imagens em informações úteis para a proteção, compreensão e melhoria de ambientes e operações." midia={{ foto: "cidade-aerea.jpg", alt: "Ruas de uma cidade à noite, vistas do alto" }} />
 
       <section className="secao">
         <Reveal className="margem">

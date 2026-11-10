@@ -45,7 +45,7 @@ export default async function PaginaSegmento({ params }: { params: Promise<{ seg
 
   return (
     <>
-      <Hero migalhas={<Migalhas nome={s.nome} />} titulo={s.hero.titulo} texto={s.hero.texto} botoes={<Botao href={contato}>Solicitar demonstração</Botao>} midia={{ foto: s.hero.foto, alt: s.hero.alt }} escurecer="bg-black/45" />
+      <Hero migalhas={<Migalhas nome={s.nome} />} titulo={s.hero.titulo} texto={s.hero.texto} botoes={<Botao href={contato}>Solicitar demonstração</Botao>} midia={{ foto: s.hero.foto, alt: s.hero.alt }} />
 
       <section className="secao overflow-hidden">
         <Reveal className="margem mb-10">

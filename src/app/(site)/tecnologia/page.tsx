@@ -1,17 +1,10 @@
 import { metadados } from "../_config/metadados";
 import { Cabecalho, Encerramento, Foto, Hero, Lista, TelaDividida, Trio } from "../_components/Base";
-import { CalibracaoIlustracao, DiagramaCamadas } from "../_components/Diagramas";
+import { CalibracaoIlustracao } from "../_components/Diagramas";
+import DemonstracaoVisao from "../_components/DemonstracaoVisao";
 import Reveal from "../_components/Reveal";
 
 export const metadata = metadados("/tecnologia", "Tecnologia", "Redes neurais, rastreamento multiobjeto e calibração por ambiente, operando sobre a estrutura de câmeras que já existe.");
-
-const CAMADAS = [
-  { titulo: "Captura", texto: "O sistema recebe os fluxos de vídeo pelo protocolo RTSP, direto das câmeras ou do gravador (NVR), e decodifica os quadros para análise." },
-  { titulo: "Percepção", texto: "Uma rede neural de detecção localiza as pessoas em cada quadro analisado." },
-  { titulo: "Continuidade", texto: "Um algoritmo de rastreamento liga as detecções de um quadro ao seguinte e mantém a identidade de cada pessoa ao longo do trajeto." },
-  { titulo: "Geometria", texto: "Linhas, zonas e posição na planta, configuradas para cada câmera, transformam trajetórias em eventos: uma passagem, uma permanência, uma entrada em área." },
-  { titulo: "Entrega", texto: "Os eventos são agregados em indicadores e enviados ao painel em tempo real, por conexão contínua com o servidor." },
-];
 
 const MODELOS = [
   { titulo: "Detecção", texto: "Rede neural de arquitetura transformer para detecção em tempo real. Analisa a imagem inteira de uma vez, o que favorece cenas com muitas pessoas e sobreposições." },
@@ -29,12 +22,14 @@ const PROCESSAMENTO = [
 export default function Tecnologia() {
   return (
     <>
-      <Hero titulo="Visão computacional aplicada à inteligência patrimonial." texto="Redes neurais, rastreamento multiobjeto e calibração por ambiente, operando sobre a estrutura de câmeras que já existe." midia={{ video: "cidade-noite.mp4", poster: "cidade-noite.jpg" }} escurecer="bg-black/25" />
+      <Hero titulo="Visão computacional aplicada à inteligência patrimonial." texto="Redes neurais, rastreamento multiobjeto e calibração por ambiente, operando sobre a estrutura de câmeras que já existe." midia={{ video: "cidade-noite.mp4", poster: "cidade-noite.jpg" }} />
 
       <section className="secao">
         <div className="margem">
-          <Cabecalho titulo="Da câmera ao painel, em cinco camadas." />
-          <DiagramaCamadas camadas={CAMADAS} />
+          <Cabecalho titulo="Visão computacional aplicada à realidade." texto="Nossa tecnologia utiliza inteligência artificial para detectar, rastrear, contar e interpretar elementos presentes nas imagens." />
+          <div className="mt-12 lg:mt-4">
+            <DemonstracaoVisao />
+          </div>
         </div>
       </section>
 

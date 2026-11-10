@@ -9,6 +9,23 @@ const M = "/site/media";
 // notebook) ela é escalada pela altura, então precisa de 150vh de largura.
 const CAPA = "(max-aspect-ratio: 3/2) 150vh, 100vw";
 
+/**
+ * Degradê só do lado do texto, como nos blocos da SpaceX: a foto fica com as
+ * cores originais e o preto vai até transparente em no máximo 40% da largura
+ * (desktop, texto à esquerda) ou da altura (celular, texto embaixo).
+ */
+export function DegradeLateral() {
+  return (
+    <>
+      <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-[40%] bg-gradient-to-t from-black/90 via-black/60 via-45% to-transparent lg:hidden" />
+      <div aria-hidden className="absolute inset-y-0 left-0 -z-10 hidden w-[40%] bg-gradient-to-r from-black/85 via-black/55 via-50% to-transparent lg:block" />
+    </>
+  );
+}
+
+// Sombra leve nas letras para ler bem sobre a foto sem escurecer a imagem.
+const SOMBRA_TEXTO = "[text-shadow:0_1px_2px_rgb(0_0_0/0.55),0_2px_24px_rgb(0_0_0/0.6)]";
+
 /** Seta dentro do círculo dos botões (ver .botao no CSS). */
 export function SetaBotao() {
   return (
@@ -38,10 +55,16 @@ export function Foto({ src, alt, className = "", sizes = "(min-width: 1024px) 60
 }
 
 // `videoCelular`: versão mais leve do vídeo para telas pequenas (opcional).
-type Midia = { foto: string; alt: string } | { video: string; videoCelular?: string; poster: string };
+// Vídeo: `fontes` em ordem de preferência (ex.: AV1, depois HEVC), com versão
+// de celular marcada; `video` é o MP4 H.264 de reserva para navegadores antigos.
+type FonteVideo = { src: string; tipo: string; celular?: boolean };
+type Midia = { foto: string; alt: string } | { video: string; poster: string; fontes?: FonteVideo[] };
 
-/** Hero em tela cheia: mídia escurecida, título à esquerda na metade inferior. */
-export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobreposicao, escurecer = "bg-black/35" }: { sobretitulo?: string; migalhas?: ReactNode; titulo: string; texto: string; botoes?: ReactNode; midia?: Midia; sobreposicao?: ReactNode; escurecer?: string }) {
+/** Hero em tela cheia: mídia com as cores originais, título à esquerda na metade inferior. */
+/** `pelicula`: película preta leve sobre toda a mídia (ex.: 0.08 = 8%). */
+export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobreposicao, pelicula = 0 }: { sobretitulo?: string; migalhas?: ReactNode; titulo: string; texto: string; botoes?: ReactNode; midia?: Midia; sobreposicao?: ReactNode; pelicula?: number }) {
+  // Com mídia: só o degradê do lado do texto, sem película sobre a imagem.
+  const comMidia = !!midia;
   return (
     <section className="relative isolate flex min-h-svh items-end overflow-hidden">
       {/* Entrada em camadas: foto, título, texto e botões (ver .entra-* no CSS). */}
@@ -50,18 +73,17 @@ export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobr
           {midia && "foto" in midia && <Image src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes={CAPA} quality={85} className="object-cover" />}
           {midia && "video" in midia && (
             <video autoPlay muted loop playsInline preload="metadata" poster={`${M}/${midia.poster}`} aria-hidden className="h-full w-full object-cover">
-              {midia.videoCelular && <source src={`${M}/${midia.videoCelular}`} type="video/mp4" media="(max-width: 767px)" />}
+              {midia.fontes?.map((f) => <source key={f.src} src={`${M}/${f.src}`} type={f.tipo} media={f.celular ? "(max-width: 767px)" : undefined} />)}
               <source src={`${M}/${midia.video}`} type="video/mp4" />
             </video>
           )}
         </div>
       </div>
-      <div aria-hidden className={`absolute inset-0 -z-10 ${escurecer}`} />
-      <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/55 to-transparent lg:bg-gradient-to-r lg:from-black/90 lg:via-black/35" />
-      <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-40 bg-gradient-to-t from-black to-transparent" />
+      {pelicula > 0 && <div aria-hidden className="absolute inset-0 -z-10 bg-black" style={{ opacity: pelicula }} />}
+      {comMidia && <DegradeLateral />}
       {sobreposicao}
       <div className="margem pb-16 pt-32 sm:pb-24">
-        <div className="max-w-[46rem]">
+        <div className={`max-w-[46rem] ${comMidia ? SOMBRA_TEXTO : ""}`}>
           {migalhas && <div className="entra-1 mb-6">{migalhas}</div>}
           {sobretitulo && <p className="entra-1 rotulo mb-5 text-white/80">{sobretitulo}</p>}
           <h1 className="entra-1 titulo-hero">{titulo}</h1>
@@ -94,24 +116,20 @@ export function TelaDividida({ id, rotulo, titulo, texto, visual, lado = "esquer
 /** Tela inteira com foto de fundo (Soluções, exemplos). */
 /**
  * `original`: serve o arquivo como está, sem a recompressão do Next (fotos próprias da AIP).
- * `lateral`: para fotos com o lado esquerdo escuro e o assunto à direita. No
- * desktop o texto fica centralizado nesse lado escuro, quase sem película; no
- * celular a foto é enquadrada no assunto (`foco`) e o texto vai embaixo.
+ * `lateral`: para fotos com o lado esquerdo escuro e o assunto à direita: no
+ * desktop o texto fica centralizado na altura, nesse lado escuro.
+ * `foco`: ponto da foto que fica sempre à vista (enquadramento no celular).
  */
 export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo, original = false, lateral = false, foco = "50% 50%" }: { foto: string; alt: string; titulo: string; texto: string; acao?: ReactNode; rotulo?: string; original?: boolean; lateral?: boolean; foco?: string }) {
   return (
     <section className={`relative isolate flex min-h-svh overflow-hidden ${lateral ? "items-end lg:items-center" : "items-end"}`}>
       <Image src={`${M}/${foto}`} alt={alt} fill sizes={CAPA} quality={85} unoptimized={original} style={{ objectPosition: foco }} className="-z-20 object-cover" />
-      {lateral ? (
-        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/40 to-transparent lg:bg-gradient-to-r lg:from-black/60 lg:via-transparent lg:to-transparent" />
-      ) : (
-        <div aria-hidden className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/55 to-black/20" />
-      )}
+      <DegradeLateral />
       <Reveal className={`margem ${lateral ? "pb-16 sm:pb-24 lg:py-24" : "pb-16 sm:pb-24"}`}>
-        <div className="max-w-[40rem]">
-          {rotulo && <p className="rotulo mb-4 text-white/80">{rotulo}</p>}
+        <div className={`max-w-[36rem] ${SOMBRA_TEXTO}`}>
+          {rotulo && <p className="rotulo mb-4 text-white/85">{rotulo}</p>}
           <h2 className="titulo-tela">{titulo}</h2>
-          <p className="mt-5 text-lg leading-relaxed text-white/80">{texto}</p>
+          <p className="mt-5 text-lg leading-relaxed text-white/90">{texto}</p>
           {acao && <div className="mt-8">{acao}</div>}
         </div>
       </Reveal>
