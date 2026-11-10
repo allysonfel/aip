@@ -2,6 +2,7 @@ import { TituloPagina } from '@/components/shopping/Comum';
 import { exigirAba } from '@/lib/sessaoServidor';
 import { obterConfiguracoes } from '@/lib/shopping/configuracoes';
 import { FormConfiguracoes } from './FormConfiguracoes';
+import { MotorDemonstracao } from '@/components/shopping/MotorDemonstracao';
 
 export default async function ConfiguracoesPage() {
   const sessao = await exigirAba('configuracoes');
@@ -9,6 +10,9 @@ export default async function ConfiguracoesPage() {
   return (
     <div>
       <TituloPagina titulo="Configurações" descricao={`Só o administrador geral vê esta tela. Última alteração: ${atualizado_em.toLocaleString('pt-BR', { timeZone: campos.fuso, dateStyle: 'short', timeStyle: 'short' })}.`} />
+      <div className="mb-6">
+        <MotorDemonstracao />
+      </div>
       <FormConfiguracoes inicial={{ ...campos, deteccao_confianca: Number(campos.deteccao_confianca), deteccao_fps: Number(campos.deteccao_fps) }} />
     </div>
   );

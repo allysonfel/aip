@@ -17,7 +17,9 @@ export type AcaoAuditoria =
   | 'usuario_reativado'
   | 'usuario_desbloqueado'
   | 'configuracoes_alteradas'
-  | 'pergunte';
+  | 'pergunte'
+  | 'motor_ligado'
+  | 'motor_desligado';
 
 export async function registrarAuditoria(a: { empresaId: number | null; usuarioId: number | null; acao: AcaoAuditoria; alvoUsuarioId?: number | null; detalhes?: Record<string, unknown> }) {
   await sql`
