@@ -136,19 +136,6 @@ export default function TotemIA() {
         </div>
       </section>
 
-      <section className="secao border-t border-linha">
-        <div className="margem">
-          <Cabecalho titulo="Cada ambiente exige uma configuração." texto="O projeto considera:" />
-          <Reveal className="mt-8">
-            <Lista colunas itens={["Quantidade e tipo de câmeras", "Altura e posicionamento dos equipamentos", "Capacidade de processamento", "Fonte de energia", "Conectividade disponível", "Condições ambientais", "Recursos de inteligência necessários"]} />
-            <p className="corpo mt-8 max-w-[44rem]">Alimentação elétrica, conectividade, instalação e modelo de contratação são definidos conforme o projeto.</p>
-            <div className="mt-8">
-              <Botao href={CONTATO} contorno>Solicitar avaliação técnica</Botao>
-            </div>
-          </Reveal>
-        </div>
-      </section>
-
       <div className="border-t border-linha">
         <Acordeao itens={FAQ} />
       </div>
