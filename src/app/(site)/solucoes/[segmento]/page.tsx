@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { metadados } from "../../_config/metadados";
 import { Acordeao, Botao, Encerramento, Hero, Lista } from "../../_components/Base";
 import Carrossel from "../../_components/Carrossel";
-import { CartaoClaro, CartaoSegmento } from "../../_components/Cartoes";
+import { CartaoSegmento } from "../../_components/Cartoes";
+import CartaoUso from "../../_components/CartaoUso";
 import Passos from "../../_components/Passos";
 import Reveal from "../../_components/Reveal";
 import { buscarSegmento, contatoSegmento, hrefSegmento, SEGMENTOS } from "../../_content/solucoes";
@@ -52,7 +53,7 @@ export default async function PaginaSegmento({ params }: { params: Promise<{ seg
           <h2 className="titulo-secao">Como a tecnologia é usada</h2>
         </Reveal>
         <Reveal>
-          <Carrossel rotulo={`Como a tecnologia é usada em ${s.nome}`} largura="w-[78vw] sm:w-[340px]" itens={s.usos.map((u) => ({ chave: u.titulo, conteudo: <CartaoClaro {...u} /> }))} />
+          <Carrossel rotulo={`Como a tecnologia é usada em ${s.nome}`} largura="w-[78vw] sm:w-[340px]" itens={s.usos.map((u, i) => ({ chave: u.titulo, conteudo: <CartaoUso indice={i + 1} {...u} /> }))} />
         </Reveal>
       </section>
 
@@ -64,15 +65,6 @@ export default async function PaginaSegmento({ params }: { params: Promise<{ seg
           </Reveal>
           <Passos passos={s.pratica.passos} />
         </div>
-      </section>
-
-      <section className="secao overflow-hidden border-t border-linha">
-        <Reveal className="margem mb-10">
-          <h2 className="titulo-secao">Soluções para outros segmentos</h2>
-        </Reveal>
-        <Reveal>
-          <Carrossel rotulo="Outros segmentos" largura="w-[72vw] sm:w-[320px]" itens={outros.map((o) => ({ chave: o.slug, conteudo: <CartaoSegmento segmento={o} /> }))} />
-        </Reveal>
       </section>
 
       {s.governanca && (
@@ -93,6 +85,15 @@ export default async function PaginaSegmento({ params }: { params: Promise<{ seg
         <Acordeao itens={s.faq} />
       </div>
       <Encerramento titulo={s.encerramento.titulo} texto={s.encerramento.texto} cta={s.encerramento.cta} href={contato} />
+
+      <section className="secao overflow-hidden border-t border-linha">
+        <Reveal className="margem mb-10">
+          <h2 className="titulo-secao">Soluções para outros segmentos</h2>
+        </Reveal>
+        <Reveal>
+          <Carrossel rotulo="Outros segmentos" largura="w-[72vw] sm:w-[320px]" itens={outros.map((o) => ({ chave: o.slug, conteudo: <CartaoSegmento segmento={o} /> }))} />
+        </Reveal>
+      </section>
     </>
   );
 }

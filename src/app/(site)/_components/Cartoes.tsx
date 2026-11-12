@@ -18,20 +18,9 @@ export function CartaoFoto({ foto, alt, titulo, texto }: { foto: string; alt: st
   );
 }
 
-/** Cartão claro de "Como a tecnologia é usada". */
-export function CartaoClaro({ titulo, texto, sobProjeto }: { titulo: string; texto: string; sobProjeto?: boolean }) {
-  return (
-    <div className="flex h-full min-h-[15rem] flex-col rounded-2xl bg-[#f1f1f1] p-7 text-black sm:min-h-[17rem] sm:p-8">
-      {sobProjeto && <span className="mb-5 w-fit rounded-full border border-black/25 px-2.5 py-1 text-[11px] font-medium uppercase tracking-[0.12em] text-black/65">Sob projeto</span>}
-      <h3 className="font-titulo text-[1.75rem] font-bold leading-[1.05]">{titulo}</h3>
-      <p className="mt-auto pt-6 leading-snug text-black/70">{texto}</p>
-    </div>
-  );
-}
-
 /** Foto vertical com o nome do segmento por cima e o botão para a página. */
-export function CartaoSegmento({ segmento, linha, cta = "Ver", fotoDoHero = false }: { segmento: Segmento; linha?: string; cta?: string; fotoDoHero?: boolean }) {
-  const foto = fotoDoHero ? segmento.hero : segmento.cartao;
+export function CartaoSegmento({ segmento, linha, cta = "Ver" }: { segmento: Segmento; linha?: string; cta?: string }) {
+  const foto = segmento.cartao;
   return (
     <div className="relative isolate flex aspect-[3/4] flex-col justify-end overflow-hidden rounded-2xl bg-painel p-6 sm:p-7">
       <Image src={`${M}/${foto.foto}`} alt={foto.alt} fill draggable={false} sizes="(min-width: 640px) 600px, 130vw" className="-z-20 object-cover" />

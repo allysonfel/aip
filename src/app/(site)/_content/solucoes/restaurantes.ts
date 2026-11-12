@@ -9,16 +9,16 @@ const segmento: Segmento = {
   hero: {
     titulo: "Entenda o movimento do seu restaurante.",
     texto: "Acompanhe a ocupação do salão, identifique horários de pico e transforme imagens em informações para sua operação.",
-    foto: "restaurante-salao.jpg",
-    alt: "Salão de restaurante com mesas postas e iluminação quente",
+    foto: "restaurante-salao-premium.jpg",
+    alt: "Salão de restaurante elegante com mesas postas, flores e iluminação suave",
   },
-  cartao: { foto: "restaurante-mesas.jpg", alt: "Mesas e cadeiras de madeira de um restaurante vistas do alto" },
+  cartao: { foto: "restaurante-salao-premium.jpg", alt: "Salão de restaurante elegante com mesas postas, flores e iluminação suave" },
   usos: [
-    { titulo: "Ocupação do salão", texto: "Acompanhe quais áreas estão ocupadas e como o espaço é utilizado." },
-    { titulo: "Fluxo de pessoas", texto: "Identifique o movimento de entrada e saída por horário." },
-    { titulo: "Mapas de calor", texto: "Visualize as áreas de maior circulação e os espaços pouco utilizados." },
-    { titulo: "Horários de pico", texto: "Compare períodos e identifique padrões de movimento ao longo do dia." },
-    { titulo: "Busca visual", texto: "Localize registros por características de roupas e aparência, com confirmação humana." },
+    { titulo: "Ocupação do salão", texto: "Acompanhe quais áreas estão ocupadas e como o espaço é utilizado.", visual: "V13", exemplo: "Salão: 18 de 24 mesas" },
+    { titulo: "Fluxo de pessoas", texto: "Identifique o movimento de entrada e saída por horário.", visual: "V1", exemplo: "Pico de entrada: 20h" },
+    { titulo: "Mapas de calor", texto: "Visualize as áreas de maior circulação e os espaços pouco utilizados.", visual: "V2", exemplo: "Varanda: área mais usada" },
+    { titulo: "Horários de pico", texto: "Compare períodos e identifique padrões de movimento ao longo do dia.", visual: "V4", exemplo: "Sábado: +46%" },
+    { titulo: "Busca visual", texto: "Localize registros por características de roupas e aparência, com confirmação humana.", visual: "V5", exemplo: "1 registro encontrado" },
   ],
   pratica: {
     texto: TEXTO_PRATICA,
@@ -26,7 +26,7 @@ const segmento: Segmento = {
   },
   faq: [
     { p: "Preciso trocar as câmeras do restaurante?", r: "Não. A IA é aplicada em qualquer câmera, inclusive nas que o restaurante já tem." },
-    { p: "É possível identificar pessoas por reconhecimento facial?", r: "Sim, como recurso sob projeto, mediante definição de finalidade, avaliação de necessidade e atendimento aos requisitos legais de proteção de dados." },
+    { p: "É possível identificar pessoas por reconhecimento facial?", r: "Sim, sob projeto. A AIP pode identificar pessoas pelo rosto, mediante avaliação técnica e jurídica, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores." },
     { p: "Consigo identificar os horários de maior movimento?", r: "Sim. A plataforma acompanha o fluxo por horário e permite comparar períodos para identificar padrões de movimento." },
     { p: "Como acesso as informações do restaurante?", r: "Os indicadores ficam disponíveis em um painel pelo navegador, com acesso controlado por perfil de usuário." },
   ],

@@ -58,11 +58,15 @@ export function Foto({ src, alt, className = "", sizes = "(min-width: 1024px) 60
 // Vídeo: `fontes` em ordem de preferência (ex.: AV1, depois HEVC), com versão
 // de celular marcada; `video` é o MP4 H.264 de reserva para navegadores antigos.
 type FonteVideo = { src: string; tipo: string; celular?: boolean };
-type Midia = { foto: string; alt: string } | { video: string; poster: string; fontes?: FonteVideo[] };
+// `foco`: ponto da foto que fica sempre à vista no recorte (ex.: "72% 50%").
+type Midia = { foto: string; alt: string; foco?: string } | { video: string; poster: string; fontes?: FonteVideo[] };
 
 /** Hero em tela cheia: mídia com as cores originais, título à esquerda na metade inferior. */
-/** `pelicula`: película preta leve sobre toda a mídia (ex.: 0.08 = 8%). */
-export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobreposicao, pelicula = 0 }: { sobretitulo?: string; migalhas?: ReactNode; titulo: string; texto: string; botoes?: ReactNode; midia?: Midia; sobreposicao?: ReactNode; pelicula?: number }) {
+/**
+ * `pelicula`: película preta leve sobre toda a mídia (ex.: 0.08 = 8%).
+ * `fundoForte`: escurece mais a faixa de baixo, para a borda do vídeo sumir no preto da seção seguinte.
+ */
+export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobreposicao, pelicula = 0, fundoForte = false }: { sobretitulo?: string; migalhas?: ReactNode; titulo: string; texto: string; botoes?: ReactNode; midia?: Midia; sobreposicao?: ReactNode; pelicula?: number; fundoForte?: boolean }) {
   // Com mídia: só o degradê do lado do texto, sem película sobre a imagem.
   const comMidia = !!midia;
   return (
@@ -70,7 +74,7 @@ export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobr
       {/* Entrada em camadas: foto, título, texto e botões (ver .entra-* no CSS). */}
       <div className="entra-foto absolute inset-0 -z-20">
         <div className="parallax absolute inset-0">
-          {midia && "foto" in midia && <Image src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes={CAPA} quality={85} className="object-cover" />}
+          {midia && "foto" in midia && <Image src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes={CAPA} quality={85} style={midia.foco ? { objectPosition: midia.foco } : undefined} className="object-cover" />}
           {midia && "video" in midia && (
             <video autoPlay muted loop playsInline preload="metadata" poster={`${M}/${midia.poster}`} aria-hidden className="h-full w-full object-cover">
               {midia.fontes?.map((f) => <source key={f.src} src={`${M}/${f.src}`} type={f.tipo} media={f.celular ? "(max-width: 767px)" : undefined} />)}
@@ -81,6 +85,7 @@ export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobr
       </div>
       {pelicula > 0 && <div aria-hidden className="absolute inset-0 -z-10 bg-black" style={{ opacity: pelicula }} />}
       {comMidia && <DegradeLateral />}
+      {fundoForte && <div aria-hidden className="absolute inset-x-0 bottom-0 -z-10 h-28 bg-gradient-to-t from-black via-black/70 to-transparent" />}
       {sobreposicao}
       <div className="margem pb-16 pt-32 sm:pb-24">
         <div className={`max-w-[46rem] ${comMidia ? SOMBRA_TEXTO : ""}`}>
@@ -172,7 +177,7 @@ export function Lista({ itens, colunas = false }: { itens: ReactNode[]; colunas?
   );
 }
 
-export function Acordeao({ titulo = "Perguntas frequentes", itens }: { titulo?: string; itens: { p: string; r: string }[] }) {
+export function Acordeao({ titulo = "Perguntas frequentes", itens }: { titulo?: string; itens: { p: string; r: ReactNode }[] }) {
   return (
     <section id="perguntas" className="secao">
       <div className="margem grid gap-10 lg:grid-cols-[1fr_2fr] lg:gap-20">
@@ -189,7 +194,7 @@ export function Acordeao({ titulo = "Perguntas frequentes", itens }: { titulo?: 
                   <span className="absolute left-0 top-1/2 h-px w-4 rotate-90 bg-current transition-transform duration-300 group-open:rotate-0" />
                 </span>
               </summary>
-              <p className="corpo max-w-[44rem] pb-6">{i.r}</p>
+              <div className="corpo max-w-[44rem] pb-6">{i.r}</div>
             </details>
           ))}
         </Reveal>

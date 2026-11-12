@@ -12,7 +12,6 @@ const GRUPOS = [
 ] as const;
 
 const SIMPLES: Item[] = [
-  { href: "/tecnologia", rotulo: "Tecnologia" },
   { href: "/sobre", rotulo: "Sobre" },
 ];
 

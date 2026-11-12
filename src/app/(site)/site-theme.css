@@ -395,3 +395,294 @@
     display: none;
   }
 }
+
+/* Mini-visuais dos cards "Como a tecnologia é usada" (ver MiniVisuais.tsx).
+   Estado inicial = escondido; quando o card ganha .ativo, cada peça anima uma
+   vez, com atraso em --d. */
+.cartao-uso {
+  --mv-curva: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.cartao-uso .mv-linha {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.3s var(--mv-curva) var(--d, 0ms);
+}
+
+.cartao-uso .mv-barra,
+.cartao-uso .mv-largura {
+  transform-box: fill-box;
+  transition: transform 1.1s var(--mv-curva) var(--d, 0ms);
+}
+
+.cartao-uso .mv-barra {
+  transform: scaleY(0);
+  transform-origin: bottom;
+}
+
+.cartao-uso .mv-largura {
+  transform: scaleX(0);
+  transform-origin: left;
+}
+
+.cartao-uso .mv-ponto {
+  opacity: 0;
+  transition: opacity 0.7s ease var(--d, 0ms);
+}
+
+.cartao-uso .mv-move {
+  opacity: 0;
+  transform: translate(var(--dx), var(--dy));
+  transition:
+    transform 1.3s var(--mv-curva) var(--d, 0ms),
+    opacity 0.4s ease var(--d, 0ms);
+}
+
+.cartao-uso .mv-arco {
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 1.4s var(--mv-curva) 150ms;
+}
+
+.cartao-uso .mv-scan {
+  opacity: 0;
+}
+
+.cartao-uso .mv-ponteiro {
+  transform-box: view-box;
+  transform-origin: 200px 38px;
+  transform: rotate(-150deg);
+  transition: transform 1.3s var(--mv-curva);
+}
+
+.cartao-uso .mv-play {
+  transform: translateX(-84px);
+  transition: transform 1.3s var(--mv-curva) 200ms;
+}
+
+.cartao-uso .mv-pulso {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.cartao-uso.ativo .mv-linha {
+  stroke-dashoffset: 0;
+}
+
+.cartao-uso.ativo .mv-barra,
+.cartao-uso.ativo .mv-largura {
+  transform: none;
+}
+
+/* .mv-ponto só muda a opacidade: não mexe no transform, que posiciona grupos no SVG. */
+.cartao-uso.ativo .mv-ponto {
+  opacity: 1;
+}
+
+.cartao-uso.ativo .mv-move {
+  opacity: 1;
+  transform: none;
+}
+
+.cartao-uso.ativo .mv-arco {
+  stroke-dashoffset: var(--p);
+}
+
+.cartao-uso.ativo .mv-scan {
+  animation: mv-scan 1.4s ease-in-out 200ms forwards;
+}
+
+.cartao-uso.ativo .mv-ponteiro,
+.cartao-uso.ativo .mv-play {
+  transform: none;
+}
+
+.cartao-uso.ativo .mv-pulso {
+  animation: mv-pulso 2.4s ease-out 900ms infinite;
+}
+
+.cartao-uso.ativo .mv-cursor {
+  animation: mv-cursor 1s steps(2, start) 3;
+}
+
+@keyframes mv-scan {
+  0% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(146px);
+  }
+}
+
+@keyframes mv-pulso {
+  0% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  70%,
+  100% {
+    opacity: 0;
+    transform: scale(3.2);
+  }
+}
+
+@keyframes mv-cursor {
+  to {
+    visibility: hidden;
+  }
+}
+
+/* V15: linha de leitura descendo pelo rosto. */
+.cartao-uso .mv-varre {
+  opacity: 0;
+}
+
+.cartao-uso.ativo .mv-varre {
+  animation: mv-varre 1.5s ease-in-out 300ms forwards;
+}
+
+@keyframes mv-varre {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  85% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(94px);
+  }
+}
+
+/* V17: anel começa ciano e fica vermelho quando os pontos se juntam. */
+.cartao-uso .mv-anel {
+  stroke: #5fd3ff;
+  opacity: 0;
+  transition:
+    stroke 0.8s ease 1.1s,
+    opacity 0.6s ease 0.6s;
+}
+
+.cartao-uso.ativo .mv-anel {
+  stroke: #ff5a5f;
+  opacity: 1;
+}
+
+.cartao-uso .mv-anel-pulso {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.cartao-uso.ativo .mv-anel-pulso {
+  animation: mv-pulso-anel 2.2s ease-out 1.6s infinite;
+}
+
+@keyframes mv-pulso-anel {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  80%,
+  100% {
+    opacity: 0;
+    transform: scale(1.45);
+  }
+}
+
+/* V21: caixa do capacete entra ciano e fica vermelha (alerta). */
+.cartao-uso .mv-alerta-caixa {
+  stroke: #5fd3ff;
+  opacity: 0;
+  transition:
+    opacity 0.5s ease 0.85s,
+    stroke 0.5s ease 1.25s;
+}
+
+.cartao-uso.ativo .mv-alerta-caixa {
+  stroke: #ff5a5f;
+  opacity: 1;
+}
+
+/* Quem pede menos movimento vê o visual já pronto. */
+@media (prefers-reduced-motion: reduce) {
+  .cartao-uso [class*="mv-"] {
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .cartao-uso .mv-linha {
+    stroke-dashoffset: 0;
+  }
+
+  .cartao-uso .mv-barra,
+  .cartao-uso .mv-largura,
+  .cartao-uso .mv-move,
+  .cartao-uso .mv-ponteiro,
+  .cartao-uso .mv-play {
+    transform: none;
+  }
+
+  .cartao-uso .mv-ponto,
+  .cartao-uso .mv-move {
+    opacity: 1;
+  }
+
+  .cartao-uso .mv-arco {
+    stroke-dashoffset: var(--p);
+  }
+
+  .cartao-uso .mv-anel {
+    stroke: #ff5a5f;
+    opacity: 1;
+  }
+
+  .cartao-uso .mv-alerta-caixa {
+    stroke: #ff5a5f;
+    opacity: 1;
+  }
+
+  .cartao-uso .mv-anel-pulso,
+  .cartao-uso .mv-varre {
+    opacity: 0;
+  }
+}
+
+/* Controle deslizante da calculadora (Câmeras IA). */
+.controle-calc {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(to right, #5fd3ff var(--pos), rgb(255 255 255 / 0.15) var(--pos));
+  cursor: pointer;
+}
+
+.controle-calc::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 4px solid #5fd3ff;
+  box-shadow: 0 0 0 6px rgb(95 211 255 / 0.15);
+}
+
+.controle-calc::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 9999px;
+  background: #fff;
+  border: 4px solid #5fd3ff;
+}
+
+.controle-calc:focus-visible {
+  outline: 2px solid #5fd3ff;
+  outline-offset: 6px;
+}

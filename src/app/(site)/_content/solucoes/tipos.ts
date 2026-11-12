@@ -1,3 +1,5 @@
+import type { VisualId } from "../../_components/MiniVisuais";
+
 // Modelo de uma página de Soluções. Para criar um segmento novo, copie um
 // dos arquivos desta pasta, ajuste o conteúdo e inclua-o em index.ts.
 
@@ -13,9 +15,10 @@ export type Segmento = {
   /** Linha do cartão no carrossel da página inicial. */
   linhaCartao: string;
   hero: { titulo: string; texto: string; foto: string; alt: string };
-  /** Foto do cartão no carrossel "outros segmentos". */
+  /** Foto do cartão nos carrosséis (página inicial e "outros segmentos"). */
   cartao: { foto: string; alt: string };
-  usos: { titulo: string; texto: string; sobProjeto?: boolean }[];
+  /** Cards de "Como a tecnologia é usada": mini-visual (V1 a V14) e um dado de exemplo. */
+  usos: { titulo: string; texto: string; visual: VisualId; exemplo: string; sobProjeto?: boolean }[];
   pratica: { texto: string; passos: Passo[] };
   /** Bloco "Governança e responsabilidade", antes do FAQ (só setor público). */
   governanca?: { texto: string; itens: string[] };

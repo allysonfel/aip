@@ -16,12 +16,12 @@ const CONTATO = "/contato?produto=totem-ia";
 const FOTO_CLIMA: string | null = null;
 
 const APLICACOES = [
-  { foto: "praca-aerea-2.jpg", alt: "Praça e ruas vistas do alto", titulo: "Espaços públicos", texto: "Monitoramento de praças, parques, áreas de convivência e espaços de circulação." },
-  { foto: "via-noite.jpg", alt: "Avenida com trânsito à noite", titulo: "Vias e mobilidade", texto: "Acompanhamento de ruas, cruzamentos, acessos e pontos estratégicos." },
-  { foto: "estacionamento-aereo.jpg", alt: "Estacionamento com carros nas vagas, visto do alto", titulo: "Estacionamentos", texto: "Monitoramento de movimentações, entradas, saídas e ocupação." },
-  { foto: "evento.jpg", alt: "Grande evento noturno visto do alto", titulo: "Eventos", texto: "Estrutura de monitoramento para locais com grande circulação de pessoas e necessidades temporárias." },
-  { foto: "obra.jpg", alt: "Guindaste em uma obra à noite", titulo: "Obras e áreas operacionais", texto: "Acompanhamento de ambientes que exigem cobertura durante períodos específicos." },
-  { foto: "condominio-noite.jpg", alt: "Torres residenciais iluminadas em volta de uma piscina, vistas do alto à noite", titulo: "Condomínios e empreendimentos", texto: "Monitoramento de acessos, áreas externas e pontos de circulação." },
+  { foto: "br-rio-aereo.jpg", alt: "Rio de Janeiro visto do alto, com a lagoa, a orla e os morros", titulo: "Espaços públicos", texto: "Monitoramento de praças, parques, áreas de convivência e espaços de circulação." },
+  { foto: "br-sp-noite.jpg", alt: "Ruas de São Paulo à noite vistas do alto", titulo: "Vias e mobilidade", texto: "Acompanhamento de ruas, cruzamentos, acessos e pontos estratégicos." },
+  { foto: "estacionamento-coberto.jpg", alt: "Estacionamento coberto moderno e iluminado", titulo: "Estacionamentos", texto: "Monitoramento de movimentações, entradas, saídas e ocupação." },
+  { foto: "br-evento-palco.jpg", alt: "Palco de festival com painéis de luz e público à noite", titulo: "Eventos", texto: "Estrutura de monitoramento para locais com grande circulação de pessoas e necessidades temporárias." },
+  { foto: "br-obra-sp.jpg", alt: "Prédio em construção com guindaste em São Paulo", titulo: "Obras e áreas operacionais", texto: "Acompanhamento de ambientes que exigem cobertura durante períodos específicos." },
+  { foto: "br-camboriu.jpg", alt: "Torres residenciais de alto padrão em Balneário Camboriú ao pôr do sol", titulo: "Condomínios e empreendimentos", texto: "Monitoramento de acessos, áreas externas e pontos de circulação." },
 ];
 
 const ETAPAS = [
