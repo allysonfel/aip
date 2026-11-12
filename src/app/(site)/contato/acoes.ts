@@ -48,6 +48,9 @@ export async function enviarContato(_anterior: EstadoContato, dados: FormData): 
     telefone: campo("telefone", 30),
     tipo_organizacao: tipos.join("|"),
     mensagem: campo("mensagem", 4000),
+    // Volta junto com os outros valores: o React limpa o formulário depois do
+    // envio, e sem isso a caixa de aceite voltava desmarcada a cada erro.
+    aceite: dados.get("aceite") === "on" ? "on" : "",
   };
   const paisTelefone = PAISES.find((p) => p.iso === valores.ddi_pais);
 
