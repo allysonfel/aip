@@ -1,103 +1,84 @@
 import Image from "next/image";
 import { metadados } from "../_config/metadados";
-import { Acordeao, Botao, Cabecalho, DegradeLateral, Encerramento, Foto, Lista, TelaDividida } from "../_components/Base";
+import { Acordeao, Botao, Cabecalho, Encerramento } from "../_components/Base";
 import Carrossel from "../_components/Carrossel";
 import { CartaoFoto } from "../_components/Cartoes";
-import { TotemIlustracao } from "../_components/Diagramas";
 import Reveal from "../_components/Reveal";
+import VisualCentral, { type TipoCentral } from "../_components/CentralVisuais";
+import TotemPorDentro, { type EtapaTotem } from "../_components/TotemPorDentro";
 
 export const metadata = metadados("/totem-ia", "Totem IA", "Monitoramento inteligente para locais que precisam de cobertura adicional ou não possuem infraestrutura convencional.");
 
 const CONTATO = "/contato?produto=totem-ia";
+const M = "/site/media";
 
-// Fundo da seção "Feito para resistir ao tempo". Coloque a imagem em
-// public/site/media/ e troque null pelo nome do arquivo (ex.: "totem-chuva.jpg").
-// Enquanto for null, a seção usa um fundo escuro com chuva desenhada.
-const FOTO_CLIMA: string | null = null;
+const ALT_FRENTE = "Totem IA da AIP visto de frente, com giroflex, quatro câmeras e linhas de LED azul, sobre fundo preto";
+const ALT_TOPO = "Topo do Totem IA em close: giroflex vermelho e azul e câmeras com a marca AIP";
+const ALT_TRES_QUARTOS = "Totem IA em três quartos, mostrando as câmeras laterais e o corpo de 3 metros";
+const ALT_LATERAL = "Totem IA visto de lado, com as linhas de LED azul acesas ao longo do corpo";
 
-const APLICACOES = [
-  { foto: "br-rio-aereo.jpg", alt: "Rio de Janeiro visto do alto, com a lagoa, a orla e os morros", titulo: "Espaços públicos", texto: "Monitoramento de praças, parques, áreas de convivência e espaços de circulação." },
-  { foto: "br-sp-noite.jpg", alt: "Ruas de São Paulo à noite vistas do alto", titulo: "Vias e mobilidade", texto: "Acompanhamento de ruas, cruzamentos, acessos e pontos estratégicos." },
-  { foto: "estacionamento-coberto.jpg", alt: "Estacionamento coberto moderno e iluminado", titulo: "Estacionamentos", texto: "Monitoramento de movimentações, entradas, saídas e ocupação." },
-  { foto: "br-evento-palco.jpg", alt: "Palco de festival com painéis de luz e público à noite", titulo: "Eventos", texto: "Estrutura de monitoramento para locais com grande circulação de pessoas e necessidades temporárias." },
-  { foto: "br-obra-sp.jpg", alt: "Prédio em construção com guindaste em São Paulo", titulo: "Obras e áreas operacionais", texto: "Acompanhamento de ambientes que exigem cobertura durante períodos específicos." },
-  { foto: "br-camboriu.jpg", alt: "Torres residenciais de alto padrão em Balneário Camboriú ao pôr do sol", titulo: "Condomínios e empreendimentos", texto: "Monitoramento de acessos, áreas externas e pontos de circulação." },
+// Posições medidas em cada foto (em % da imagem).
+const ETAPAS: EtapaTotem[] = [
+  { titulo: "Giroflex conectado", texto: "Sinalização luminosa acionada pela nossa central de monitoramento 24h, com conexão aos órgãos de segurança pública.", foto: "totem-topo.jpg", alt: ALT_TOPO, alvos: [{ x: 50.5, y: 24, w: 30, h: 17 }] },
+  { titulo: "4 câmeras com IA", texto: "Cobertura de 360° com detecção de pessoas, veículos, comportamentos suspeitos, ocorrências e armas.", foto: "totem-topo.jpg", alt: ALT_TOPO, alvos: [{ x: 22, y: 49.5, w: 26, h: 13 }, { x: 78.5, y: 49.5, w: 26, h: 13 }] },
+  { titulo: "Leitura de placas e reconhecimento facial", texto: "Identificação de veículos e de pessoas, com alertas em tempo real para a central e para as autoridades responsáveis.", foto: "totem-frente.jpg", alt: ALT_FRENTE, alvos: [{ x: 43, y: 16, w: 9, h: 6 }, { x: 56.5, y: 16.2, w: 9, h: 6 }], zoom: 1.12 },
+  { titulo: "Áreas restritas", texto: "Aviso imediato quando alguém entra em locais ou horários definidos.", foto: "totem-tres-quartos.jpg", alt: ALT_TRES_QUARTOS, alvos: [{ x: 42, y: 16.8, w: 8, h: 5.5 }, { x: 58.5, y: 16.8, w: 7, h: 5.5 }], zoom: 1.12 },
+  { titulo: "Presença visível", texto: "Linhas de LED que tornam o totem visível de dia e de noite e inibem ações suspeitas.", foto: "totem-lateral.jpg", alt: ALT_LATERAL, alvos: [{ x: 46.3, y: 57, w: 5, h: 45, caixa: true }] },
+  { titulo: "Estrutura de 3 metros", texto: "Aço tratado contra corrosão, preparado para qualquer ambiente e conectado à plataforma AIP por 4G ou rede local.", foto: "totem-tres-quartos.jpg", alt: ALT_TRES_QUARTOS, alvos: [{ x: 50.3, y: 48, w: 25, h: 90, caixa: true }], zoom: 1 },
 ];
 
-const ETAPAS = [
-  { titulo: "Captura", texto: "As câmeras registram imagens do ambiente." },
-  { titulo: "Processamento", texto: "A inteligência artificial interpreta as imagens conforme as aplicações configuradas." },
-  { titulo: "Identificação", texto: "Informações e eventos relevantes são identificados." },
-  { titulo: "Acompanhamento", texto: "Os dados podem ser encaminhados à plataforma AIP." },
+const CENTRAL: { visual: TipoCentral; titulo: string; texto: string }[] = [
+  { visual: "relogio", titulo: "24/7", texto: "Monitoramento contínuo, todos os dias do ano." },
+  { visual: "agentes", titulo: "Agentes próprios", texto: "Nossa equipe monitora 24 horas por dia, confirma cada ocorrência e notifica as autoridades ou os responsáveis pelo local." },
+  { visual: "integracao", titulo: "Integração com a segurança pública", texto: "Conexão com Polícia Militar, Polícia Civil, Polícia Federal, Guarda Municipal e centrais integradas de segurança, conforme cada projeto." },
+];
+
+const APLICACOES = [
+  { foto: "cenario-espacos-publicos.jpg", alt: "Totem IA numa praça urbana ao anoitecer, com bancos, árvores e prédios ao fundo", titulo: "Espaços públicos", texto: "Monitoramento de praças, parques, áreas de convivência e espaços de circulação." },
+  { foto: "cenario-vias.jpg", alt: "Totem IA na esquina de um cruzamento movimentado à noite, com faixa de pedestres e semáforos", titulo: "Vias e mobilidade", texto: "Acompanhamento de ruas, cruzamentos, acessos e pontos estratégicos." },
+  { foto: "cenario-eventos.jpg", alt: "Totem IA num festival à noite, com o palco iluminado e o público ao fundo", titulo: "Eventos", texto: "Estrutura de monitoramento para locais com grande circulação de pessoas e necessidades temporárias." },
+  { foto: "cenario-obras.jpg", alt: "Totem IA ao lado de um canteiro de obras com guindaste e prédio em construção", titulo: "Obras e áreas operacionais", texto: "Acompanhamento de ambientes que exigem cobertura durante períodos específicos." },
+  { foto: "cenario-condominios.jpg", alt: "Totem IA na entrada de um condomínio residencial, com portaria e cancela", titulo: "Condomínios e empreendimentos", texto: "Monitoramento de acessos, áreas externas e pontos de circulação." },
 ];
 
 const FAQ = [
-  { p: "O Totem substitui uma instalação convencional?", r: "Pode reduzir a necessidade de infraestrutura convencional em determinadas aplicações. A viabilidade depende das condições do local." },
-  { p: "Como funciona a conexão?", r: "As opções de conectividade são definidas conforme a disponibilidade e os requisitos do projeto." },
-  { p: "Onde as imagens são processadas?", r: "O processamento e a transferência de dados dependem da configuração técnica e dos equipamentos utilizados." },
-  { p: "Pode ser utilizado temporariamente?", r: "Aplicações temporárias, como eventos e obras, podem ser avaliadas conforme as condições de instalação." },
-  { p: "Quais recursos estão disponíveis?", r: "Os recursos são definidos conforme os equipamentos e as aplicações contratadas." },
+  { p: "O Totem substitui uma instalação convencional?", r: "Em muitos casos, sim. Ele reúne câmeras, processamento e conectividade numa estrutura só, ideal para locais sem infraestrutura ou que precisam de cobertura adicional. Avaliamos cada local antes da instalação." },
+  { p: "Como funciona a conexão?", r: "O Totem se conecta à plataforma AIP por 4G ou pela rede local, conforme o que estiver disponível no ponto de instalação." },
+  { p: "O Totem é conectado à polícia?", r: "Sim. Além da nossa central 24h, o Totem pode ser integrado a órgãos de segurança pública, como as Polícias Militar, Civil e Federal, a Guarda Municipal e as centrais integradas de segurança, conforme cada projeto." },
+  { p: "Pode ser utilizado temporariamente?", r: "Sim. Eventos, obras e operações temporárias podem ser atendidos, conforme as condições de instalação." },
+  { p: "Como os dados são tratados?", r: "Seguimos a LGPD, com finalidade definida, perfis de acesso, registro de auditoria e retenção configurável. O reconhecimento facial é aplicado conforme a finalidade de cada projeto e a legislação aplicável." },
 ];
 
 export default function TotemIA() {
   return (
     <>
-      <section className="relative isolate flex min-h-svh items-center overflow-hidden pb-14 pt-28">
-        <div className="margem grid items-center gap-8 lg:grid-cols-[1.15fr_1fr]">
+      {/* 1. Hero: texto à esquerda, totem à direita sobre o fundo preto. */}
+      <section className="relative isolate overflow-hidden pb-16 pt-24 lg:flex lg:min-h-svh lg:items-center lg:py-0">
+        <div className="margem grid items-center gap-6 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
           <div className="order-2 lg:order-1">
-            <h1 className="titulo-hero">Segurança inteligente em qualquer lugar.</h1>
-            <p className="mt-6 max-w-[36rem] text-lg leading-relaxed text-white/80">Monitoramento inteligente para locais que precisam de cobertura adicional ou não possuem infraestrutura convencional.</p>
-            <div className="mt-8">
-              <Botao href="#aplicacao">Conheça a solução</Botao>
-            </div>
+            <h1 className="entra-1 titulo-hero">Segurança inteligente em qualquer lugar.</h1>
+            <p className="entra-2 mt-6 max-w-[36rem] text-lg leading-relaxed text-white/80">Monitoramento inteligente para locais que precisam de cobertura adicional ou não possuem infraestrutura convencional.</p>
           </div>
-          <figure className="order-1 mx-auto w-full max-w-[20rem] lg:order-2 lg:max-w-[28rem]">
-            <TotemIlustracao className="w-full" />
-          </figure>
+          <div className="entra-foto relative order-1 mx-auto aspect-[4/5] h-[52svh] max-h-[30rem] funde-preto-leve lg:order-2 lg:h-[88svh] lg:max-h-[56rem]">
+            <Image src={`${M}/totem-frente.jpg`} alt={ALT_FRENTE} fill priority sizes="(min-width: 1024px) 45vw, 80vw" quality={85} className="object-contain" />
+          </div>
         </div>
       </section>
 
-      <TelaDividida
-        id="aplicacao"
-        titulo="Monitoramento em locais que exigem uma estrutura diferente."
-        texto="O Totem IA foi desenvolvido para ampliar a capacidade de monitoramento em ambientes nos quais a instalação convencional pode ser limitada ou complexa. Sua estrutura integrada reúne câmeras, processamento e conectividade em uma solução definida conforme as necessidades do local."
-        visual={<Foto src="praca-aerea.jpg" alt="Parque urbano e rotatória vistos do alto" className="aspect-[4/3]" />}
-      />
+      {/* 2. O totem por dentro */}
+      <TotemPorDentro id="por-dentro" titulo="Cada detalhe pensado para proteger." etapas={ETAPAS} fotoFixa={{ src: "totem-frente.jpg", alt: ALT_FRENTE }} />
 
-      <TelaDividida
-        titulo="Mais do que captar imagens."
-        texto="Conforme a configuração de cada projeto, o Totem IA pode incorporar:"
-        lado="direita"
-        visual={<Foto src="camera-poste-2.jpg" alt="Conjunto de câmeras de monitoramento em um poste" className="aspect-[4/5]" />}
-      >
-        <Lista
-          itens={[
-            "Câmeras integradas",
-            "Contagem de pessoas",
-            "Monitoramento de áreas e movimentações",
-            <>Identificação de entrada em áreas restritas <span className="text-sm text-cinza">· sob projeto</span></>,
-            <>Reconhecimento facial <span className="text-sm text-cinza">· sob projeto</span></>,
-            <>Leitura de placas veiculares (LPR) <span className="text-sm text-cinza">· sob projeto</span></>,
-            <>Geração e encaminhamento de alertas <span className="text-sm text-cinza">· sob projeto</span></>,
-            "Integração com a plataforma AIP",
-          ]}
-        />
-        <p className="mt-5 text-sm text-cinza">A disponibilidade depende dos equipamentos, das condições do ambiente e do escopo contratado.</p>
-      </TelaDividida>
-
-      <section className="relative isolate flex min-h-svh items-center overflow-hidden">
-        {FOTO_CLIMA ? (
-          <Image src={`/site/media/${FOTO_CLIMA}`} alt="Totem IA instalado ao ar livre sob chuva" fill sizes="(max-aspect-ratio: 3/2) 150vh, 100vw" quality={85} className="-z-20 object-cover" />
-        ) : (
-          <div aria-hidden className="absolute inset-0 -z-20 bg-[linear-gradient(160deg,#1b2733_0%,#0d141b_55%,#05080b_100%)]">
-            <div className="absolute inset-0 opacity-25 [background-image:repeating-linear-gradient(105deg,transparent_0_22px,rgba(255,255,255,0.35)_22px_23px,transparent_23px_61px)]" />
-          </div>
-        )}
-        <DegradeLateral />
-        <Reveal className="margem py-28">
-          <div className="max-w-[38rem]">
+      {/* 3. Feito para resistir ao tempo: foto em tela cheia no desktop; no celular, foto em cima e texto embaixo. */}
+      <section className="relative isolate border-t border-linha lg:flex lg:min-h-svh lg:items-center lg:overflow-hidden lg:border-0">
+        <div className="relative aspect-[4/3] w-full lg:absolute lg:inset-0 lg:-z-20 lg:aspect-auto">
+          <Image src={`${M}/totem-chuva.jpg`} alt="Totem IA sob chuva forte, visto de baixo para cima, com nuvens carregadas ao fundo" fill sizes="100vw" quality={85} style={{ objectPosition: "68% 50%" }} className="object-cover" />
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black to-transparent lg:hidden" />
+        </div>
+        <div aria-hidden className="absolute inset-y-0 left-0 -z-10 hidden w-[45%] bg-gradient-to-r from-black/85 via-black/55 via-50% to-transparent lg:block" />
+        <Reveal className="margem pb-20 pt-8 lg:py-28">
+          <div className="max-w-[34rem] lg:[text-shadow:0_1px_2px_rgb(0_0_0/0.55),0_2px_24px_rgb(0_0_0/0.6)]">
             <h2 className="titulo-tela">Feito para resistir ao tempo.</h2>
-            <p className="mt-6 text-lg leading-relaxed text-white/80">Chuva forte, sol, vento e variações de temperatura fazem parte da rotina de quem fica na rua. O Totem IA é projetado para operar ao ar livre, com estrutura e equipamentos preparados para as condições de cada local, para que o monitoramento continue quando o tempo muda.</p>
+            <p className="mt-6 text-lg leading-relaxed text-white/85">Chuva forte, sol, vento e variações de temperatura fazem parte da rotina de quem fica na rua. O Totem IA é projetado para operar ao ar livre, com estrutura e equipamentos preparados para qualquer ambiente, para que o monitoramento continue quando o tempo muda.</p>
             <div className="mt-8">
               <Botao href={CONTATO}>Solicitar avaliação técnica</Botao>
             </div>
@@ -105,6 +86,34 @@ export default function TotemIA() {
         </Reveal>
       </section>
 
+      {/* 4. Central AIP 24 horas: foto inteira e o texto num bloco embaixo dela. */}
+      <section className="relative">
+        <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:max-h-[92svh] lg:min-h-[32rem]">
+          <Image src={`${M}/central-24h.jpg`} alt="Agente da central AIP, de costas e com fone, diante de uma parede de telas com imagens de câmeras analisadas pela inteligência artificial" fill sizes="100vw" quality={85} style={{ objectPosition: "50% 40%" }} className="object-cover" />
+          <div aria-hidden className="absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-t from-black via-black/60 to-transparent" />
+        </div>
+        <div className="margem relative -mt-6 pb-24 sm:-mt-10 lg:pb-32">
+          <Reveal className="max-w-[52rem]">
+            <p className="rotulo mb-4">Central AIP</p>
+            <h2 className="titulo-tela">Olhos atentos 24 horas por dia.</h2>
+            <p className="corpo mt-6 text-lg">Além da inteligência artificial, cada Totem IA está conectado à nossa central de monitoramento. Agentes da AIP acompanham as imagens 24 horas por dia, 7 dias por semana, confirmam cada ocorrência e notificam quem precisa agir.</p>
+          </Reveal>
+          <ol className="mt-12 grid gap-4 md:grid-cols-3">
+            {CENTRAL.map((d, i) => (
+              <li key={d.titulo}>
+                <Reveal atraso={i * 90} className="h-full rounded-2xl border border-white/10 bg-[#111214] p-6 sm:p-7">
+                  <VisualCentral tipo={d.visual} />
+                  <p className="mt-6 font-titulo text-sm font-medium tracking-[0.18em] text-white/45">{String(i + 1).padStart(2, "0")}</p>
+                  <h3 className="mt-2 font-titulo text-[1.625rem] font-bold leading-[1.05]">{d.titulo}</h3>
+                  <p className="mt-2 leading-snug text-white/65">{d.texto}</p>
+                </Reveal>
+              </li>
+            ))}
+          </ol>
+        </div>
+      </section>
+
+      {/* 5. Cenários */}
       <section className="secao overflow-hidden border-t border-linha">
         <div className="margem mb-12">
           <Cabecalho titulo="Uma estrutura para diferentes cenários." />
@@ -114,31 +123,12 @@ export default function TotemIA() {
         </Reveal>
       </section>
 
-      <section className="secao border-t border-linha">
-        <div className="margem">
-          <Cabecalho titulo="Da captura ao acompanhamento." />
-          <ol className="mt-16 grid gap-10 md:grid-cols-4 md:gap-0">
-            {ETAPAS.map((e, i) => (
-              <li key={e.titulo}>
-                <Reveal atraso={i * 100} className="flex gap-5 md:block md:pr-8">
-                  <div className="flex shrink-0 items-center md:mb-6">
-                    <span className="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 font-titulo text-xl font-semibold">{i + 1}</span>
-                    <span aria-hidden className="ml-3 hidden h-px flex-1 bg-linha md:block" />
-                  </div>
-                  <div>
-                    <h3 className="titulo-coluna">{e.titulo}</h3>
-                    <p className="corpo mt-2">{e.texto}</p>
-                  </div>
-                </Reveal>
-              </li>
-            ))}
-          </ol>
-        </div>
-      </section>
-
+      {/* 6. Perguntas frequentes */}
       <div className="border-t border-linha">
         <Acordeao itens={FAQ} />
       </div>
+
+      {/* 7. Encerramento */}
       <Encerramento titulo="Leve inteligência a novos pontos de monitoramento." cta="Conversar sobre meu projeto" href={CONTATO} />
     </>
   );

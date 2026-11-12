@@ -13,12 +13,6 @@ Exceto `totem-aip.jpg`, todos os arquivos vêm do Pexels (um deles publicado lá
 | `condominio-torre.jpg` | Torre residencial com piscina, vista do alto | não confirmado¹ | https://www.pexels.com/photo/an-aerial-view-of-a-pool-and-a-building-17286413/ |
 | `restaurante-salao-premium.jpg` | Salão de restaurante elegante com mesas postas | não confirmado¹ | https://www.pexels.com/photo/empty-restaurant-at-night-17294740/ |
 | `estacionamento-coberto.jpg` | Estacionamento coberto moderno | não confirmado¹ | https://www.pexels.com/photo/modern-car-parked-in-urban-parking-garage-28986817/ |
-| `br-rio-aereo.jpg` | Rio de Janeiro visto do alto (lagoa e orla) | não confirmado¹ | https://www.pexels.com/photo/aerial-view-of-rio-de-janeiro-7079778/ |
-| `br-sp-noite.jpg` | São Paulo à noite, vista do alto | Matheus Bertelli | https://www.pexels.com/photo/bird-s-eye-view-photography-of-city-1482778/ |
-| `br-evento-palco.jpg` | Palco de festival com painéis de luz | não confirmado¹ | https://www.pexels.com/photo/vibrant-nighttime-music-festival-with-led-lights-30169356/ |
-| `br-obra-sp.jpg` | Prédio em construção com guindaste, São Paulo | Mavio Silva | https://www.pexels.com/photo/low-angle-shot-of-a-construction-site-15641049/ |
-| `br-camboriu.jpg` | Torres de Balneário Camboriú ao pôr do sol | não confirmado¹ | https://www.pexels.com/photo/skyscrapers-during-sunset-10065290/ |
-| `cidade-aerea.jpg` | Ruas da cidade à noite, vistas do alto | Yura Forrat | https://www.pexels.com/photo/aerial-view-of-city-streets-at-night-29737076/ |
 
 ¹ A página do Pexels não pôde ser consultada automaticamente para confirmar o nome do autor. A Licença Pexels não exige atribuição; confira o nome na página se quiser creditar.
 
@@ -38,3 +32,10 @@ A antiga `camera-poste.jpg` (câmera em poste, Johny Goh, Pexels) foi removida: 
 Removidos junto com a página Tecnologia (2026-11-12): `cidade-noite.mp4`, `cidade-noite.jpg`, `servidores.jpg` e `praca-demo.jpg`.
 Removidas do carrossel do Totem IA (2026-11-12), sem outro uso: `evento.jpg`, `obra.jpg`, `condominio-noite.jpg` e `estacionamento-aereo.jpg`.
 Removidas junto com a seção "Seu painel AIP" e as telas de exemplo (2026-11-12): `armazem.jpg`, `estacionamento.jpg`, `via-noite.jpg`, `praca-aerea-2.jpg`, `praca-hero.jpg` e `camera-solar.jpg`.
+
+`sobre-central-monitoramento.jpg`: sala de monitoramento com parede de telas, fornecida pela AIP (2026-11-12), topo da página Sobre. `totem-noite.jpg`: totem da AIP à noite, fornecido pela AIP (2026-11-12), mantido no projeto. `bandeira-brasil.svg`: bandeira oficial do Brasil (Wikimedia Commons, domínio público), card Soberania digital da página Sobre. Contornos dos países do card Referências internacionais: Natural Earth 1:110m (domínio público). `logos-company-simbolo.png`: símbolo da Logos Company (arquivo da empresa), bloco do ecossistema na página Sobre. Removida a antiga `cidade-aerea.jpg` (topo antigo da página Sobre).
+
+Página Totem IA (2026-11-12), imagens fornecidas pela AIP: `totem-frente.jpg`, `totem-tres-quartos.jpg`, `totem-lateral.jpg` e `totem-topo.jpg` (estúdio, fundo preto; topo da página e bloco "O totem por dentro"), `totem-chuva.jpg` (bloco "Feito para resistir ao tempo") e `central-24h.jpg` (bloco "Central AIP"). Removida a `camera-poste-2.jpg`, que ficou sem uso.
+Removida a `estacionamento-coberto.jpg` (carrossel do Totem IA, 2026-11-12), que ficou sem uso.
+
+Carrossel "Uma estrutura para diferentes cenários" do Totem IA (2026-11-12), imagens fornecidas pela AIP: `cenario-espacos-publicos.jpg`, `cenario-vias.jpg`, `cenario-eventos.jpg`, `cenario-obras.jpg` e `cenario-condominios.jpg`. Removidas as antigas, sem outro uso: `br-rio-aereo.jpg`, `br-sp-noite.jpg`, `br-evento-palco.jpg`, `br-obra-sp.jpg` e `br-camboriu.jpg` (Pexels).

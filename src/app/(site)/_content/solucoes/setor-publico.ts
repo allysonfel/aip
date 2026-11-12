@@ -34,12 +34,12 @@ const segmento: Segmento = {
   },
   governanca: {
     texto: "O tratamento das informações deve respeitar a finalidade pública, os requisitos legais e as condições estabelecidas contratualmente.",
-    itens: ["Perfis e permissões de usuários", "Registros de atividades e auditoria", "Identificação de autor e data das ações registradas", "Definição de períodos de retenção e exclusão", "Identificação de pessoas pelo rosto sob projeto, mediante avaliação técnica e jurídica, conforme a finalidade pública e a legislação aplicável"],
+    itens: ["Perfis e permissões de usuários", "Registros de atividades e auditoria", "Identificação de autor e data das ações registradas", "Definição de períodos de retenção e exclusão", "Identificação de pessoas pelo rosto, com avaliação técnica e jurídica, conforme a finalidade pública e a legislação aplicável"],
   },
   faq: [
     { p: "Como o órgão contrata a AIP?", r: "As modalidades são definidas com as equipes técnicas e jurídicas do órgão, conforme a legislação aplicável." },
     { p: "É possível aproveitar as câmeras que a cidade já tem?", r: "Sim. A IA é aplicada em qualquer câmera, inclusive nas que a cidade já tem." },
-    { p: "A AIP faz reconhecimento facial?", r: "Sim, sob projeto. A AIP pode identificar pessoas pelo rosto, mediante avaliação técnica e jurídica, conforme a finalidade pública e a legislação aplicável." },
+    { p: "A AIP faz reconhecimento facial?", r: "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade pública e a legislação aplicável." },
     { p: "Quem acessa as informações?", r: "Servidores autorizados, com acesso por perfil e registro em auditoria." },
   ],
   encerramento: { titulo: "Mais inteligência para os espaços públicos.", texto: "Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.", cta: "Fale com a equipe AIP" },

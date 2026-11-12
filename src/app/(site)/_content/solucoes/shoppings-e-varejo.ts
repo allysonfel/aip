@@ -28,7 +28,7 @@ const segmento: Segmento = {
   faq: [
     { p: "Preciso trocar minhas câmeras?", r: "Não. A IA é aplicada em qualquer câmera, inclusive nas que você já tem." },
     { p: "A contagem diferencia entrada e saída?", r: "Sim. As linhas de contagem registram a direção da passagem." },
-    { p: "A AIP faz reconhecimento facial?", r: "Sim, sob projeto. A AIP pode identificar pessoas pelo rosto, mediante avaliação técnica e jurídica, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores." },
+    { p: "A AIP faz reconhecimento facial?", r: "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores." },
     { p: "Quem acessa os dados?", r: "Apenas usuários cadastrados, com permissões definidas por perfil." },
   ],
   encerramento: ENCERRAMENTO_PRIVADO,

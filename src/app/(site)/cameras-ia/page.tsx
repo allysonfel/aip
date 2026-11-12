@@ -17,7 +17,7 @@ const CONTATO = "/contato?produto=cameras-ia";
 const FAQ: { p: string; r: ReactNode }[] = [
   { p: "Preciso trocar minhas câmeras atuais?", r: "Não necessariamente. Câmeras compatíveis com os requisitos técnicos podem ser usadas. Avaliamos a sua estrutura antes da implantação." },
   { p: "A solução funciona à noite?", r: "Sim, dentro das condições da câmera. O desempenho depende da iluminação e da qualidade das imagens." },
-  { p: "A AIP faz reconhecimento facial?", r: "Sim, sob projeto. A AIP pode identificar pessoas pelo rosto, mediante avaliação técnica e jurídica, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores." },
+  { p: "A AIP faz reconhecimento facial?", r: "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores." },
   { p: "Quanto tempo leva a implantação?", r: "Depende da quantidade de câmeras, da infraestrutura e da configuração necessária. Após a avaliação técnica, informamos o prazo do seu projeto." },
   {
     p: "A AIP atende só os segmentos apresentados no site?",

@@ -28,7 +28,7 @@ const segmento: Segmento = {
   },
   faq: [
     { p: "É preciso trocar as câmeras do condomínio?", r: "Não. A IA é aplicada em qualquer câmera, inclusive nas que o condomínio já tem." },
-    { p: "A AIP faz reconhecimento facial?", r: "Sim, sob projeto. A AIP pode identificar pessoas pelo rosto, mediante avaliação técnica e jurídica, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores." },
+    { p: "A AIP faz reconhecimento facial?", r: "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores." },
     { p: "Quem pode ver as imagens?", r: "Apenas os usuários cadastrados, com acesso definido por perfil." },
     { p: "Por quanto tempo as imagens ficam guardadas?", r: "O prazo de retenção é definido pelo condomínio." },
   ],

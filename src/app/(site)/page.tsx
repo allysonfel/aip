@@ -49,7 +49,7 @@ export default function Inicio() {
       <TelaFoto rotulo="Produto" foto="camera-ia-lente-limpa.jpg" original lateral foco="72% 50%" alt="Lente de uma câmera de segurança refletindo uma via com pessoas e veículos marcados pela inteligência artificial" titulo="Câmeras IA" texto="Inteligência artificial aplicada às câmeras que você já tem ou a uma nova estrutura planejada com a AIP, para identificar movimentações, analisar fluxos, localizar registros e acompanhar sua operação." acao={<Botao href="/cameras-ia">Conheça as Câmeras IA</Botao>} />
       <TelaFoto rotulo="Produto" foto="totem-aip.jpg" original alt="Totem IA da AIP instalado em frente a um prédio comercial" titulo="Totem IA" texto="Uma estrutura integrada de monitoramento inteligente para ampliar a cobertura em locais públicos e privados." acao={<Botao href="/totem-ia">Conheça o Totem IA</Botao>} />
 
-      <section className="secao overflow-hidden">
+      <section id="solucoes" className="secao scroll-mt-24 overflow-hidden">
         <div className="margem mb-10">
           <Cabecalho titulo="Diferentes ambientes. Novas possibilidades." />
         </div>

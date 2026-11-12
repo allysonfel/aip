@@ -609,6 +609,162 @@
   opacity: 1;
 }
 
+/* Fotos de estúdio com fundo preto: as bordas somem no fundo da página. */
+.funde-preto {
+  mask-image:
+    linear-gradient(to bottom, black 72%, transparent 97%),
+    linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-composite: intersect;
+}
+
+/* Topo do Totem IA: degradê de baixo mais curto, para manter o reflexo no chão. */
+.funde-preto-leve {
+  mask-image:
+    linear-gradient(to bottom, black 90%, transparent 100%),
+    linear-gradient(to right, transparent, black 10%, black 90%, transparent);
+  mask-composite: intersect;
+}
+
+/* Totem IA, bloco "O totem por dentro": linha da parte destacada até o texto. */
+.linha-totem {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: linha-totem 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.ponto-totem {
+  opacity: 0;
+  animation: ponto-totem 0.3s ease 0.7s forwards;
+}
+
+.entra-suave {
+  animation: entra-suave 0.5s ease both;
+}
+
+@keyframes linha-totem {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes ponto-totem {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes entra-suave {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .linha-totem,
+  .ponto-totem,
+  .entra-suave {
+    animation: none;
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+/* Cards da Central AIP (Totem IA). */
+.cartao-uso .mv-gira {
+  transform-box: view-box;
+  transform-origin: var(--o);
+  transform: rotate(-360deg);
+  transition: transform 2s cubic-bezier(0.45, 0, 0.2, 1) var(--d, 0ms);
+}
+
+.cartao-uso.ativo .mv-gira {
+  transform: rotate(0deg);
+}
+
+/* Movimento contínuo e sutil depois da entrada (cards da Central AIP). */
+.cartao-uso .mv-gira-lento {
+  transform-box: view-box;
+  transform-origin: var(--o);
+}
+
+.cartao-uso.ativo .mv-gira-lento {
+  animation: mv-gira-lento 7s linear var(--d, 0ms) infinite;
+}
+
+@keyframes mv-gira-lento {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.cartao-uso.ativo .mv-fluxo {
+  animation: mv-fluxo 1.8s linear infinite;
+}
+
+@keyframes mv-fluxo {
+  to {
+    stroke-dashoffset: -9;
+  }
+}
+
+.cartao-uso.ativo .mv-notifica {
+  animation: mv-notifica 2.4s ease-in-out var(--d, 0ms) infinite;
+}
+
+@keyframes mv-notifica {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+
+.cartao-uso .mv-halo {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.cartao-uso.ativo .mv-halo {
+  animation: mv-halo 2.4s ease-out var(--d, 0ms) infinite;
+}
+
+@keyframes mv-halo {
+  0% {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: scale(1.5);
+  }
+}
+
+/* Card fora da tela: o movimento contínuo para. */
+.cartao-uso.pausado,
+.cartao-uso.pausado * {
+  animation-play-state: paused !important;
+}
+
+.cartao-uso .mv-acende {
+  stroke: rgb(255 255 255 / 0.4);
+  fill: transparent;
+  transition:
+    stroke 0.5s ease var(--d, 0ms),
+    fill 0.5s ease var(--d, 0ms),
+    filter 0.5s ease var(--d, 0ms);
+}
+
+.cartao-uso.ativo .mv-acende {
+  stroke: #5fd3ff;
+  fill: rgb(95 211 255 / 0.15);
+  filter: drop-shadow(0 0 3px rgb(95 211 255 / 0.6));
+}
+
 /* Quem pede menos movimento vê o visual já pronto. */
 @media (prefers-reduced-motion: reduce) {
   .cartao-uso [class*="mv-"] {
@@ -645,6 +801,10 @@
   .cartao-uso .mv-alerta-caixa {
     stroke: #ff5a5f;
     opacity: 1;
+  }
+
+  .cartao-uso .mv-gira {
+    transform: none;
   }
 
   .cartao-uso .mv-anel-pulso,

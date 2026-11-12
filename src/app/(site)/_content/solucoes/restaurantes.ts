@@ -26,7 +26,7 @@ const segmento: Segmento = {
   },
   faq: [
     { p: "Preciso trocar as câmeras do restaurante?", r: "Não. A IA é aplicada em qualquer câmera, inclusive nas que o restaurante já tem." },
-    { p: "É possível identificar pessoas por reconhecimento facial?", r: "Sim, sob projeto. A AIP pode identificar pessoas pelo rosto, mediante avaliação técnica e jurídica, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores." },
+    { p: "É possível identificar pessoas por reconhecimento facial?", r: "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores." },
     { p: "Consigo identificar os horários de maior movimento?", r: "Sim. A plataforma acompanha o fluxo por horário e permite comparar períodos para identificar padrões de movimento." },
     { p: "Como acesso as informações do restaurante?", r: "Os indicadores ficam disponíveis em um painel pelo navegador, com acesso controlado por perfil de usuário." },
   ],
