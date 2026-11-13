@@ -1,8 +1,12 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Conta, d, reduzido, Slide } from "./slide";
-import { Anel30, ChatAssistente, FiltroMono, HudFonte, HudPatrimonio, HudPortaria, HudVigilancia, Icone, LINHA_FIM, LinhaDoTempo, LogoAIP, LogoAIPNome, LogoSantaJoana, PainelIlustrativo, TelaCamera, type NomeIcone } from "./Visuais";
+import type { ReactNode } from "react";
+import { Icone, type NomeIcone } from "../_compartilhado/Icones";
+import { LINHA_FIM, LinhaDoTempo } from "../_compartilhado/LinhaDoTempo";
+import { LogoAIPNome } from "../_compartilhado/Logos";
+import { dois, Marca, Moldura, Rotulo, useNavegacao } from "../_compartilhado/Moldura";
+import { Conta, d, Slide } from "../_compartilhado/slide";
+import { Anel30, ChatAssistente, ETAPAS, FiltroMono, HudFonte, HudPatrimonio, HudPortaria, HudVigilancia, LogoSantaJoana, PainelIlustrativo, TelaCamera } from "./Visuais";
 
 // Apresentação comercial exclusiva da Água Mineral Santa Joana (página oculta:
 // sem link no site, fora do sitemap, noindex). Modo apresentação: um slide por
@@ -10,133 +14,6 @@ import { Anel30, ChatAssistente, FiltroMono, HudFonte, HudPatrimonio, HudPortari
 // para tela cheia. Texto exatamente como aprovado: não editar a copy aqui sem ok.
 
 const TOTAL = 15;
-const dois = (n: number) => String(n).padStart(2, "0");
-
-/* ------------------------------ moldura ------------------------------ */
-
-function useNavegacao() {
-  const [atual, setAtual] = useState(0);
-  const atualRef = useRef(0);
-  const destino = useRef<number | null>(null);
-
-  useEffect(() => {
-    const slides = () => Array.from(document.querySelectorAll<HTMLElement>("[data-slide]"));
-    let raf = 0;
-    let espera = 0;
-
-    // Slide atual: o último cujo topo já passou de 45% da altura da tela.
-    const calcula = () => {
-      const linha = window.innerHeight * 0.45;
-      let i = 0;
-      slides().forEach((s, k) => {
-        if (s.getBoundingClientRect().top <= linha) i = k;
-      });
-      atualRef.current = i;
-      setAtual(i);
-    };
-    const aoRolar = () => {
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(calcula);
-    };
-
-    const ir = (i: number) => {
-      const lista = slides();
-      const alvo = Math.max(0, Math.min(lista.length - 1, i));
-      destino.current = alvo;
-      lista[alvo].scrollIntoView({ behavior: reduzido() ? "auto" : "smooth", block: "start" });
-      window.clearTimeout(espera);
-      espera = window.setTimeout(() => (destino.current = null), 900);
-    };
-
-    const tecla = (e: KeyboardEvent) => {
-      if (e.metaKey || e.ctrlKey || e.altKey) return;
-      if ((e.target as HTMLElement | null)?.closest("input, textarea, select, [contenteditable]")) return;
-      const base = destino.current ?? atualRef.current;
-      switch (e.key) {
-        case "ArrowDown":
-        case "ArrowRight":
-        case "PageDown":
-          e.preventDefault();
-          ir(base + 1);
-          break;
-        case "ArrowUp":
-        case "ArrowLeft":
-        case "PageUp":
-          e.preventDefault();
-          ir(base - 1);
-          break;
-        case " ":
-        case "Spacebar":
-          e.preventDefault();
-          ir(e.shiftKey ? base - 1 : base + 1);
-          break;
-        case "Home":
-          e.preventDefault();
-          ir(0);
-          break;
-        case "End":
-          e.preventDefault();
-          ir(TOTAL - 1);
-          break;
-        case "f":
-        case "F":
-          e.preventDefault();
-          if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
-          else document.documentElement.requestFullscreen?.().catch(() => {});
-          break;
-      }
-    };
-
-    calcula();
-    window.addEventListener("scroll", aoRolar, { passive: true });
-    window.addEventListener("resize", aoRolar);
-    window.addEventListener("keydown", tecla);
-    return () => {
-      cancelAnimationFrame(raf);
-      window.clearTimeout(espera);
-      window.removeEventListener("scroll", aoRolar);
-      window.removeEventListener("resize", aoRolar);
-      window.removeEventListener("keydown", tecla);
-    };
-  }, []);
-
-  return atual;
-}
-
-function Moldura({ atual }: { atual: number }) {
-  return (
-    <>
-      {/* progresso: linha fina ciano no topo */}
-      <div aria-hidden className="fixed inset-x-0 top-0 z-50 h-[2px] bg-white/[0.06]">
-        <div className="h-full origin-left bg-[#5FD3FF] transition-transform duration-500 ease-out" style={{ transform: `scaleX(${(atual + 1) / TOTAL})` }} />
-      </div>
-      {/* marca discreta depois da capa */}
-      <div aria-hidden className={`pointer-events-none fixed left-[clamp(1.25rem,3vw,3rem)] top-[clamp(1rem,3vh,2rem)] z-40 transition-opacity duration-500 ${atual > 0 && atual < TOTAL - 1 ? "opacity-60" : "opacity-0"}`}>
-        <LogoAIP className="h-[clamp(0.9rem,1.6vh,1.25rem)] text-white" />
-      </div>
-      {/* número do slide */}
-      <div className="pointer-events-none fixed bottom-[clamp(0.9rem,2.6vh,1.75rem)] right-[clamp(1.25rem,3vw,3rem)] z-40 ap-num text-[clamp(0.8rem,1.6vh,1.1rem)] tracking-[0.18em] text-white/45" aria-live="polite">
-        <span className="text-white/85">{dois(atual + 1)}</span> / {TOTAL}
-      </div>
-    </>
-  );
-}
-
-/* ------------------------------ peças ------------------------------ */
-
-function Rotulo({ children, atraso = 0 }: { children: ReactNode; atraso?: number }) {
-  return (
-    <p className="ap-in ap-rotulo mb-[clamp(1rem,3vh,2rem)] flex items-center gap-3" style={d(atraso)}>
-      <span aria-hidden className="h-px w-8 bg-[#5FD3FF]" />
-      {children}
-    </p>
-  );
-}
-
-/** Marcador de lista: tracinho ciano. */
-function Marca() {
-  return <span aria-hidden className="mt-[0.62em] h-px w-5 shrink-0 bg-[#5FD3FF]" />;
-}
 
 /** Fluxo de três etapas ligadas por uma linha ciano que se desenha (slide 5). */
 function Fluxo() {
@@ -254,7 +131,7 @@ const MOTIVOS: { icone: NomeIcone; titulo: string; texto: string }[] = [
 /* ------------------------------ apresentação ------------------------------ */
 
 export default function Apresentacao() {
-  const atual = useNavegacao();
+  const atual = useNavegacao(TOTAL);
 
   return (
     <>
@@ -262,7 +139,7 @@ export default function Apresentacao() {
         <style>{`.ap-in,.ap-fade,.ap-acende,.ap-linha-x,.ap-linha-y{opacity:1!important;transform:none!important}`}</style>
       </noscript>
       <FiltroMono />
-      <Moldura atual={atual} />
+      <Moldura atual={atual} total={TOTAL} />
 
       <main>
         {/* 1 · Capa */}
@@ -628,7 +505,7 @@ export default function Apresentacao() {
           <div className="ap-margem">
             <Rotulo>Próximos passos</Rotulo>
             <div className="ap-fade" style={d(100)}>
-              <LinhaDoTempo />
+              <LinhaDoTempo etapas={ETAPAS} />
             </div>
             <div className="mt-[clamp(2.5rem,8vh,5.5rem)] text-center">
               <p className="ap-in ap-titulo-p mx-auto max-w-[30ch]" style={d(LINHA_FIM + 900)}>

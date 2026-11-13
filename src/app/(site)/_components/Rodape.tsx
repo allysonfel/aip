@@ -24,16 +24,17 @@ export default function Rodape() {
     <footer className="border-t border-linha">
       <div className="margem grid grid-cols-2 gap-x-6 gap-y-12 py-16 sm:gap-x-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.1fr] lg:gap-x-12">
         <div className="col-span-2 lg:col-span-1">
-          {/* Assinatura: o nome fica embaixo do AIP, com a mesma largura do logo. */}
+          {/* Assinatura: o nome centralizado embaixo do AIP, no mesmo desenho das
+              apresentações comerciais (texto com ~18% da altura do logo, espaçado). */}
           <Link
             href="/"
             aria-label="AIP — Agência de Inteligência Patrimonial, página inicial"
-            className="inline-grid"
+            className="inline-flex flex-col items-center"
           >
             <LogoAIP className="h-11 text-white" />
             <span
               aria-hidden
-              className="mt-2 block w-0 min-w-full whitespace-nowrap text-[8.5px] font-medium uppercase text-white/70 [text-align-last:justify]"
+              className="mt-[0.55em] whitespace-nowrap text-[8px] font-medium uppercase tracking-[0.14em] text-white/70"
             >
               Agência de Inteligência Patrimonial
             </span>

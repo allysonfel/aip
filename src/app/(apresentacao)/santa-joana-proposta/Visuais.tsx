@@ -1,30 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
-import { LogoAIP, LogoA } from "@/components/shopping/Logo";
-import { Conta, d, reduzido, useAtivo } from "./slide";
+import { useEffect, useRef, useState } from "react";
+import { Conta, d, reduzido, useAtivo } from "../_compartilhado/slide";
+import { C, Caixa, F, Hud, L, Visto } from "../_compartilhado/Hud";
+import { LogoA, LogoAIP } from "../_compartilhado/Logos";
+import type { EtapaLinha } from "../_compartilhado/LinhaDoTempo";
 
 // Visuais da apresentação: linha fina (branco translúcido) com detalhe em
 // ciano, no mesmo idioma dos mini-visuais do site. Entrada via .ap-in/.ap-fade/
 // .ap-acende (uma vez); depois só pulso, onda e varredura.
 
-const C = "#5FD3FF";
-const L = "rgb(255 255 255 / 0.62)";
-const F = "rgb(255 255 255 / 0.16)";
-
-/* ---------------------------------- logos ---------------------------------- */
-
-export { LogoAIP };
-
-/** Logo da AIP com o nome por extenso logo abaixo, centralizado. */
-export function LogoAIPNome({ logo, nome }: { logo: string; nome: string }) {
-  return (
-    <span className="inline-flex flex-col items-center">
-      <LogoAIP className={`${logo} text-white`} />
-      <span className={`mt-[0.55em] whitespace-nowrap font-medium uppercase tracking-[0.14em] text-white/70 ${nome}`}>Agência de Inteligência Patrimonial</span>
-    </span>
-  );
-}
 
 const LOGO_SJ = "/clientes/santa-joana-logo.png";
 
@@ -62,142 +47,6 @@ export function FiltroMono() {
       </filter>
     </svg>
   );
-}
-
-/* ---------------------------------- ícones ---------------------------------- */
-
-const ICONES = {
-  camera: (
-    <>
-      <path d="M3 7.5h11.5l4 3-4 3H3z" />
-      <path d="M6.5 13.5v3.5H3" />
-      <path d="M20.5 9v3" />
-    </>
-  ),
-  ia: (
-    <>
-      <path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16" />
-      <path d="M7.5 12s1.8-3.2 4.5-3.2 4.5 3.2 4.5 3.2-1.8 3.2-4.5 3.2S7.5 12 7.5 12z" />
-      <circle cx="12" cy="12" r="1.1" />
-    </>
-  ),
-  dispositivos: (
-    <>
-      <rect x="2.5" y="4.5" width="13.5" height="10" rx="1.5" />
-      <path d="M6.5 18.5h5.5M9.25 14.5v4" />
-      <rect x="16.5" y="9" width="5" height="10.5" rx="1.2" />
-    </>
-  ),
-  conecta: (
-    <>
-      <path d="M9 7V3.5M15 7V3.5" />
-      <path d="M6.5 7h11v3.5a5.5 5.5 0 0 1-11 0z" />
-      <path d="M12 16v4.5" />
-    </>
-  ),
-  alerta: (
-    <>
-      <path d="M6 16.5V11a6 6 0 0 1 12 0v5.5l1.5 2h-15z" />
-      <path d="M10 20.5a2 2 0 0 0 4 0" />
-    </>
-  ),
-  painel: (
-    <>
-      <rect x="3" y="4" width="18" height="16" rx="1.8" />
-      <path d="M3 9h18M9 9v11" />
-    </>
-  ),
-  equipe: (
-    <>
-      <circle cx="9" cy="8.5" r="3" />
-      <path d="M3.5 19a5.5 5.5 0 0 1 11 0" />
-      <circle cx="16.5" cy="9.5" r="2.4" />
-      <path d="M15.2 14.1a4.6 4.6 0 0 1 5.8 4.4" />
-    </>
-  ),
-  escudo: (
-    <>
-      <path d="M12 3.5 19 6v5.5c0 4.4-3 7.8-7 9-4-1.2-7-4.6-7-9V6z" />
-      <path d="m9 12 2.2 2.2L15.5 10" />
-    </>
-  ),
-  local: (
-    <>
-      <path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z" />
-      <circle cx="12" cy="10" r="2.4" />
-    </>
-  ),
-  busca: (
-    <>
-      <circle cx="10.5" cy="10.5" r="6" />
-      <path d="m15 15 5.5 5.5" />
-      <path d="M8 10.5h5M10.5 8v5" />
-    </>
-  ),
-  teste: (
-    <>
-      <rect x="3.5" y="5" width="17" height="15.5" rx="1.8" />
-      <path d="M3.5 10h17M8 3v4M16 3v4" />
-      <path d="m9 15 2 2 4-4" />
-    </>
-  ),
-  expansao: (
-    <>
-      <circle cx="6" cy="12" r="2.2" />
-      <circle cx="18" cy="5.5" r="2" />
-      <circle cx="18" cy="12" r="2" />
-      <circle cx="18" cy="18.5" r="2" />
-      <path d="M8 11 16.1 6.4M8.2 12h7.8M8 13l8.1 4.6" />
-    </>
-  ),
-  semTroca: (
-    <>
-      <path d="M3 6.5h11.5l4 3-4 3H3z" />
-      <path d="M6.5 12.5v3H3" />
-      <path d="m13 18 2 2 4-4" />
-    </>
-  ),
-} satisfies Record<string, ReactNode>;
-
-export type NomeIcone = keyof typeof ICONES;
-
-export function Icone({ nome, className = "h-7 w-7" }: { nome: NomeIcone; className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" className={className}>
-      {ICONES[nome]}
-    </svg>
-  );
-}
-
-/* ------------------------------ moldura HUD ------------------------------ */
-
-/** Quadro de "tela de análise": cantos marcados, grade fraca e varredura lenta. */
-function Hud({ children, className = "" }: { children: ReactNode; className?: string }) {
-  return (
-    <div className={`relative overflow-hidden rounded-xl border border-white/10 bg-[#050607] ${className}`}>
-      <div aria-hidden className="ap-grade opacity-40" style={{ backgroundSize: "28px 28px" }} />
-      <div aria-hidden className="ap-varredura" style={{ "--t": "7s" } as React.CSSProperties} />
-      <svg viewBox="0 0 320 180" aria-hidden className="relative block h-full w-full" fill="none" strokeLinecap="round" strokeLinejoin="round">
-        {children}
-      </svg>
-      {/* cantos do visor */}
-      <span aria-hidden className="absolute left-2 top-2 h-3 w-3 border-l border-t border-white/35" />
-      <span aria-hidden className="absolute right-2 top-2 h-3 w-3 border-r border-t border-white/35" />
-      <span aria-hidden className="absolute bottom-2 left-2 h-3 w-3 border-b border-l border-white/35" />
-      <span aria-hidden className="absolute bottom-2 right-2 h-3 w-3 border-b border-r border-white/35" />
-    </div>
-  );
-}
-
-/** Cantos de uma caixa de detecção. */
-function Caixa({ x, y, w, h, t = 10, cor = C }: { x: number; y: number; w: number; h: number; t?: number; cor?: string }) {
-  const r = x + w;
-  const b = y + h;
-  return <path d={`M${x} ${y + t}V${y}h${t} M${r - t} ${y}h${t}v${t} M${r} ${b - t}v${t}h-${t} M${x + t} ${b}h-${t}v-${t}`} stroke={cor} strokeWidth="1.6" />;
-}
-
-function Visto({ x, y, cor = C }: { x: number; y: number; cor?: string }) {
-  return <path d={`M${x - 3.5} ${y}l2.6 2.6 5-5.2`} stroke={cor} strokeWidth="1.5" />;
 }
 
 /** 01 · Fonte e fábrica: perímetro da fonte e colaborador com touca, máscara e luva conferidas. */
@@ -598,99 +447,9 @@ export function Anel30() {
 
 /* ------------------------------ linha do tempo (slide 15) ------------------------------ */
 
-const ETAPAS: { n: string; titulo: string; frase: string; icone: NomeIcone }[] = [
+export const ETAPAS: EtapaLinha[] = [
   { n: "01", titulo: "Visita técnica", frase: "conhecemos a operação e as unidades.", icone: "local" },
   { n: "02", titulo: "Avaliação das câmeras", frase: "verificamos o que já existe e o que cada câmera pode monitorar.", icone: "busca" },
   { n: "03", titulo: "Teste de 30 dias", frase: "a AIP funcionando numa unidade, sem custo.", icone: "teste" },
   { n: "04", titulo: "Expansão", frase: "levamos para as demais unidades.", icone: "expansao" },
 ];
-
-const LINHA_INICIO = 400;
-const LINHA_DUR = 2400;
-export const LINHA_FIM = LINHA_INICIO + LINHA_DUR;
-
-/**
- * Quatro etapas ligadas por uma linha ciano que se desenha (horizontal no
- * desktop, vertical no celular). Cada etapa acende quando a linha chega nela;
- * no fim, a etapa 04 se ramifica em pontos (as outras unidades).
- */
-export function LinhaDoTempo() {
-  const quando = (i: number) => LINHA_INICIO + (LINHA_DUR * i) / (ETAPAS.length - 1);
-  return (
-    <div className="relative">
-      {/* trilho + linha (desktop): do centro do 1º ao centro do 4º marcador */}
-      <div aria-hidden className="absolute left-[calc(12.5%)] right-[calc(12.5%)] top-[clamp(1.5rem,3.4vh,2rem)] hidden h-px bg-white/15 lg:block">
-        <div className="ap-linha-x h-full w-full bg-[#5FD3FF]" style={{ "--d": `${LINHA_INICIO}ms`, "--t": `${LINHA_DUR}ms`, transitionTimingFunction: "linear" } as React.CSSProperties} />
-      </div>
-      {/* trilho + linha (celular) */}
-      <div aria-hidden className="absolute bottom-10 left-[clamp(1.5rem,3.4vh,2rem)] top-6 w-px bg-white/15 lg:hidden">
-        <div className="ap-linha-y h-full w-full bg-[#5FD3FF]" style={{ "--d": `${LINHA_INICIO}ms`, "--t": `${LINHA_DUR}ms`, transitionTimingFunction: "linear" } as React.CSSProperties} />
-      </div>
-
-      <ol className="relative grid gap-8 lg:grid-cols-4 lg:gap-6">
-        {ETAPAS.map((e, i) => (
-          <li key={e.n} className="relative flex gap-5 lg:flex-col lg:items-center lg:gap-0 lg:text-center">
-            <div className="relative h-[clamp(3rem,6.8vh,4rem)] w-[clamp(3rem,6.8vh,4rem)] shrink-0 self-start lg:self-center">
-              <span className="flex h-[clamp(3rem,6.8vh,4rem)] w-[clamp(3rem,6.8vh,4rem)] items-center justify-center rounded-full border border-white/20 bg-black text-white/35">
-                <Icone nome={e.icone} className="h-[45%] w-[45%]" />
-              </span>
-              {/* estado aceso */}
-              <span className="ap-fade absolute inset-0 flex items-center justify-center rounded-full border border-[#5FD3FF] bg-black text-[#5FD3FF] shadow-[0_0_28px_rgb(95_211_255/0.35)]" style={d(quando(i))}>
-                <Icone nome={e.icone} className="h-[45%] w-[45%]" />
-              </span>
-              {i === ETAPAS.length - 1 && <Ramos />}
-            </div>
-            <div className="ap-acende min-w-0 lg:mt-5" style={d(quando(i))}>
-              <div className="ap-num text-[clamp(1rem,1.4vw,1.6rem)] text-[#5FD3FF]">{e.n}</div>
-              <div className="mt-1 font-titulo text-[clamp(1.4rem,min(2vw,3.6vh),2.4rem)] font-semibold leading-tight">{e.titulo}:</div>
-              <p className="mt-1.5 text-white/70 ap-pequeno lg:mx-auto lg:max-w-[22ch]">{e.frase}</p>
-              {i === ETAPAS.length - 1 && <RamosCelular />}
-            </div>
-          </li>
-        ))}
-      </ol>
-    </div>
-  );
-}
-
-/** A etapa 04 se ramifica: pequenos pontos (as demais unidades) acendendo depois que a linha termina. */
-function Ramos() {
-  const pontos: [number, number][] = [
-    [58, 8],
-    [66, 26],
-    [70, 44],
-    [64, 62],
-    [54, 78],
-  ];
-  return (
-    <svg viewBox="0 0 80 86" aria-hidden className="pointer-events-none absolute left-[78%] top-1/2 hidden h-[180%] -translate-y-1/2 overflow-visible lg:block" fill="none">
-      {pontos.map(([x, y], i) => (
-        <g key={i}>
-          <path d={`M4 43 Q${x * 0.45} ${43 + (y - 43) * 0.15} ${x} ${y}`} stroke={C} strokeOpacity="0.5" className="ap-fade" style={d(LINHA_FIM + 150 + i * 110)} />
-          <g className="ap-fade" style={d(LINHA_FIM + 300 + i * 110)}>
-            <circle cx={x} cy={y} r="3.4" fill={C} />
-            <circle cx={x} cy={y} r="3.4" stroke={C} className="ap-onda" style={{ animationDelay: `${i * 300}ms` }} />
-          </g>
-        </g>
-      ))}
-    </svg>
-  );
-}
-
-/** No celular a ramificação vai para baixo do texto da etapa 04 (ao lado do marcador ela cobriria o texto). */
-function RamosCelular() {
-  const xs = [14, 52, 90, 128, 166];
-  return (
-    <svg viewBox="0 0 180 40" aria-hidden className="mt-4 h-10 w-[180px] overflow-visible lg:hidden" fill="none">
-      {xs.map((x, i) => (
-        <g key={x}>
-          <path d={`M14 2 Q14 22 ${x} 30`} stroke={C} strokeOpacity="0.5" className="ap-fade" style={d(LINHA_FIM + 150 + i * 110)} />
-          <g className="ap-fade" style={d(LINHA_FIM + 300 + i * 110)}>
-            <circle cx={x} cy="30" r="3.4" fill={C} />
-            <circle cx={x} cy="30" r="3.4" stroke={C} className="ap-onda" style={{ animationDelay: `${i * 300}ms` }} />
-          </g>
-        </g>
-      ))}
-    </svg>
-  );
-}
