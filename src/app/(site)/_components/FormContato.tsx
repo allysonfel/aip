@@ -161,7 +161,7 @@ export default function FormContato({ tipo, origem }: { tipo?: string; origem: s
 
       <div className="sm:col-span-2">
         <label className="flex items-start gap-3 text-sm text-white/85">
-          <input type="checkbox" name="aceite" className="mt-0.5 h-5 w-5 shrink-0 accent-white" />
+          <input type="checkbox" name="aceite" defaultChecked={v.aceite === "on"} className="mt-0.5 h-5 w-5 shrink-0 accent-white" />
           <span>
             Li e aceito a{" "}
             <Link href="/privacidade" target="_blank" className="underline underline-offset-2">Política de Privacidade</Link>.
