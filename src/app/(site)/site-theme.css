@@ -641,6 +641,7 @@
   animation: entra-suave 0.5s ease both;
 }
 
+
 @keyframes linha-totem {
   to {
     stroke-dashoffset: 0;

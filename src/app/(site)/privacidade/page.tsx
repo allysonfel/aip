@@ -15,8 +15,8 @@ function Bloco({ titulo, children }: { titulo: string; children: ReactNode }) {
 export default function Privacidade() {
   return (
     <article className="margem max-w-[56rem] pb-24 pt-32 sm:pt-40">
-      <h1 className="titulo-tela">Política de Privacidade</h1>
-      <p role="note" className="mt-6 rounded-xl border border-white/30 px-4 py-3 text-sm">
+      <h1 className="entra-1 titulo-tela">Política de Privacidade</h1>
+      <p role="note" className="entra-2 mt-6 rounded-xl border border-white/30 px-4 py-3 text-sm">
         Em revisão jurídica. Este é um texto-base e pode ser alterado.
       </p>
 

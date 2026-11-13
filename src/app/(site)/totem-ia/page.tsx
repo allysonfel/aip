@@ -3,6 +3,7 @@ import { metadados } from "../_config/metadados";
 import { Acordeao, Botao, Cabecalho, Encerramento } from "../_components/Base";
 import Carrossel from "../_components/Carrossel";
 import { CartaoFoto } from "../_components/Cartoes";
+import FotoEntra from "../_components/FotoEntra";
 import Reveal from "../_components/Reveal";
 import VisualCentral, { type TipoCentral } from "../_components/CentralVisuais";
 import TotemPorDentro, { type EtapaTotem } from "../_components/TotemPorDentro";
@@ -59,8 +60,8 @@ export default function TotemIA() {
             <h1 className="entra-1 titulo-hero">Segurança inteligente em qualquer lugar.</h1>
             <p className="entra-2 mt-6 max-w-[36rem] text-lg leading-relaxed text-white/80">Monitoramento inteligente para locais que precisam de cobertura adicional ou não possuem infraestrutura convencional.</p>
           </div>
-          <div className="entra-foto relative order-1 mx-auto aspect-[4/5] h-[52svh] max-h-[30rem] funde-preto-leve lg:order-2 lg:h-[88svh] lg:max-h-[56rem]">
-            <Image src={`${M}/totem-frente.jpg`} alt={ALT_FRENTE} fill priority sizes="(min-width: 1024px) 45vw, 80vw" quality={85} className="object-contain" />
+          <div className="relative order-1 mx-auto aspect-[4/5] h-[52svh] max-h-[30rem] funde-preto-leve lg:order-2 lg:h-[88svh] lg:max-h-[56rem]">
+            <FotoEntra src={`${M}/totem-frente.jpg`} alt={ALT_FRENTE} fill priority sizes="(min-width: 1024px) 45vw, 80vw" quality={85} className="object-contain" />
           </div>
         </div>
       </section>

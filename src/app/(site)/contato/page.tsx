@@ -17,16 +17,18 @@ export default async function Contato({ searchParams }: { searchParams: Promise<
     <section className="pb-24 pt-32 sm:pt-40">
       <div className="margem grid gap-12 lg:grid-cols-[1fr_1.6fr] lg:gap-20">
         <div>
-          <h1 className="titulo-hero">Solicite uma consulta.</h1>
-          <p className="mt-6 max-w-[28rem] text-lg leading-relaxed text-white/80">Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.</p>
+          <h1 className="entra-1 titulo-hero">Solicite uma consulta.</h1>
+          <p className="entra-2 mt-6 max-w-[28rem] text-lg leading-relaxed text-white/80">Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.</p>
           {(WHATSAPP || EMAIL) && (
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="entra-3 mt-8 flex flex-wrap gap-3">
               {WHATSAPP && <a href={`https://wa.me/${WHATSAPP}`} className="botao botao-contorno botao-simples">WhatsApp</a>}
               {EMAIL && <a href={`mailto:${EMAIL}`} className="botao botao-contorno botao-simples">E-mail</a>}
             </div>
           )}
         </div>
-        <FormContato tipo={tipo ? TIPOS[tipo] : undefined} origem={origem} />
+        <div className="entra-3">
+          <FormContato tipo={tipo ? TIPOS[tipo] : undefined} origem={origem} />
+        </div>
       </div>
     </section>
   );

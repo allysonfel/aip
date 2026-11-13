@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
+import FotoEntra from "./FotoEntra";
 import Link from "next/link";
 import Reveal from "./Reveal";
 
@@ -72,9 +73,9 @@ export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobr
   return (
     <section className="relative isolate flex min-h-svh items-end overflow-hidden">
       {/* Entrada em camadas: foto, título, texto e botões (ver .entra-* no CSS). */}
-      <div className="entra-foto absolute inset-0 -z-20">
+      <div className={`absolute inset-0 -z-20 ${midia && "video" in midia ? "entra-foto" : ""}`}>
         <div className="parallax absolute inset-0">
-          {midia && "foto" in midia && <Image src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes={CAPA} quality={85} style={midia.foco ? { objectPosition: midia.foco } : undefined} className="object-cover" />}
+          {midia && "foto" in midia && <FotoEntra src={`${M}/${midia.foto}`} alt={midia.alt} fill priority sizes={CAPA} quality={85} style={midia.foco ? { objectPosition: midia.foco } : undefined} className="object-cover" />}
           {midia && "video" in midia && (
             <video autoPlay muted loop playsInline preload="metadata" poster={`${M}/${midia.poster}`} aria-hidden className="h-full w-full object-cover">
               {midia.fontes?.map((f) => <source key={f.src} src={`${M}/${f.src}`} type={f.tipo} media={f.celular ? "(max-width: 767px)" : undefined} />)}
