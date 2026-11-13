@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Conta, d, reduzido, Slide } from "./slide";
-import { Anel30, ChatAssistente, FiltroMono, HudFonte, HudPatrimonio, HudPortaria, HudVigilancia, Icone, LINHA_FIM, LinhaDoTempo, LogoAIP, LogoSantaJoana, PainelIlustrativo, TelaCamera, type NomeIcone } from "./Visuais";
+import { Anel30, ChatAssistente, FiltroMono, HudFonte, HudPatrimonio, HudPortaria, HudVigilancia, Icone, LINHA_FIM, LinhaDoTempo, LogoAIP, LogoAIPNome, LogoSantaJoana, PainelIlustrativo, TelaCamera, type NomeIcone } from "./Visuais";
 
 // Apresentação comercial exclusiva da Água Mineral Santa Joana (página oculta:
 // sem link no site, fora do sitemap, noindex). Modo apresentação: um slide por
@@ -276,14 +276,14 @@ export default function Apresentacao() {
             <span className="absolute bottom-0 right-0 h-6 w-6 border-b border-r border-white/25" />
           </div>
           <div className="ap-margem relative flex flex-col items-center">
-            <div className="flex items-center gap-[clamp(1.25rem,3.5vw,3.5rem)]">
+            <div className="flex flex-col items-center gap-[clamp(1rem,3.5vw,3.5rem)] sm:flex-row">
               <span className="ap-in" style={d(0)}>
-                <LogoAIP className="h-[clamp(2.25rem,7vh,5rem)] text-white" />
+                <LogoAIPNome logo="h-[clamp(2.25rem,7vh,5rem)]" nome="text-[clamp(0.5rem,1.25vh,0.9rem)]" />
               </span>
               <svg viewBox="0 0 24 24" aria-hidden className="ap-in h-[clamp(1.25rem,3.4vh,2.25rem)] w-[clamp(1.25rem,3.4vh,2.25rem)] text-[#5FD3FF]" style={d(90)} fill="none" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round">
                 <path d="M12 3v18M3 12h18" />
               </svg>
-              <span className="ap-in" style={d(180)}>
+              <span className="ap-in shrink-0" style={d(180)}>
                 <LogoSantaJoana className="h-[clamp(4.25rem,13vh,9.5rem)]" />
               </span>
             </div>
@@ -635,9 +635,9 @@ export default function Apresentacao() {
                 Vamos tornar a Santa Joana mais segura, mais eficiente e ainda mais confiável.
               </p>
               <div className="ap-in mt-[clamp(1.5rem,4.5vh,3rem)] flex items-center justify-center gap-[clamp(1rem,2.5vw,2.5rem)]" style={d(LINHA_FIM + 1100)}>
-                <LogoAIP className="h-[clamp(1.5rem,4vh,2.75rem)] text-white" />
+                <LogoAIPNome logo="h-[clamp(1.6rem,4.4vh,3rem)]" nome="text-[clamp(0.45rem,0.85vh,0.62rem)]" />
                 <span aria-hidden className="h-[clamp(2rem,6vh,4rem)] w-px bg-white/20" />
-                <LogoSantaJoana className="h-[clamp(2.75rem,8vh,5.5rem)]" />
+                <LogoSantaJoana className="h-[clamp(2.75rem,8vh,5.5rem)] shrink-0" />
               </div>
             </div>
           </div>

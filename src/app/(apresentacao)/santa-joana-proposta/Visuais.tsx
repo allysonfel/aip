@@ -16,6 +16,16 @@ const F = "rgb(255 255 255 / 0.16)";
 
 export { LogoAIP };
 
+/** Logo da AIP com o nome por extenso logo abaixo, centralizado. */
+export function LogoAIPNome({ logo, nome }: { logo: string; nome: string }) {
+  return (
+    <span className="inline-flex flex-col items-center">
+      <LogoAIP className={`${logo} text-white`} />
+      <span className={`mt-[0.55em] whitespace-nowrap font-medium uppercase tracking-[0.14em] text-white/70 ${nome}`}>Agência de Inteligência Patrimonial</span>
+    </span>
+  );
+}
+
 const LOGO_SJ = "/clientes/santa-joana-logo.png";
 
 /**
