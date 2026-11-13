@@ -81,14 +81,6 @@ const ICONES = {
       <circle cx="12" cy="12" r="1.1" />
     </>
   ),
-  central: (
-    <>
-      <path d="M4.5 14v-2a7.5 7.5 0 0 1 15 0v2" />
-      <rect x="3.5" y="13" width="4" height="6" rx="1.5" />
-      <rect x="16.5" y="13" width="4" height="6" rx="1.5" />
-      <path d="M18.5 19c0 1.4-1.9 2.3-4.5 2.3" />
-    </>
-  ),
   dispositivos: (
     <>
       <rect x="2.5" y="4.5" width="13.5" height="10" rx="1.5" />
@@ -468,7 +460,7 @@ const KPIS = [
 ];
 
 const FEED = [
-  { hora: "02:14", local: "Fonte", tipo: "Movimento em área restrita", status: "Central acionada", aberto: true },
+  { hora: "02:14", local: "Fonte", tipo: "Movimento em área restrita", status: "Segurança notificada", aberto: true },
   { hora: "06:58", local: "Portaria", tipo: "Placa não cadastrada", status: "Verificado" },
   { hora: "09:42", local: "Envase, Linha 2", tipo: "Colaborador sem touca", status: "Resolvido" },
   { hora: "11:15", local: "Manutenção", tipo: "EPI ausente: capacete", status: "Resolvido" },

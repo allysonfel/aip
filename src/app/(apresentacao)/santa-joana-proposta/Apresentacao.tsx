@@ -241,7 +241,7 @@ const FALTARIA = [
   "Pagamento todo no início, em vez de uma mensalidade.",
   "Manutenção e troca: câmeras queimam, envelhecem e saem de linha. Em 3 a 4 anos, boa parte precisa ser trocada.",
   "Funções congeladas: a câmera fica só com as funções de fábrica.",
-  "Sem o resto da AIP: sem assistente de IA, WhatsApp, relatórios, contagem de produção sob medida e central 24h.",
+  "Sem o resto da AIP: sem assistente de IA, WhatsApp, relatórios e contagem de produção sob medida.",
 ];
 
 const MOTIVOS: { icone: NomeIcone; titulo: string; texto: string }[] = [
@@ -304,7 +304,7 @@ export default function Apresentacao() {
               {(
                 [
                   ["camera", "IA nas câmeras que a empresa já tem"],
-                  ["central", "Central 24h"],
+                  ["painel", "Painel sob medida"],
                   ["dispositivos", "Alertas no WhatsApp, no celular e no computador"],
                 ] as [NomeIcone, string][]
               ).map(([icone, texto], i) => (
@@ -416,7 +416,7 @@ export default function Apresentacao() {
             n={4}
             titulo="Vigilância e resposta"
             frase="Quem protege também é acompanhado. E quem precisa agir é avisado na hora."
-            itens={["Conferência automática de rondas", "Alerta de câmera tampada, virada ou desligada", "Busca visual: localize uma pessoa em minutos", "Central AIP 24h e acionamento das autoridades"]}
+            itens={["Conferência automática de rondas", "Alerta de câmera tampada, virada ou desligada", "Busca visual: localize uma pessoa em minutos", "Alerta imediato para a equipe de segurança, com as imagens prontas para acionar as autoridades"]}
             visual={<HudVigilancia />}
           />
         </Slide>
