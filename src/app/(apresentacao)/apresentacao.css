@@ -1,0 +1,326 @@
+/*
+ * Modo apresentação (grupo (apresentacao)): slides de tela inteira com
+ * scroll-snap, entrada animada uma vez por slide (classe .ativo) e só
+ * movimento contínuo sutil depois. Anima apenas transform e opacity.
+ */
+
+html.apresentacao {
+  scroll-behavior: auto;
+  scrollbar-gutter: auto;
+  scrollbar-width: none;
+  scroll-snap-type: y mandatory;
+  --ap-ciano: #5fd3ff;
+  --ap-curva: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+html.apresentacao::-webkit-scrollbar {
+  display: none;
+}
+
+/* Celular e telas baixas: slides podem passar da altura da tela; o snap fica solto. */
+@media (max-width: 1023px), (max-height: 640px) {
+  html.apresentacao {
+    scroll-snap-type: y proximity;
+  }
+}
+
+.ap-slide {
+  position: relative;
+  display: flex;
+  min-height: 100svh;
+  align-items: center;
+  overflow: hidden;
+  scroll-snap-align: start;
+  /* O site reserva espaço para o menu em todo [id]; aqui não há menu. */
+  scroll-margin-top: 0;
+  padding-block: clamp(4.5rem, 10vh, 7rem);
+}
+
+.ap-margem {
+  width: 100%;
+  max-width: 1640px;
+  margin-inline: auto;
+  padding-inline: clamp(1.25rem, 5vw, 6rem);
+}
+
+.ap-ciano {
+  color: var(--ap-ciano);
+}
+
+/* ---------- tipografia (escala pela largura e pela altura: projetor e celular) ---------- */
+
+.ap-titulo,
+.ap-titulo-m,
+.ap-titulo-p {
+  font-family: var(--font-titulo);
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.005em;
+  text-wrap: balance;
+}
+
+.ap-titulo {
+  font-size: clamp(2.5rem, min(5.6vw, 10vh), 7rem);
+}
+
+.ap-titulo-m {
+  font-size: clamp(2.125rem, min(4.2vw, 7.4vh), 5.25rem);
+}
+
+.ap-titulo-p {
+  font-size: clamp(1.75rem, min(3vw, 5.4vh), 3.75rem);
+  line-height: 1.04;
+}
+
+.ap-num {
+  font-family: var(--font-titulo);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.ap-texto {
+  font-size: clamp(1.125rem, min(1.75vw, 3.1vh), 2rem);
+  font-weight: 300;
+  line-height: 1.38;
+  color: rgb(255 255 255 / 0.76);
+  text-wrap: pretty;
+}
+
+.ap-item {
+  font-size: clamp(1.0625rem, min(1.45vw, 2.6vh), 1.75rem);
+  font-weight: 400;
+  line-height: 1.3;
+}
+
+.ap-pequeno {
+  font-size: clamp(0.9375rem, min(1.1vw, 2vh), 1.3rem);
+  line-height: 1.4;
+}
+
+.ap-rotulo {
+  font-size: clamp(0.75rem, min(0.95vw, 1.7vh), 1.05rem);
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--aip-cinza);
+}
+
+/* ---------- entrada (uma vez, quando o slide recebe .ativo) ---------- */
+
+.ap-in {
+  opacity: 0;
+  transform: translate3d(0, 18px, 0);
+  transition:
+    opacity 0.7s var(--ap-curva) var(--d, 0ms),
+    transform 0.85s var(--ap-curva) var(--d, 0ms);
+}
+
+.ap-fade {
+  opacity: 0;
+  transition: opacity 0.6s ease-out var(--d, 0ms);
+}
+
+.ativo .ap-in,
+.ativo .ap-fade {
+  opacity: 1;
+  transform: none;
+}
+
+/* Linhas que "se desenham": escala a partir da origem. */
+.ap-linha-x,
+.ap-linha-y {
+  transition: transform var(--t, 900ms) cubic-bezier(0.45, 0, 0.2, 1) var(--d, 0ms);
+}
+
+.ap-linha-x {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.ap-linha-y {
+  transform: scaleY(0);
+  transform-origin: center top;
+}
+
+.ativo .ap-linha-x {
+  transform: scaleX(1);
+}
+
+.ativo .ap-linha-y {
+  transform: scaleY(1);
+}
+
+/* Elementos que "acendem" (passam de apagado a aceso). */
+.ap-acende {
+  opacity: 0.22;
+  transition: opacity 0.55s ease-out var(--d, 0ms);
+}
+
+.ativo .ap-acende {
+  opacity: 1;
+}
+
+/* Elementos SVG escalando a partir do próprio centro. */
+.ap-svg-in {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* ---------- movimento contínuo e sutil ---------- */
+
+@keyframes ap-pulso {
+  0%,
+  100% {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
+
+@keyframes ap-onda {
+  from {
+    opacity: 0.55;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.6);
+  }
+}
+
+@keyframes ap-respira {
+  0%,
+  100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes ap-varre {
+  from {
+    transform: translate3d(0, -100%, 0);
+  }
+  to {
+    transform: translate3d(0, 100%, 0);
+  }
+}
+
+@keyframes ap-varre-x {
+  from {
+    transform: translate3d(-100%, 0, 0);
+  }
+  to {
+    transform: translate3d(100%, 0, 0);
+  }
+}
+
+@keyframes ap-gira {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes ap-cursor {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.ap-pulso {
+  animation: ap-pulso 2.4s ease-in-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.ap-onda {
+  animation: ap-onda 2.6s ease-out infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.ap-respira {
+  animation: ap-respira 4s ease-in-out infinite;
+}
+
+.ap-cursor {
+  animation: ap-cursor 1s steps(1) infinite;
+}
+
+/* Linha de varredura: o filho ocupa a altura toda e desce em loop lento. */
+.ap-varredura {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ap-varredura::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, transparent 88%, rgb(95 211 255 / 0.07) 98%, rgb(95 211 255 / 0.22) 99.6%, transparent 100%);
+  animation: ap-varre var(--t, 9s) linear infinite;
+}
+
+.ap-varre-x {
+  animation: ap-varre-x 2.6s ease-in-out infinite alternate;
+}
+
+.ap-gira {
+  animation: ap-gira 24s linear infinite;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* Grade da capa: linhas finas em ciano, apagando nas bordas. */
+.ap-grade {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgb(95 211 255 / 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(95 211 255 / 0.07) 1px, transparent 1px);
+  background-size: 72px 72px;
+  background-position: center center;
+  mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, black 10%, transparent 75%);
+}
+
+/* ---------- movimento reduzido: só o conteúdo, sem animação ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .ap-in,
+  .ap-fade,
+  .ap-acende,
+  .ap-linha-x,
+  .ap-linha-y {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .ap-pulso,
+  .ap-onda,
+  .ap-respira,
+  .ap-cursor,
+  .ap-varre-x,
+  .ap-gira,
+  .ap-varredura::after {
+    animation: none;
+  }
+
+  .ap-onda,
+  .ap-varredura::after {
+    opacity: 0;
+  }
+}
