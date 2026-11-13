@@ -26,7 +26,7 @@ function centro(alvos: Alvo[]) {
  * contorno com brilho ciano em volta dela. As imagens têm fundo preto e se
  * fundem ao fundo da página; o pé de cada uma some num degradê.
  */
-function Palco({ etapas, ativa, className = "", style, refPalco }: { etapas: EtapaTotem[]; ativa: number; className?: string; style?: React.CSSProperties; refPalco?: React.Ref<HTMLDivElement> }) {
+export function Palco({ etapas, ativa, className = "", style, refPalco }: { etapas: EtapaTotem[]; ativa: number; className?: string; style?: React.CSSProperties; refPalco?: React.Ref<HTMLDivElement> }) {
   const fotos = [...new Set(etapas.map((e) => e.foto))];
   const e = etapas[ativa];
   const z = e.zoom ?? 1.06;

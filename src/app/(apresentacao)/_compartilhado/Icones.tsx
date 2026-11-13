@@ -93,6 +93,20 @@ const ICONES = {
       <path d="m13 18 2 2 4-4" />
     </>
   ),
+  totem: (
+    <>
+      <rect x="9" y="5.5" width="6" height="15" rx="1" />
+      <path d="M10.5 3.5h3M12 3.5v2M7.5 20.5h9" />
+      <path d="M12 9v7" />
+    </>
+  ),
+  mapa: (
+    <>
+      <path d="M3.5 6.5 9 4.5l6 2 5.5-2v13l-5.5 2-6-2-5.5 2z" />
+      <path d="M9 4.5v13M15 6.5v13" />
+    </>
+  ),
+  visto: <path d="m5 12.5 4.2 4.2L19 7" />,
 } satisfies Record<string, ReactNode>;
 
 export type NomeIcone = keyof typeof ICONES;

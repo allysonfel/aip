@@ -296,6 +296,33 @@ html.apresentacao::-webkit-scrollbar {
   mask-image: radial-gradient(ellipse 70% 65% at 50% 50%, black 10%, transparent 75%);
 }
 
+/* Pontos que se deslocam devagar (multidão): cada um com --dx/--dy/--dur próprios. */
+@keyframes ap-deriva {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(var(--dx, 4px), var(--dy, 2px));
+  }
+}
+
+.ap-deriva {
+  animation: ap-deriva var(--dur, 6s) ease-in-out var(--atraso, 0s) infinite;
+  transform-box: fill-box;
+}
+
+/* Barras de gráfico que sobem a partir da base (uma vez). */
+.ap-barra {
+  transform: scaleY(0);
+  transform-origin: center bottom;
+  transition: transform 0.8s var(--ap-curva) var(--d, 0ms);
+}
+
+.ativo .ap-barra {
+  transform: scaleY(1);
+}
+
 /* ---------- movimento reduzido: só o conteúdo, sem animação ---------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -303,7 +330,8 @@ html.apresentacao::-webkit-scrollbar {
   .ap-fade,
   .ap-acende,
   .ap-linha-x,
-  .ap-linha-y {
+  .ap-linha-y,
+  .ap-barra {
     opacity: 1;
     transform: none;
     transition: none;
@@ -315,6 +343,7 @@ html.apresentacao::-webkit-scrollbar {
   .ap-cursor,
   .ap-varre-x,
   .ap-gira,
+  .ap-deriva,
   .ap-varredura::after {
     animation: none;
   }
