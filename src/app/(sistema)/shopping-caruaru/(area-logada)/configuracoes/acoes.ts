@@ -31,6 +31,6 @@ export async function salvar(c: CamposConfiguracoes): Promise<{ ok: true } | { o
   const mudou = (Object.keys(c) as (keyof CamposConfiguracoes)[]).filter((k) => k !== 'logo' && String(antes[k]) !== String(c[k]));
   if (antes.logo !== c.logo) mudou.push('logo');
   await registrarAuditoria({ empresaId: eu.empresaId, usuarioId: eu.id, acao: 'configuracoes_alteradas', detalhes: { campos: mudou } });
-  revalidatePath('/shopping', 'layout');
+  revalidatePath('/shopping-caruaru', 'layout');
   return { ok: true };
 }

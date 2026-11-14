@@ -50,7 +50,7 @@ export function SaudeCamerasReal({ urlMotor }: { urlMotor: string }) {
         <Tabela
           cabecalho={['Câmera', 'Situação', 'Imagem', 'Análises/s', 'Tempo de análise', 'Pessoas agora']}
           alinharDireita={[3, 4, 5]}
-          aoClicarLinha={(i) => router.push(`/shopping/ao-vivo?camera=${encodeURIComponent(cams[i].id)}`)}
+          aoClicarLinha={(i) => router.push(`/shopping-caruaru/ao-vivo?camera=${encodeURIComponent(cams[i].id)}`)}
           linhas={cams.map((c) => [
             <span key="n" className="text-sm font-medium text-primary hover:underline">
               {partesDoNome(c.nome).codigo} {partesDoNome(c.nome).titulo}

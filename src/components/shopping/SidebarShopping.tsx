@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 import { cn } from '@/lib/cn';
-import { fazerLogout } from '@/app/(sistema)/login/actions';
+import { fazerLogout } from '@/app/(sistema)/shopping-caruaru/login/actions';
 import { ThemeToggle } from '@/components/admin/ThemeToggle';
 import { LogoAIP } from './Logo';
 import {
@@ -26,29 +26,29 @@ export const GRUPOS: { titulo: string; abas: { href: string; label: string; Icon
   {
     titulo: 'Operação',
     abas: [
-      { href: '/shopping', label: 'Visão geral', Icone: IconeVisaoGeral, aba: 'visao-geral' },
-      { href: '/shopping/ao-vivo', label: 'Câmeras ao vivo', Icone: IconeCamera, aba: 'cameras' },
+      { href: '/shopping-caruaru', label: 'Visão geral', Icone: IconeVisaoGeral, aba: 'visao-geral' },
+      { href: '/shopping-caruaru/ao-vivo', label: 'Câmeras ao vivo', Icone: IconeCamera, aba: 'cameras' },
     ],
   },
   {
     titulo: 'Fluxo e espaços',
     abas: [
-      { href: '/shopping/mapa-calor', label: 'Mapa de calor', Icone: IconeCalor, aba: 'mapa-calor' },
-      { href: '/shopping/zonas-mortas', label: 'Zonas mortas', Icone: IconeZonaMorta, aba: 'zonas-mortas' },
-      { href: '/shopping/comparativo', label: 'Comparativo de períodos', Icone: IconeComparar, aba: 'comparativo' },
-      { href: '/shopping/rotas', label: 'Rotas e fluxo', Icone: IconeRotas, aba: 'rotas' },
+      { href: '/shopping-caruaru/mapa-calor', label: 'Mapa de calor', Icone: IconeCalor, aba: 'mapa-calor' },
+      { href: '/shopping-caruaru/zonas-mortas', label: 'Zonas mortas', Icone: IconeZonaMorta, aba: 'zonas-mortas' },
+      { href: '/shopping-caruaru/comparativo', label: 'Comparativo de períodos', Icone: IconeComparar, aba: 'comparativo' },
+      { href: '/shopping-caruaru/rotas', label: 'Rotas e fluxo', Icone: IconeRotas, aba: 'rotas' },
     ],
   },
   {
     titulo: 'Segurança',
-    abas: [{ href: '/shopping/crianca-perdida', label: 'Busca de criança perdida', Icone: IconeCrianca, aba: 'crianca-perdida' }],
+    abas: [{ href: '/shopping-caruaru/crianca-perdida', label: 'Busca de criança perdida', Icone: IconeCrianca, aba: 'crianca-perdida' }],
   },
   {
     titulo: 'Sistema',
     abas: [
-      { href: '/shopping/cameras', label: 'Câmeras e saúde', Icone: IconeAtividade, aba: 'cameras' },
-      { href: '/shopping/usuarios', label: 'Usuários', Icone: IconePessoas, aba: 'usuarios' },
-      { href: '/shopping/configuracoes', label: 'Configurações', Icone: IconeConfig, aba: 'configuracoes' },
+      { href: '/shopping-caruaru/cameras', label: 'Câmeras e saúde', Icone: IconeAtividade, aba: 'cameras' },
+      { href: '/shopping-caruaru/usuarios', label: 'Usuários', Icone: IconePessoas, aba: 'usuarios' },
+      { href: '/shopping-caruaru/configuracoes', label: 'Configurações', Icone: IconeConfig, aba: 'configuracoes' },
     ],
   },
 ];
@@ -57,7 +57,7 @@ export const GRUPOS: { titulo: string; abas: { href: string; label: string; Icon
 export type DadosMenu = { nomeUsuario: string; permissoes: Permissoes; nomeShopping: string; logo: string | null };
 
 function ehAtiva(pathname: string, href: string) {
-  return href === '/shopping' ? pathname === '/shopping' : pathname.startsWith(href);
+  return href === '/shopping-caruaru' ? pathname === '/shopping-caruaru' : pathname.startsWith(href);
 }
 
 function Navegacao({ permissoes, aoNavegar }: { permissoes: Permissoes; aoNavegar?: () => void }) {

@@ -6,16 +6,16 @@ export type AbaId = 'visao-geral' | 'cameras' | 'mapa-calor' | 'zonas-mortas' | 
 export type Aba = { id: AbaId; nome: string; rotas: string[]; descricao: string; soAdminGeral?: boolean; seguranca?: boolean };
 
 export const ABAS: Aba[] = [
-  { id: 'visao-geral', nome: 'Visão geral', rotas: ['/shopping'], descricao: 'Números do dia, entradas e corredores mais movimentados' },
-  { id: 'mapa-calor', nome: 'Mapa de calor', rotas: ['/shopping/mapa-calor'], descricao: 'Onde as pessoas circulam e ficam' },
-  { id: 'zonas-mortas', nome: 'Zonas mortas', rotas: ['/shopping/zonas-mortas'], descricao: 'Áreas abaixo da média e teste de ações' },
-  { id: 'comparativo', nome: 'Comparativos', rotas: ['/shopping/comparativo'], descricao: 'Comparar períodos' },
-  { id: 'rotas', nome: 'Rotas e fluxo', rotas: ['/shopping/rotas'], descricao: 'Caminhos e fluxos entre áreas' },
-  { id: 'crianca-perdida', nome: 'Busca de criança perdida', rotas: ['/shopping/crianca-perdida'], descricao: 'Procurar criança pela descrição da família', seguranca: true },
+  { id: 'visao-geral', nome: 'Visão geral', rotas: ['/shopping-caruaru'], descricao: 'Números do dia, entradas e corredores mais movimentados' },
+  { id: 'mapa-calor', nome: 'Mapa de calor', rotas: ['/shopping-caruaru/mapa-calor'], descricao: 'Onde as pessoas circulam e ficam' },
+  { id: 'zonas-mortas', nome: 'Zonas mortas', rotas: ['/shopping-caruaru/zonas-mortas'], descricao: 'Áreas abaixo da média e teste de ações' },
+  { id: 'comparativo', nome: 'Comparativos', rotas: ['/shopping-caruaru/comparativo'], descricao: 'Comparar períodos' },
+  { id: 'rotas', nome: 'Rotas e fluxo', rotas: ['/shopping-caruaru/rotas'], descricao: 'Caminhos e fluxos entre áreas' },
+  { id: 'crianca-perdida', nome: 'Busca de criança perdida', rotas: ['/shopping-caruaru/crianca-perdida'], descricao: 'Procurar criança pela descrição da família', seguranca: true },
   { id: 'pergunte', nome: 'Pergunte à AIP', rotas: [], descricao: 'Chat com perguntas sobre os dados das abas que o usuário vê' },
-  { id: 'cameras', nome: 'Câmeras', rotas: ['/shopping/ao-vivo', '/shopping/cameras'], descricao: 'Câmeras ao vivo e saúde do sistema', seguranca: true },
-  { id: 'usuarios', nome: 'Usuários', rotas: ['/shopping/usuarios'], descricao: 'Cadastro de usuários e permissões', soAdminGeral: true },
-  { id: 'configuracoes', nome: 'Configurações', rotas: ['/shopping/configuracoes'], descricao: 'Dados do shopping, horários, retenção e limites', soAdminGeral: true },
+  { id: 'cameras', nome: 'Câmeras', rotas: ['/shopping-caruaru/ao-vivo', '/shopping-caruaru/cameras'], descricao: 'Câmeras ao vivo e saúde do sistema', seguranca: true },
+  { id: 'usuarios', nome: 'Usuários', rotas: ['/shopping-caruaru/usuarios'], descricao: 'Cadastro de usuários e permissões', soAdminGeral: true },
+  { id: 'configuracoes', nome: 'Configurações', rotas: ['/shopping-caruaru/configuracoes'], descricao: 'Dados do shopping, horários, retenção e limites', soAdminGeral: true },
 ];
 
 export const ABAS_IDS = ABAS.map((a) => a.id);
@@ -40,7 +40,7 @@ export function abaDaRota(pathname: string): AbaId | undefined {
   let melhor: { id: AbaId; tam: number } | undefined;
   for (const a of ABAS)
     for (const r of a.rotas) {
-      const bate = r === '/shopping' ? pathname === '/shopping' : pathname === r || pathname.startsWith(`${r}/`);
+      const bate = r === '/shopping-caruaru' ? pathname === '/shopping-caruaru' : pathname === r || pathname.startsWith(`${r}/`);
       if (bate && (!melhor || r.length > melhor.tam)) melhor = { id: a.id, tam: r.length };
     }
   return melhor?.id;

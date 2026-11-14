@@ -54,7 +54,7 @@ export async function criarUsuario(d: DadosUsuario): Promise<Resultado> {
     RETURNING id
   `;
   await registrarAuditoria({ empresaId: eu.empresaId, usuarioId: eu.id, alvoUsuarioId: novo.id, acao: 'usuario_criado', detalhes: { login: u.username, abas: u.abas, adminGeral: u.adminGeral } });
-  revalidatePath('/shopping/usuarios');
+  revalidatePath('/shopping-caruaru/usuarios');
   return { ok: true };
 }
 
@@ -78,7 +78,7 @@ export async function editarUsuario(id: number, d: DadosUsuario): Promise<Result
   await registrarAuditoria({ empresaId: eu.empresaId, usuarioId: eu.id, alvoUsuarioId: id, acao: 'usuario_editado', detalhes: { login: u.username } });
   if (mudouPermissao)
     await registrarAuditoria({ empresaId: eu.empresaId, usuarioId: eu.id, alvoUsuarioId: id, acao: 'permissoes_alteradas', detalhes: { antes: { abas: atual.abas, adminGeral: atual.admin_geral }, depois: { abas: u.abas, adminGeral: u.adminGeral } } });
-  revalidatePath('/shopping/usuarios');
+  revalidatePath('/shopping-caruaru/usuarios');
   return { ok: true };
 }
 
@@ -91,7 +91,7 @@ export async function alterarAtivo(id: number, ativo: boolean): Promise<Resultad
   await sql`UPDATE usuarios SET ativo = ${ativo} WHERE id = ${id} AND empresa_id = ${eu.empresaId}`;
   if (!ativo) await encerrarSessoesDoUsuario(id);
   await registrarAuditoria({ empresaId: eu.empresaId, usuarioId: eu.id, alvoUsuarioId: id, acao: ativo ? 'usuario_reativado' : 'usuario_desativado' });
-  revalidatePath('/shopping/usuarios');
+  revalidatePath('/shopping-caruaru/usuarios');
   return { ok: true };
 }
 
@@ -104,7 +104,7 @@ export async function redefinirSenha(id: number): Promise<Resultado> {
   await sql`UPDATE usuarios SET senha_hash = ${await hashSenha(senha)}, trocar_senha = true, tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = ${id} AND empresa_id = ${eu.empresaId}`;
   await encerrarSessoesDoUsuario(id);
   await registrarAuditoria({ empresaId: eu.empresaId, usuarioId: eu.id, alvoUsuarioId: id, acao: 'senha_redefinida' });
-  revalidatePath('/shopping/usuarios');
+  revalidatePath('/shopping-caruaru/usuarios');
   return { ok: true, senhaProvisoria: senha };
 }
 
@@ -112,6 +112,6 @@ export async function desbloquear(id: number): Promise<Resultado> {
   const eu = await admin();
   await sql`UPDATE usuarios SET tentativas_falhas = 0, bloqueado_ate = NULL WHERE id = ${id} AND empresa_id = ${eu.empresaId}`;
   await registrarAuditoria({ empresaId: eu.empresaId, usuarioId: eu.id, alvoUsuarioId: id, acao: 'usuario_desbloqueado' });
-  revalidatePath('/shopping/usuarios');
+  revalidatePath('/shopping-caruaru/usuarios');
   return { ok: true };
 }

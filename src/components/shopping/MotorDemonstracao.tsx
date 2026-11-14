@@ -5,7 +5,7 @@ import { Secao } from '@/components/shopping/Comum';
 import { Alert } from '@/components/ui/Alert';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
-import { consultarMotor, mudarMotor } from '@/app/(sistema)/shopping/configuracoes/motorAcoes';
+import { consultarMotor, mudarMotor } from '@/app/(sistema)/shopping-caruaru/(area-logada)/configuracoes/motorAcoes';
 import type { EstadoMotor } from '@/lib/shopping/motor';
 
 // Liga o motor das câmeras só na hora da demonstração. Desligado, as telas que

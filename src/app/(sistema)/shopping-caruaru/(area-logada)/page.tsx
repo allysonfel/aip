@@ -156,7 +156,7 @@ function VisaoSimulada({ per }: { per: Periodo }) {
           descricao={per.dias === 1 ? `Onde as pessoas passaram e ficaram · ${per.rotulo}` : `Onde as pessoas passaram e ficaram · último dia do período (${formatarData(per.fim)})`}
           className="xl:col-span-2"
           acao={
-            <Link href="/shopping/mapa-calor" className="text-sm font-medium text-primary hover:underline">
+            <Link href="/shopping-caruaru/mapa-calor" className="text-sm font-medium text-primary hover:underline">
               Abrir mapa de calor →
             </Link>
           }

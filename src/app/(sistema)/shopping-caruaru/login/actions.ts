@@ -46,5 +46,5 @@ export async function fazerLogout(): Promise<void> {
     await destruirSessao(token);
   }
   jar.delete(COOKIE_SESSAO);
-  redirect('/login');
+  redirect('/shopping-caruaru/login');
 }

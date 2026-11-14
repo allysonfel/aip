@@ -4,7 +4,7 @@ import { FormTrocarSenha } from './FormTrocarSenha';
 
 export default async function TrocarSenhaPage() {
   const sessao = await getSessaoAtual();
-  if (!sessao) redirect('/login');
+  if (!sessao) redirect('/shopping-caruaru/login');
   return (
     <div className="flex min-h-screen items-center justify-center bg-surface-dim px-4">
       <div className="w-full max-w-sm rounded border border-outline-variant bg-surface p-8">

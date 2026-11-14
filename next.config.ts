@@ -7,6 +7,17 @@ const nextConfig: NextConfig = {
     // 85 para as fotos grandes do site; 75 continua sendo o padrão.
     qualities: [75, 85],
   },
+  // O painel do Shopping Caruaru fica todo em /shopping-caruaru (login
+  // incluso). Os endereços antigos continuam funcionando e levam para lá.
+  async redirects() {
+    return [
+      { source: '/shopping', destination: '/shopping-caruaru', permanent: false },
+      { source: '/shopping/:caminho*', destination: '/shopping-caruaru/:caminho*', permanent: false },
+      { source: '/login', destination: '/shopping-caruaru/login', permanent: false },
+      { source: '/trocar-senha', destination: '/shopping-caruaru/trocar-senha', permanent: false },
+      { source: '/sem-acesso', destination: '/shopping-caruaru/sem-acesso', permanent: false },
+    ];
+  },
 };
 
 export default nextConfig;

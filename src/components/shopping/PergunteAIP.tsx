@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState, useTransition } from 'react';
-import { perguntarAIP, type RespostaAIP } from '@/app/(sistema)/shopping/acoes';
+import { perguntarAIP, type RespostaAIP } from '@/app/(sistema)/shopping-caruaru/(area-logada)/acoes';
 import { LogoA } from './Logo';
 import { GraficoBarras, GraficoLinhas } from './Graficos';
 import { cn } from '@/lib/cn';

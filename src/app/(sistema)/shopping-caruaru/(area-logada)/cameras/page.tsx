@@ -32,7 +32,7 @@ export default async function CamerasPage() {
         titulo="Câmeras e saúde do sistema"
         descricao={`Situação de cada câmera de corredor usada pela AIP. ${cams.length} câmeras cadastradas; o shopping tem cerca de 250, ligadas aos NVRs Intelbras e acessadas só pela VPN (o RTSP nunca fica exposto na internet).`}
       >
-        <Link href="/shopping/ao-vivo" className="inline-flex h-8 items-center rounded-sm border border-outline-variant bg-surface px-3 text-xs font-medium text-on-surface hover:bg-surface-container-low">
+        <Link href="/shopping-caruaru/ao-vivo" className="inline-flex h-8 items-center rounded-sm border border-outline-variant bg-surface px-3 text-xs font-medium text-on-surface hover:bg-surface-container-low">
           Ver câmeras ao vivo
         </Link>
       </TituloPagina>

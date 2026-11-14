@@ -8,7 +8,7 @@ import { destinoInicial, getSessaoAtual } from '@/lib/sessaoServidor';
 
 export async function trocarSenha(_prev: { erro: string | null }, formData: FormData): Promise<{ erro: string | null }> {
   const sessao = await getSessaoAtual();
-  if (!sessao) redirect('/login');
+  if (!sessao) redirect('/shopping-caruaru/login');
   const atual = String(formData.get('atual') ?? '');
   const nova = String(formData.get('nova') ?? '');
   const confirmar = String(formData.get('confirmar') ?? '');

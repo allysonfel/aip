@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/cn';
-import { fazerLogout } from '@/app/(sistema)/login/actions';
+import { fazerLogout } from '@/app/(sistema)/shopping-caruaru/login/actions';
 import { ThemeToggle } from './ThemeToggle';
 import {
   IconeVisaoGeral,
