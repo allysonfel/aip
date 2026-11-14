@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { BASE } from '@/lib/base';
 
-type Objeto = { id: number; c: string; b: [number, number, number, number] };
+type Objeto = { id: number; c: string; b: [number, number, number, number]; r?: string };
 type Quadro = { ts: number; objetos: Objeto[] };
 type Linha = { a: [number, number]; b: [number, number] } | null;
 
@@ -162,7 +162,7 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado }: { canal:
         const h = (o.b[3] - o.b[1]) * dh;
         g.strokeStyle = cor;
         g.strokeRect(x, y, w, h);
-        const rot = o.c === 'pessoa' ? `pessoa ${o.id}` : (NOME[o.c] ?? o.c);
+        const rot = o.c === 'pessoa' ? (o.r === 'condutor' ? `condutor ${o.id}` : `pessoa ${o.id}`) : (NOME[o.c] ?? o.c);
         const tw = g.measureText(rot).width + 8;
         g.fillStyle = cor;
         g.fillRect(x - 1, y - 16, tw, 16);

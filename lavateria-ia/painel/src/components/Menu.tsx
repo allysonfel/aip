@@ -82,10 +82,7 @@ function Navegacao({ aoNavegar, alertas = 0 }: { aoNavegar?: () => void; alertas
 function Cabecalho() {
   return (
     <div className="px-6 pb-4 pt-6">
-      <span className="inline-flex flex-col items-center">
-        <LogoAIP className="h-7 text-on-surface" />
-        <span className="mt-[0.55em] whitespace-nowrap text-[4.5px] font-medium uppercase tracking-[0.14em] text-on-surface-variant">Agência de Inteligência Patrimonial</span>
-      </span>
+      <LogoAIP className="h-7 text-on-surface" />
     </div>
   );
 }

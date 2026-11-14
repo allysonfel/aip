@@ -1,7 +1,10 @@
 import { Secao, TituloPagina } from '@/components/Comum';
 import { Atualizar } from '@/components/Atualizar';
 import { BASE } from '@/lib/base';
+import { FiltroPeriodo } from '@/components/Periodo';
+import { Paginacao } from '@/components/Paginacao';
 import { alertas } from '@/lib/dados';
+import { lerPagina, lerPeriodo, POR_PAGINA } from '@/lib/periodo';
 import { marcarLido, marcarTodosLidos } from './acoes';
 
 const NIVEL: Record<string, { t: string; c: string }> = {
@@ -11,22 +14,27 @@ const NIVEL: Record<string, { t: string; c: string }> = {
   info: { t: 'Informação', c: 'bg-surface-container-high text-on-surface-variant' },
 };
 
-export default async function Alertas() {
-  const lista = await alertas();
+export default async function Alertas({ searchParams }: { searchParams: Promise<{ p?: string; de?: string; ate?: string; pag?: string }> }) {
+  const sp = await searchParams;
+  const per = lerPeriodo({ ...sp, p: sp.p ?? '7d' });
+  const pagina = lerPagina(sp.pag);
+  const { itens: lista, total } = await alertas(per, pagina);
+  const params = { p: per.chave, de: per.chave === 'personalizado' ? per.de : undefined, ate: per.chave === 'personalizado' ? per.ate : undefined };
   const naoLidos = lista.filter((a) => !a.lido_em && a.nivel !== 'info').length;
   return (
     <>
       <Atualizar segundos={20} />
-      <TituloPagina titulo="Alertas" descricao="Regras da loja (últimos 7 dias). As regras ligam e desligam em Configuração. O aviso por WhatsApp fica para depois.">
+      <TituloPagina titulo="Alertas" descricao={`Regras da loja (${per.rotulo.toLowerCase()}). As regras ligam e desligam em Configuração. O aviso por WhatsApp fica para depois.`}>
         {naoLidos > 0 && (
           <form action={marcarTodosLidos}>
             <button className="rounded-sm border border-outline-variant px-3 py-2 text-sm text-on-surface">Marcar todos como vistos</button>
           </form>
         )}
       </TituloPagina>
+      <FiltroPeriodo caminho="/alertas" periodo={per} />
       {lista.length === 0 ? (
         <Secao titulo="Nenhum alerta">
-          <p className="text-sm text-on-surface-variant">Nada aconteceu nos últimos 7 dias que dispare uma regra.</p>
+          <p className="text-sm text-on-surface-variant">Nada aconteceu no período que dispare uma regra.</p>
         </Secao>
       ) : (
         <ul className="space-y-3">
@@ -60,6 +68,7 @@ export default async function Alertas() {
           })}
         </ul>
       )}
+      <Paginacao caminho="/alertas" pagina={pagina} total={total} porPagina={POR_PAGINA} params={params} />
     </>
   );
 }

@@ -131,6 +131,8 @@ export async function garantirSchema() {
     -- Etapa 4: regras da loja (alertas), validação de precisão e contagem manual.
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS interna BOOLEAN NOT NULL DEFAULT false;
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS zona_totem JSONB;
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS conf_min REAL;
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS exclusao JSONB;
     CREATE TABLE IF NOT EXISTS alertas (
       id BIGSERIAL PRIMARY KEY,
       tipo TEXT NOT NULL,
@@ -214,6 +216,13 @@ export async function garantirSchema() {
     const loja = { abre: 6, fecha: 23, limpeza_de: 14, limpeza_ate: 17, fachada_s: 60, totem_s: 180, regras: { loja_fechada: true, fechamento: true, sala_maquinas: true, camera_caida: true, pet: true, fachada_fechada: true, totem: true } };
     await sql`INSERT INTO config (chave, valor) VALUES ('loja', ${sql.json(loja)}) ON CONFLICT DO NOTHING`;
     await sql`INSERT INTO config (chave, valor) VALUES ('migracao_4', 'true')`;
+  }
+
+  // Migração 5: confiança mínima maior nas câmeras da frente (lixo e sombra viravam "pessoa").
+  const [v5] = await sql`SELECT 1 FROM config WHERE chave = 'migracao_5'`;
+  if (!v5) {
+    await sql`UPDATE cameras SET conf_min = CASE WHEN canal IN ('cam1', 'cam2') THEN 0.5 ELSE 0.4 END WHERE conf_min IS NULL`;
+    await sql`INSERT INTO config (chave, valor) VALUES ('migracao_5', 'true')`;
   }
 
   await sql`DELETE FROM sessoes WHERE expira < now()`;

@@ -2,9 +2,11 @@ import Link from 'next/link';
 import { Secao, TituloPagina } from '@/components/Comum';
 import { ChipAtributo } from '@/components/Atributos';
 import { BASE } from '@/lib/base';
+import { FiltroPeriodo } from '@/components/Periodo';
+import { Paginacao } from '@/components/Paginacao';
 import { buscar, cameras, config, CORES_PESSOA, CORES_VEICULO, NOMES_VEICULO, type Filtros } from '@/lib/dados';
+import { lerPagina, lerPeriodo, POR_PAGINA } from '@/lib/periodo';
 
-const hojeBr = () => new Date(Date.now() - 3 * 3600_000).toISOString().slice(0, 10);
 const hora = (d: Date) => new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Sao_Paulo' });
 
 function Campo({ nome, rotulo, valor, opcoes }: { nome: string; rotulo: string; valor: string; opcoes: [string, string][] }) {
@@ -23,22 +25,37 @@ function Campo({ nome, rotulo, valor, opcoes }: { nome: string; rotulo: string; 
   );
 }
 
-export default async function Busca({ searchParams }: { searchParams: Promise<Partial<Filtros>> }) {
+type Params = Partial<Omit<Filtros, 'de' | 'ate'>> & { p?: string; de?: string; ate?: string; hde?: string; hate?: string; pag?: string };
+
+export default async function Busca({ searchParams }: { searchParams: Promise<Params> }) {
   const sp = await searchParams;
+  const per = lerPeriodo(sp);
+  const pagina = lerPagina(sp.pag);
   const f: Filtros = {
-    tipo: sp.tipo === 'veiculos' ? 'veiculos' : 'pessoas', data: sp.data || hojeBr(), de: sp.de || '', ate: sp.ate || '', camera: sp.camera || '',
+    tipo: sp.tipo === 'veiculos' ? 'veiculos' : 'pessoas', de: sp.hde || '', ate: sp.hate || '', camera: sp.camera || '',
     cima: sp.cima || '', baixo_tipo: sp.baixo_tipo || '', baixo_cor: sp.baixo_cor || '', genero: sp.genero || '', bone: sp.bone || '', mochila: sp.mochila || '', bolsa: sp.bolsa || '',
     classe: sp.classe || '', cor: sp.cor || '',
   };
   const [cfg, cams] = await Promise.all([config(), cameras()]);
-  const r = await buscar(f, cfg.limiar);
+  const r = await buscar(f, cfg.limiar, per, pagina);
+  const { tipo, camera, cima, baixo_tipo, baixo_cor, genero, bone, mochila, bolsa, classe, cor } = f;
+  const manter = { tipo, camera, cima, baixo_tipo, baixo_cor, genero, bone, mochila, bolsa, classe, cor, hde: sp.hde, hate: sp.hate };
+  const params = { ...manter, p: per.chave, de: per.chave === 'personalizado' ? per.de : undefined, ate: per.chave === 'personalizado' ? per.ate : undefined };
   const cores = (lista: string[]) => lista.map((c) => [c, c] as [string, string]);
   const simNao: [string, string][] = [['sim', 'sim'], ['nao', 'não']];
   return (
     <>
-      <TituloPagina titulo="Busca por características" descricao={`Exemplo: camisa vermelha + bermuda, hoje entre 14h e 16h. Só entram atributos estimados com pelo menos ${Math.round(cfg.limiar * 100)}% de confiança.`} />
+      <TituloPagina titulo="Busca por características" descricao={`Exemplo: camisa vermelha + bermuda, hoje entre 14h e 16h (escolha o período e o horário). Só entram atributos estimados com pelo menos ${Math.round(cfg.limiar * 100)}% de confiança.`} />
+      <FiltroPeriodo caminho="/busca" periodo={per} manter={manter} />
       <Secao titulo="Filtros">
         <form className="grid gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          <input type="hidden" name="p" value={per.chave} />
+          {per.chave === 'personalizado' && (
+            <>
+              <input type="hidden" name="de" value={per.de} />
+              <input type="hidden" name="ate" value={per.ate} />
+            </>
+          )}
           <label className="block">
             <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Procurar</span>
             <select name="tipo" defaultValue={f.tipo} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-2 py-2 text-sm text-on-surface">
@@ -47,16 +64,12 @@ export default async function Busca({ searchParams }: { searchParams: Promise<Pa
             </select>
           </label>
           <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Dia</span>
-            <input type="date" name="data" defaultValue={f.data} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-2 py-2 text-sm text-on-surface" />
-          </label>
-          <label className="block">
-            <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Das</span>
-            <input type="time" name="de" defaultValue={f.de} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-2 py-2 text-sm text-on-surface" />
+            <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Horário: das</span>
+            <input type="time" name="hde" defaultValue={f.de} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-2 py-2 text-sm text-on-surface" />
           </label>
           <label className="block">
             <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Até</span>
-            <input type="time" name="ate" defaultValue={f.ate} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-2 py-2 text-sm text-on-surface" />
+            <input type="time" name="hate" defaultValue={f.ate} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-2 py-2 text-sm text-on-surface" />
           </label>
           <Campo nome="camera" rotulo="Câmera" valor={f.camera} opcoes={cams.map((c) => [c.canal, c.nome])} />
           <div />
@@ -85,7 +98,7 @@ export default async function Busca({ searchParams }: { searchParams: Promise<Pa
         </form>
         <p className="mt-2 text-xs text-on-surface-variant">Mudou entre pessoas e veículos? Clique em Buscar para trocar os filtros.</p>
       </Secao>
-      <Secao titulo={`${r.itens.length} ${r.tipo === 'pessoas' ? (r.itens.length === 1 ? 'pessoa encontrada' : 'pessoas encontradas') : r.itens.length === 1 ? 'veículo encontrado' : 'veículos encontrados'}`} className="mt-4" descricao="Clique num recorte para ver a sequência de imagens daquele momento.">
+      <Secao titulo={`${r.total} ${r.tipo === 'pessoas' ? (r.total === 1 ? 'pessoa encontrada' : 'pessoas encontradas') : r.total === 1 ? 'veículo encontrado' : 'veículos encontrados'}`} className="mt-4" descricao="Clique num recorte para ver a sequência de imagens daquele momento.">
         <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-6">
           {r.tipo === 'pessoas'
             ? r.itens.map((p) => (
@@ -117,6 +130,7 @@ export default async function Busca({ searchParams }: { searchParams: Promise<Pa
               ))}
         </ul>
         {!r.itens.length && <p className="text-sm text-on-surface-variant">Nada encontrado com esses filtros.</p>}
+        <Paginacao caminho="/busca" pagina={pagina} total={r.total} porPagina={POR_PAGINA} params={params} />
       </Secao>
     </>
   );

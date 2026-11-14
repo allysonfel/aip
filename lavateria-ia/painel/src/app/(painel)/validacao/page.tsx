@@ -2,6 +2,8 @@ import Link from 'next/link';
 import { Secao, Tabela, TituloPagina } from '@/components/Comum';
 import { BASE } from '@/lib/base';
 import { amostraValidacao, config, NOMES_VEICULO, precisao, type Atributo } from '@/lib/dados';
+import { Paginacao } from '@/components/Paginacao';
+import { lerPagina } from '@/lib/periodo';
 import { contagemManual } from './acoes';
 import { Marcador } from './Marcador';
 
@@ -11,10 +13,12 @@ const ROTULOS: Record<string, string> = {
 const fmt = (v: Atributo['valor']) => (v === true ? 'sim' : v === false ? 'não' : String(v));
 const hora = (d: Date) => new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', timeZone: 'America/Sao_Paulo' });
 
-export default async function Validacao({ searchParams }: { searchParams: Promise<{ tipo?: string }> }) {
-  const tipo = (await searchParams).tipo === 'veiculo' ? 'veiculo' : 'pessoa';
+export default async function Validacao({ searchParams }: { searchParams: Promise<{ tipo?: string; pag?: string }> }) {
+  const sp = await searchParams;
+  const tipo = sp.tipo === 'veiculo' ? 'veiculo' : 'pessoa';
+  const pagina = lerPagina(sp.pag);
   const [cfg, p] = await Promise.all([config(), precisao()]);
-  const amostra = await amostraValidacao(tipo);
+  const { itens: amostra, total } = await amostraValidacao(tipo, pagina);
   const linhasPrecisao = Object.keys(ROTULOS)
     .map((k) => p.linhas.find((l) => l.atributo === k))
     .filter((l): l is { atributo: string; certos: number; total: number } => Boolean(l))
@@ -61,7 +65,9 @@ export default async function Validacao({ searchParams }: { searchParams: Promis
           const linhas: { k: string; est: string }[] = [];
           if (tipo === 'pessoa') {
             const a = (item as { atributos: Record<string, Atributo> }).atributos;
+            const condutor = (a as { papel?: string }).papel === 'condutor';
             for (const k of ['genero', 'cima', 'baixo_tipo', 'baixo_cor', 'bone', 'mochila', 'bolsa']) {
+              if (condutor && k.startsWith('baixo')) continue;
               const x = a[k];
               if (x && !x.motivo && x.valor != null && (x.conf ?? 0) >= cfg.limiar) linhas.push({ k, est: fmt(x.valor) });
             }
@@ -91,6 +97,7 @@ export default async function Validacao({ searchParams }: { searchParams: Promis
         })}
       </ul>
       {!amostra.length && <p className="text-sm text-on-surface-variant">Tudo marcado por enquanto. Volte mais tarde para validar as próximas.</p>}
+      <Paginacao caminho="/validacao" pagina={pagina} total={total} porPagina={12} params={{ tipo: tipo === 'veiculo' ? 'veiculo' : undefined }} />
     </>
   );
 }

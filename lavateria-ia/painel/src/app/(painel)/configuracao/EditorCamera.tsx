@@ -15,11 +15,12 @@ const NOME_PONTO = ['1 frente-esq.', '2 frente-dir.', '3 fundo-dir.', '4 fundo-e
 export default function EditorCamera({ cam }: { cam: CameraInfo }) {
   const [linha, setLinha] = useState(cam.linha ?? PADRAO);
   const [tipo, setTipo] = useState<string>(cam.tipo_linha ?? '');
-  const [arrastando, setArrastando] = useState<'a' | 'b' | 0 | 1 | 2 | 3 | 'z0' | 'z1' | 'z2' | 'z3' | null>(null);
+  const [arrastando, setArrastando] = useState<string | number | null>(null);
   const [cal, setCal] = useState<Ponto[]>(cam.calibracao?.pontos ?? CAL_PADRAO);
   const [calibrar, setCalibrar] = useState(Boolean(cam.calibracao));
   const [zona, setZona] = useState<Ponto[]>(cam.zona_totem ?? [[0.3, 0.3], [0.5, 0.3], [0.5, 0.6], [0.3, 0.6]]);
   const [temZona, setTemZona] = useState(Boolean(cam.zona_totem));
+  const [exclusao, setExclusao] = useState<Ponto[][]>(cam.exclusao ?? []);
   const [salvo, setSalvo] = useState(false);
   const caixa = useRef<HTMLDivElement>(null);
   const proporcao = cam.largura && cam.altura ? cam.largura / cam.altura : 704 / 480;
@@ -31,7 +32,11 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
     const r3: Ponto = [Math.round(p[0] * 1000) / 1000, Math.round(p[1] * 1000) / 1000];
     if (typeof arrastando === 'number') setCal((c) => c.map((x, i) => (i === arrastando ? r3 : x)));
     else if (arrastando.startsWith('z')) setZona((z) => z.map((x, i) => (i === Number(arrastando[1]) ? r3 : x)));
-    else setLinha((l) => ({ ...l, [arrastando]: r3 }));
+    else if (arrastando.startsWith('x')) {
+      const [, zi, pi] = arrastando.split(':').map(Number);
+      setExclusao((ex) => ex.map((pol, i) => (i === zi ? pol.map((x, j) => (j === pi ? r3 : x)) : pol)));
+    }
+    else if (arrastando === 'a' || arrastando === 'b') setLinha((l) => ({ ...l, [arrastando]: r3 }));
     setSalvo(false);
   };
 
@@ -69,6 +74,28 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
             <img src={`${BASE}/api/quadro/${cam.canal}?tipo=cru&t=${new Date(cam.quadro_cru_em).getTime()}`} alt={`Quadro atual da câmera ${cam.nome}`} className="h-full w-full object-contain" draggable={false} />
           ) : (
             <p className="absolute inset-0 flex items-center justify-center text-sm text-white/70">Esperando o primeiro quadro do motor...</p>
+          )}
+          {exclusao.length > 0 && (
+            <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+              {exclusao.map((pol, i) => (
+                <polygon key={i} points={pol.map((p) => p.join(',')).join(' ')} fill="rgba(239,68,68,0.25)" stroke="#ef4444" style={{ strokeWidth: 2 }} vectorEffect="non-scaling-stroke" />
+              ))}
+            </svg>
+          )}
+          {exclusao.map((pol, zi) =>
+            pol.map((p, pi) => (
+              <button
+                key={`x${zi}-${pi}`}
+                type="button"
+                aria-label={`Canto ${pi + 1} da zona de exclusão ${zi + 1} (arraste)`}
+                onPointerDown={(e) => {
+                  (e.target as HTMLElement).setPointerCapture(e.pointerId);
+                  setArrastando(`x:${zi}:${pi}`);
+                }}
+                className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-full border-2 border-white bg-[#ef4444] shadow"
+                style={{ left: `${p[0] * 100}%`, top: `${p[1] * 100}%` }}
+              />
+            )),
           )}
           {temZona && (
             <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
@@ -172,6 +199,28 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
           <input type="checkbox" name="ativa" defaultChecked={cam.ativa} />
           Analisar esta câmera
         </label>
+        <label className="block">
+          <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Confiança mínima para detectar (%)</span>
+          <input name="conf_min" type="number" min={20} max={90} defaultValue={Math.round((cam.conf_min ?? 0.4) * 100)} className="mt-1 w-28 rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
+          <span className="mt-1 block text-xs text-on-surface-variant">Mais alta nas câmeras da rua evita lixo e sombra virando pessoa.</span>
+        </label>
+        <div className="rounded-sm border border-outline-variant p-3">
+          <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Zonas de exclusão</p>
+          <p className="mt-1 text-xs text-on-surface-variant">Áreas vermelhas onde nada é detectado (ex.: o ponto do lixo). Arraste os cantos sobre a imagem.</p>
+          <input type="hidden" name="exclusao" value={JSON.stringify(exclusao)} />
+          <div className="mt-2 flex flex-wrap gap-2">
+            {exclusao.length < 4 && (
+              <button type="button" onClick={() => { setExclusao((ex) => [...ex, [[0.4, 0.4], [0.6, 0.4], [0.6, 0.6], [0.4, 0.6]]]); setSalvo(false); }} className="rounded-sm border border-outline-variant px-3 py-1 text-xs text-on-surface">
+                + Adicionar zona
+              </button>
+            )}
+            {exclusao.map((_, i) => (
+              <button key={i} type="button" onClick={() => { setExclusao((ex) => ex.filter((__, j) => j !== i)); setSalvo(false); }} className="rounded-sm border border-error px-3 py-1 text-xs text-error">
+                Remover zona {i + 1}
+              </button>
+            ))}
+          </div>
+        </div>
         <label className="flex items-center gap-2">
           <input type="checkbox" name="fachada" defaultChecked={cam.fachada} />
           Esta câmera vê a calçada (conversão da fachada)
