@@ -12,7 +12,7 @@ export default async function Configuracao() {
         <form action={salvarGeral} className="flex flex-wrap items-end gap-6 text-sm">
           <label className="flex items-center gap-2">
             <input type="checkbox" name="borrar" defaultChecked={cfg.borrarRostos} />
-            Borrar as cabeças nas imagens (recomendado em demonstrações). Com isso ligado, o vídeo cru fica desligado.
+            Borrar as cabeças nas imagens e nos recortes (desligado: o sistema é interno). Se ligar, o vídeo ao vivo vira uma foto a cada 5 segundos.
           </label>
           <label className="block">
             <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Guardar eventos por (dias)</span>

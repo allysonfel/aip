@@ -73,9 +73,21 @@ export async function garantirSchema() {
       fps_total REAL
     );
     CREATE INDEX IF NOT EXISTS motor_amostras_em ON motor_amostras (em);
+    -- Caixas da última análise de cada câmera (o navegador desenha por cima do vídeo).
+    CREATE TABLE IF NOT EXISTS deteccoes (
+      id BIGSERIAL PRIMARY KEY,
+      canal TEXT NOT NULL,
+      ts BIGINT NOT NULL,
+      objetos JSONB NOT NULL,
+      criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS deteccoes_canal_ts ON deteccoes (canal, ts);
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS contagem_hoje JSONB;
+    ALTER TABLE motor_status ADD COLUMN IF NOT EXISTS detector TEXT;
   `);
 
-  await sql`INSERT INTO config (chave, valor) VALUES ('borrar_rostos', 'true'), ('retencao_dias', '30') ON CONFLICT DO NOTHING`;
+
+  await sql`INSERT INTO config (chave, valor) VALUES ('borrar_rostos', 'false'), ('retencao_dias', '30') ON CONFLICT DO NOTHING`;
 
   // As 5 câmeras da unidade Bezerros (canais conferidos no mediamtx em
   // 14/11/2026). Começa com 3 ligadas, a 2 quadros por segundo.
@@ -99,5 +111,15 @@ export async function garantirSchema() {
     const hash = await bcrypt.hash(senha, 11);
     await sql`INSERT INTO usuarios (login, senha_hash, nome) VALUES (${login}, ${hash}, 'Administrador') ON CONFLICT (login) DO NOTHING`;
   }
+  // Migração 2 (uma vez só): sem borrão por padrão (sistema interno) e as 5
+  // câmeras ligadas, com quadros por segundo conforme a necessidade de cada uma.
+  const [v2] = await sql`SELECT 1 FROM config WHERE chave = 'migracao_2'`;
+  if (!v2) {
+    await sql`UPDATE config SET valor = 'false' WHERE chave = 'borrar_rostos'`;
+    const fps: Record<string, number> = { cam2: 5, cam5: 4, cam3: 2, cam1: 2, cam4: 1 };
+    for (const [canal, q] of Object.entries(fps)) await sql`UPDATE cameras SET ativa = true, fps = ${q} WHERE canal = ${canal}`;
+    await sql`INSERT INTO config (chave, valor) VALUES ('migracao_2', 'true')`;
+  }
+
   await sql`DELETE FROM sessoes WHERE expira < now()`;
 }

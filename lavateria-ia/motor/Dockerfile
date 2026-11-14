@@ -9,7 +9,9 @@ WORKDIR /app
 RUN pip install --no-cache-dir --index-url https://download.pytorch.org/whl/cpu torch torchvision
 COPY requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
-RUN python -c "import rfdetr; rfdetr.RFDETRNano(device='cpu')"
+# Pesos do RF-DETR Nano + exportação para ONNX (o OpenVINO roda esse arquivo).
+RUN python -c "from rfdetr import RFDETRNano; RFDETRNano(device='cpu').export(output_dir='/app/modelo')" > /tmp/export.log 2>&1 \
+    && ls -la /app/modelo/*.onnx
 
 COPY *.py ./
 ENV PYTHONUNBUFFERED=1

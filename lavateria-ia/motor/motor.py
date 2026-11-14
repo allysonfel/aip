@@ -44,15 +44,77 @@ cv2.setNumThreads(1)
 # Rótulos COCO originais usados pelo RF-DETR.
 CLASSES = {1: "pessoa", 2: "bicicleta", 3: "carro", 4: "moto", 6: "onibus", 8: "caminhao"}
 VEICULOS = {"bicicleta", "carro", "moto", "onibus", "caminhao"}
-COR_PESSOA = (255, 196, 64)  # BGR: azul claro
-COR_VEICULO = (64, 200, 255)  # BGR: âmbar
-COR_LINHA = (80, 220, 120)
 
 PARAR = threading.Event()
 
 
 def log(*a) -> None:
     print(time.strftime("%H:%M:%S"), "[motor]", *a, flush=True)
+
+
+# ---------------------------------------------------------------- detector
+
+MODELO_ONNX = os.environ.get("MOTOR_ONNX") or next(iter(sorted(__import__("glob").glob("/app/modelo/*.onnx"))), "/app/modelo/rfdetr-nano.onnx")
+RESOLUCAO = 384
+MEDIA = np.array([0.485, 0.456, 0.406], dtype=np.float32)
+DESVIO = np.array([0.229, 0.224, 0.225], dtype=np.float32)
+
+
+class Detector:
+    """RF-DETR Nano. Preferência: OpenVINO sobre o ONNX exportado no build
+    (medido na VPS, 2 vCPU: 45 ms por quadro contra 176 ms do PyTorch, com a
+    mesma entrada de 384 px). Se o OpenVINO falhar, usa o PyTorch."""
+
+    def __init__(self) -> None:
+        self.motor = "pytorch"
+        self._req = None
+        try:
+            import openvino as ov
+
+            core = ov.Core()
+            modelo = core.compile_model(MODELO_ONNX, "CPU", {"INFERENCE_NUM_THREADS": THREADS, "PERFORMANCE_HINT": "LATENCY"})
+            self._req = modelo.create_infer_request()
+            self._saidas = [o.get_any_name() for o in modelo.outputs]
+            self.motor = "openvino"
+            log(f"detector: OpenVINO ({MODELO_ONNX}, {THREADS} threads)")
+        except Exception as e:
+            log("OpenVINO indisponível, usando PyTorch:", repr(e)[:300])
+            torch.set_num_threads(THREADS)
+            from rfdetr import RFDETRNano
+
+            m = RFDETRNano(device="cpu")
+            try:
+                self._torch = m.inference()
+            except Exception:
+                self._torch = m
+
+    def detectar(self, bgr: np.ndarray) -> sv.Detections:
+        h, w = bgr.shape[:2]
+        if self._req is None:
+            with torch.inference_mode():
+                d = self._torch.predict(cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB), threshold=CONF_MIN)
+            return d[np.isin(d.class_id, list(CLASSES))]
+        rgb = cv2.cvtColor(cv2.resize(bgr, (RESOLUCAO, RESOLUCAO), interpolation=cv2.INTER_LINEAR), cv2.COLOR_BGR2RGB)
+        x = ((rgb.astype(np.float32) / 255.0 - MEDIA) / DESVIO).transpose(2, 0, 1)[None]
+        r = self._req.infer({0: np.ascontiguousarray(x)})
+        vals = {k.get_any_name(): v for k, v in r.items()}
+        caixas, logits = vals.get("dets", list(vals.values())[0])[0], vals.get("labels", list(vals.values())[1])[0]
+        # Mesmo pós-processamento do RF-DETR: as 300 maiores probabilidades
+        # entre todas as consultas x classes.
+        prob = 1.0 / (1.0 + np.exp(-logits))
+        plano = prob.reshape(-1)
+        topo = np.argpartition(-plano, 300)[:300]
+        topo = topo[plano[topo] > CONF_MIN]
+        if not len(topo):
+            return sv.Detections.empty()
+        q, cls = topo // prob.shape[1], topo % prob.shape[1]
+        manter = np.isin(cls, list(CLASSES))
+        q, cls, conf = q[manter], cls[manter], plano[topo][manter]
+        cx, cy, bw, bh = caixas[q].T
+        xyxy = np.stack([(cx - bw / 2) * w, (cy - bh / 2) * h, (cx + bw / 2) * w, (cy + bh / 2) * h], axis=1).clip(0, [w, h, w, h])
+        d = sv.Detections(xyxy=xyxy.astype(np.float32), confidence=conf.astype(np.float32), class_id=cls.astype(int))
+        # A mesma consulta pode aparecer em duas classes (ex.: carro e caminhão): fica a mais provável.
+        return d.with_nms(threshold=0.7, class_agnostic=True)
 
 
 # ---------------------------------------------------------------- linhas
@@ -68,12 +130,12 @@ class Linha:
     quando termina do lado negativo (produto vetorial com fim - início) e
     "b" no outro sentido."""
 
-    def __init__(self, a, b, largura: int) -> None:
+    def __init__(self, a, b, largura: int, faixa_rel: float = LINHA_FAIXA_MORTA) -> None:
         self.a = np.array(a, dtype=float)
         self.b = np.array(b, dtype=float)
         self.v = self.b - self.a
         self.comp = float(np.hypot(*self.v)) or 1.0
-        self.faixa = LINHA_FAIXA_MORTA * largura
+        self.faixa = faixa_rel * largura
         self._lado: dict[int, tuple[bool, np.ndarray]] = {}
 
     def _dist(self, p: np.ndarray) -> float:
@@ -112,6 +174,8 @@ class _Veiculo:
     centro: np.ndarray
     visto: float
     caixa: np.ndarray
+    origem: np.ndarray | None = None
+    contado: bool = False
 
 
 class RastreadorVeiculos:
@@ -120,7 +184,7 @@ class RastreadorVeiculos:
     perde o veículo. Aqui a associação é pelo centro mais próximo, dentro
     de um raio proporcional à imagem, preferindo a mesma classe."""
 
-    def __init__(self, largura: int, raio_rel: float = 0.38, validade_s: float = 2.2) -> None:
+    def __init__(self, largura: int, raio_rel: float = 0.25, validade_s: float = 1.6) -> None:
         self.raio = raio_rel * largura
         self.validade = validade_s
         self._v: dict[int, _Veiculo] = {}
@@ -145,7 +209,8 @@ class RastreadorVeiculos:
                 self._prox += 1
             else:
                 livres.pop(melhor)
-            v = _Veiculo(melhor, classes[i], centros[i], ts, caixas[i])
+            antes = self._v.get(melhor)
+            v = _Veiculo(melhor, classes[i], centros[i], ts, caixas[i], origem=antes.origem if antes else centros[i], contado=bool(antes and antes.contado))
             self._v[melhor] = v
             saida.append(v)
         return saida
@@ -173,6 +238,7 @@ class Camera:
     chave_linha: str = ""
     tamanho: tuple[int, int] | None = None
     ultimo_cru: float = 0.0
+    ultimo_seq: int = -1
     processados: list[float] = field(default_factory=list)
     contagem: dict[str, int] = field(default_factory=dict)
 
@@ -197,7 +263,7 @@ def montar_rastreio(cam: Camera, largura: int, altura: int) -> None:
     if cam.tipo_linha and cam.linha:
         a = (cam.linha["a"][0] * largura, cam.linha["a"][1] * altura)
         b = (cam.linha["b"][0] * largura, cam.linha["b"][1] * altura)
-        cam.contador = Linha(a, b, largura)
+        cam.contador = Linha(a, b, largura, faixa_rel=0.03 if cam.tipo_linha == "veiculos" else 0.015)
 
 
 # ---------------------------------------------------------------- privacidade e desenho
@@ -221,37 +287,6 @@ def borrar_cabecas(img: np.ndarray, caixas: np.ndarray) -> None:
         img[cy1:cy2, cx1:cx2] = cv2.GaussianBlur(regiao, (k, k), 0)
 
 
-def desenhar(img: np.ndarray, cam: Camera, pessoas: sv.Detections, veiculos: list[_Veiculo]) -> np.ndarray:
-    out = img.copy()
-    for (x1, y1, x2, y2), tid in zip(pessoas.xyxy, pessoas.tracker_id if pessoas.tracker_id is not None else []):
-        cv2.rectangle(out, (int(x1), int(y1)), (int(x2), int(y2)), COR_PESSOA, 2)
-        _rotulo(out, f"pessoa {tid}", int(x1), int(y1), COR_PESSOA)
-    for v in veiculos:
-        x1, y1, x2, y2 = v.caixa
-        cv2.rectangle(out, (int(x1), int(y1)), (int(x2), int(y2)), COR_VEICULO, 2)
-        _rotulo(out, v.classe, int(x1), int(y1), COR_VEICULO)
-    if cam.contador is not None and cam.tamanho:
-        a = tuple(int(x) for x in cam.contador.a)
-        b = tuple(int(x) for x in cam.contador.b)
-        cv2.line(out, a, b, COR_LINHA, 2, cv2.LINE_AA)
-        cv2.circle(out, a, 4, COR_LINHA, -1)
-        cv2.circle(out, b, 4, COR_LINHA, -1)
-        if cam.tipo_linha == "entrada":
-            texto = f"entradas {cam.contagem.get('entrada', 0)}  saidas {cam.contagem.get('saida', 0)}"
-        else:
-            texto = f"sentido A {cam.contagem.get('a', 0)}  sentido B {cam.contagem.get('b', 0)}"
-        _rotulo(out, texto, 8, out.shape[0] - 8, COR_LINHA, embaixo=True)
-    return out
-
-
-def _rotulo(img, texto, x, y, cor, embaixo=False) -> None:
-    (tw, th), _ = cv2.getTextSize(texto, cv2.FONT_HERSHEY_SIMPLEX, 0.45, 1)
-    y0 = y - th - 6 if not embaixo else y - th - 6
-    y0 = max(0, y0)
-    cv2.rectangle(img, (x, y0), (x + tw + 6, y0 + th + 6), cor, -1)
-    cv2.putText(img, texto, (x + 3, y0 + th + 2), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (20, 20, 20), 1, cv2.LINE_AA)
-
-
 def jpeg(img: np.ndarray, qualidade: int = 72) -> bytes:
     ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, qualidade])
     return buf.tobytes() if ok else b""
@@ -273,18 +308,7 @@ class Motor:
         self._ultima_config = 0.0
         self._ultima_limpeza = 0.0
         self._ultimo_cru_inativas = 0.0
-        log(f"carregando RF-DETR Nano (CPU, {THREADS} threads)...")
-        from rfdetr import RFDETRNano
-
-        self.modelo = RFDETRNano(device="cpu")
-        # Preditor otimizado (TorchScript) do próprio RF-DETR: mesmo resultado,
-        # menos tempo por quadro na CPU. Se falhar, segue com o modelo normal.
-        self.preditor = self.modelo
-        try:
-            self.preditor = self.modelo.inference()
-            log("preditor otimizado pronto")
-        except Exception as e:
-            log("sem preditor otimizado, usando o modelo normal:", repr(e))
+        self.detector = Detector()
 
     # ---------- banco
 
@@ -369,19 +393,17 @@ class Motor:
     # ---------- processamento
 
     def detectar(self, bgr: np.ndarray) -> sv.Detections:
-        rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
         t0 = time.perf_counter()
-        with torch.inference_mode():
-            dets = self.preditor.predict(rgb, threshold=CONF_MIN)
+        dets = self.detector.detectar(bgr)
         self.ms_inferencia.append((time.perf_counter() - t0) * 1000)
         self.ms_inferencia = self.ms_inferencia[-50:]
-        manter = np.isin(dets.class_id, list(CLASSES))
-        return dets[manter]
+        return dets
 
     def processar(self, cam: Camera) -> None:
         q = cam.fonte.ultimo() if cam.fonte else None
-        if q is None:
+        if q is None or q.seq == cam.ultimo_seq:
             return
+        cam.ultimo_seq = q.seq
         img = q.imagem
         h, w = img.shape[:2]
         if cam.tamanho != (w, h):
@@ -390,7 +412,7 @@ class Motor:
         dets = self.detectar(img)
         nomes = [CLASSES[int(c)] for c in dets.class_id]
         e_pessoa = np.array([n == "pessoa" for n in nomes], dtype=bool)
-        pessoas = cam.rastreador.update_with_detections(dets[e_pessoa]) if len(dets) else cam.rastreador.update_with_detections(sv.Detections.empty())
+        pessoas = cam.rastreador.update_with_detections(dets[e_pessoa] if len(dets) else sv.Detections.empty())
         if pessoas.tracker_id is None:
             pessoas.tracker_id = np.array([], dtype=int)
         # Veículos só contam (e aparecem) na câmera da rua: nas internas, o
@@ -398,40 +420,57 @@ class Motor:
         idx_v = [i for i, n in enumerate(nomes) if n in VEICULOS] if cam.tipo_linha == "veiculos" else []
         veiculos = cam.veiculos.atualizar(dets.xyxy[idx_v] if idx_v else np.zeros((0, 4)), [nomes[i] for i in idx_v], q.ts)
 
-        mudou_contagem = False
+        mudou = False
         if cam.contador is not None:
             if cam.tipo_linha == "entrada":
                 for (x1, y1, x2, y2), tid in zip(pessoas.xyxy, pessoas.tracker_id):
                     s = cam.contador.atualizar(int(tid), ((x1 + x2) / 2, y2))
                     if s:
-                        tipo = "entrada" if s == "a" else "saida"
-                        self.salvar_evento(cam.canal, tipo, "pessoa", s, int(tid))
-                        mudou_contagem = True
+                        self.salvar_evento(cam.canal, "entrada" if s == "a" else "saida", "pessoa", s, int(tid))
+                        mudou = True
                 cam.contador.esquecer({int(t) for t in pessoas.tracker_id})
             elif cam.tipo_linha == "veiculos":
                 for v in veiculos:
                     s = cam.contador.atualizar(v.id, tuple(v.centro))
-                    if s:
+                    # Conta uma vez só por veículo, e só se ele andou de verdade
+                    # (carro parado perto da linha "cruzava" a cada tremida da caixa).
+                    andou = v.origem is not None and float(np.hypot(*(v.centro - v.origem))) >= 0.06 * w
+                    if s and not v.contado and andou:
+                        v.contado = True
                         self.salvar_evento(cam.canal, "veiculo", v.classe, s, v.id)
-                        mudou_contagem = True
+                        mudou = True
                 cam.contador.esquecer(cam.veiculos.vivos())
-        if mudou_contagem:
+        if mudou:
             self.contagem_hoje(cam)
 
-        base = img.copy()
-        if self.borrar and len(pessoas):
-            borrar_cabecas(base, pessoas.xyxy)
-        anotado = desenhar(base, cam, pessoas, veiculos)
+        # Caixas para o navegador desenhar por cima do vídeo (posições de 0 a 1).
+        objetos = [
+            {"id": int(t), "c": "pessoa", "b": [round(float(x1) / w, 4), round(float(y1) / h, 4), round(float(x2) / w, 4), round(float(y2) / h, 4)]}
+            for (x1, y1, x2, y2), t in zip(pessoas.xyxy, pessoas.tracker_id)
+        ] + [
+            {"id": 100000 + v.id, "c": v.classe, "b": [round(float(v.caixa[0]) / w, 4), round(float(v.caixa[1]) / h, 4), round(float(v.caixa[2]) / w, 4), round(float(v.caixa[3]) / h, 4)]}
+            for v in veiculos
+        ]
         cam.processados.append(time.time())
         agora = time.time()
         with self.db.cursor() as c:
             c.execute(
-                "UPDATE cameras SET quadro = %s, quadro_em = now(), pessoas_agora = %s, veiculos_agora = %s, online = true, erro = NULL WHERE canal = %s",
-                (jpeg(anotado), int(len(pessoas)), len(veiculos), cam.canal),
+                "INSERT INTO deteccoes (canal, ts, objetos) VALUES (%s, %s, %s)",
+                (cam.canal, int(q.ts * 1000), json.dumps(objetos)),
             )
-            if agora - cam.ultimo_cru > 20:
+            c.execute(
+                "UPDATE cameras SET pessoas_agora = %s, veiculos_agora = %s, online = true, erro = NULL, contagem_hoje = %s WHERE canal = %s",
+                (int(len(pessoas)), len(veiculos), json.dumps(cam.contagem), cam.canal),
+            )
+            if agora - cam.ultimo_cru > 5:
                 cam.ultimo_cru = agora
-                c.execute("UPDATE cameras SET quadro_cru = %s, quadro_cru_em = now(), largura = %s, altura = %s WHERE canal = %s", (jpeg(base, 80), w, h, cam.canal))
+                base = img.copy()
+                if self.borrar and len(pessoas):
+                    borrar_cabecas(base, pessoas.xyxy)
+                c.execute(
+                    "UPDATE cameras SET quadro_cru = %s, quadro_cru_em = now(), largura = %s, altura = %s WHERE canal = %s",
+                    (jpeg(base, 80), w, h, cam.canal),
+                )
 
     def atualizar_offline(self) -> None:
         with self.db.cursor() as c:
@@ -467,11 +506,11 @@ class Motor:
         ms = float(np.mean(self.ms_inferencia)) if self.ms_inferencia else None
         with self.db.cursor() as c:
             c.execute(
-                """INSERT INTO motor_status (id, cpu_pct, mem_mb, ms_inferencia, threads, cameras, atualizado_em)
-                   VALUES (1, %s, %s, %s, %s, %s, now())
+                """INSERT INTO motor_status (id, cpu_pct, mem_mb, ms_inferencia, threads, cameras, detector, atualizado_em)
+                   VALUES (1, %s, %s, %s, %s, %s, %s, now())
                    ON CONFLICT (id) DO UPDATE SET cpu_pct = EXCLUDED.cpu_pct, mem_mb = EXCLUDED.mem_mb, ms_inferencia = EXCLUDED.ms_inferencia,
-                     threads = EXCLUDED.threads, cameras = EXCLUDED.cameras, atualizado_em = now()""",
-                (round(cpu, 1), round(mem), ms and round(ms, 1), THREADS, json.dumps(cams)),
+                     threads = EXCLUDED.threads, cameras = EXCLUDED.cameras, detector = EXCLUDED.detector, atualizado_em = now()""",
+                (round(cpu, 1), round(mem), ms and round(ms, 1), THREADS, json.dumps(cams), self.detector.motor),
             )
             c.execute(
                 "INSERT INTO motor_amostras (cpu_pct, mem_mb, ms_inferencia, cameras_ativas, fps_total) VALUES (%s, %s, %s, %s, %s)",
@@ -508,6 +547,8 @@ class Motor:
                     self._ultimo_status = time.time()
                     self.atualizar_offline()
                     self.escrever_status()
+                    with self.db.cursor() as c:
+                        c.execute("DELETE FROM deteccoes WHERE criado_em < now() - interval '2 minutes'")
                 if not trabalhou:
                     time.sleep(0.03)
             except psycopg.Error as e:

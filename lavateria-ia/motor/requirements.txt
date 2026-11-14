@@ -5,3 +5,8 @@ opencv-python-headless>=4.10
 psycopg[binary]>=3.2
 psutil>=6.0
 numpy
+# Detector rápido na CPU: o modelo é exportado para ONNX no build e roda no OpenVINO.
+openvino>=2025.0
+onnx
+onnxscript
+onnxsim

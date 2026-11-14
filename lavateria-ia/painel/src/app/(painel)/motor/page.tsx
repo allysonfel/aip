@@ -33,7 +33,7 @@ export default async function Motor() {
           <Numero rotulo="MB em uso pelo motor" valor={status?.mem_mb ?? '—'} />
         </Secao>
         <Secao titulo="Tempo por quadro">
-          <Numero rotulo="ms de inferência (média)" valor={v(status?.ms_inferencia, 0)} detalhe={`${v(fpsTotal, 1)} quadros analisados por segundo no total`} />
+          <Numero rotulo={`ms de inferência (média, ${status?.detector === 'openvino' ? 'OpenVINO' : 'PyTorch'})`} valor={v(status?.ms_inferencia, 0)} detalhe={`${v(fpsTotal, 1)} quadros analisados por segundo no total`} />
         </Secao>
       </div>
       <Secao titulo="Últimas 2 horas" className="mt-4">

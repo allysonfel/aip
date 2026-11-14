@@ -1,8 +1,7 @@
 import { Secao, TituloPagina } from '@/components/Comum';
 import { Atualizar } from '@/components/Atualizar';
-import { QuadroAnotado } from '@/components/CameraAoVivo';
+import { VideoComCaixas } from '@/components/VideoComCaixas';
 import { cameras, config } from '@/lib/dados';
-import VideoBotao from './VideoBotao';
 
 export default async function AoVivo() {
   const [cams, cfg] = await Promise.all([cameras(), config()]);
@@ -13,12 +12,15 @@ export default async function AoVivo() {
       <Atualizar segundos={10} />
       <TituloPagina
         titulo="Câmeras ao vivo"
-        descricao={`Imagens analisadas pelo motor, com as caixas de detecção e as linhas de contagem. ${cfg.borrarRostos ? 'Privacidade ligada: as cabeças saem borradas.' : 'Privacidade desligada.'}`}
+        descricao={
+          cfg.borrarRostos
+            ? 'Privacidade ligada: em vez do vídeo, uma foto a cada 5 segundos com as cabeças borradas, e as caixas da análise por cima.'
+            : 'Vídeo na velocidade da câmera, com as caixas da análise por cima. A IA analisa menos quadros por segundo; entre uma análise e outra, as caixas são interpoladas. O vídeo tem alguns segundos de atraso.'
+        }
       />
       <div className="grid gap-4 lg:grid-cols-2">
         {ativas.map((c) => {
-          const atraso = c.quadro_em ? (Date.now() - new Date(c.quadro_em).getTime()) / 1000 : null;
-          const noAr = c.online && atraso !== null && atraso < 15;
+          const noAr = c.online;
           return (
             <Secao
               key={c.canal}
@@ -31,12 +33,11 @@ export default async function AoVivo() {
                 </span>
               }
             >
-              <QuadroAnotado canal={c.canal} nome={c.nome} />
+              <VideoComCaixas canal={c.canal} caminho={c.caminho} nome={c.nome} videoLiberado={!cfg.borrarRostos} />
               <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-sm text-on-surface-variant">
                 <span>
-                  {c.pessoas_agora} {c.pessoas_agora === 1 ? 'pessoa' : 'pessoas'} e {c.veiculos_agora} {c.veiculos_agora === 1 ? 'veículo' : 'veículos'} na imagem · {c.fps} quadros/s
+                  {c.pessoas_agora} {c.pessoas_agora === 1 ? 'pessoa' : 'pessoas'} e {c.veiculos_agora} {c.veiculos_agora === 1 ? 'veículo' : 'veículos'} na imagem · IA a {String(c.fps).replace('.', ',')} quadros/s
                 </span>
-                {!cfg.borrarRostos && <VideoBotao caminho={c.caminho} />}
               </div>
               {!noAr && c.erro && <p className="mt-2 text-xs text-error">{c.erro}</p>}
             </Secao>
