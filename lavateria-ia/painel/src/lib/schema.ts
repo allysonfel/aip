@@ -128,6 +128,40 @@ export async function garantirSchema() {
       img BYTEA NOT NULL
     );
     CREATE INDEX IF NOT EXISTS quadros_momento_ref ON quadros_momento (tipo, ref_id, ts);
+    -- Etapa 4: regras da loja (alertas), validação de precisão e contagem manual.
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS interna BOOLEAN NOT NULL DEFAULT false;
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS zona_totem JSONB;
+    CREATE TABLE IF NOT EXISTS alertas (
+      id BIGSERIAL PRIMARY KEY,
+      tipo TEXT NOT NULL,
+      canal TEXT,
+      nivel TEXT NOT NULL,
+      mensagem TEXT NOT NULL,
+      imagem BYTEA,
+      quando TIMESTAMPTZ NOT NULL DEFAULT now(),
+      lido_em TIMESTAMPTZ
+    );
+    CREATE INDEX IF NOT EXISTS alertas_quando ON alertas (quando);
+    CREATE TABLE IF NOT EXISTS validacoes (
+      id BIGSERIAL PRIMARY KEY,
+      tipo TEXT NOT NULL CHECK (tipo IN ('pessoa', 'veiculo')),
+      ref_id BIGINT NOT NULL,
+      atributo TEXT NOT NULL,
+      estimado TEXT,
+      correto BOOLEAN NOT NULL,
+      usuario_id INT,
+      em TIMESTAMPTZ NOT NULL DEFAULT now(),
+      UNIQUE (tipo, ref_id, atributo)
+    );
+    CREATE TABLE IF NOT EXISTS contagens_manuais (
+      id BIGSERIAL PRIMARY KEY,
+      de TIMESTAMPTZ NOT NULL,
+      ate TIMESTAMPTZ NOT NULL,
+      manual INT NOT NULL,
+      automatico INT NOT NULL,
+      usuario_id INT,
+      em TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
     ALTER TABLE motor_status ADD COLUMN IF NOT EXISTS detector TEXT;
   `);
 
@@ -171,6 +205,15 @@ export async function garantirSchema() {
   if (!v3) {
     await sql`UPDATE cameras SET fachada = true WHERE canal = 'cam1'`;
     await sql`INSERT INTO config (chave, valor) VALUES ('migracao_3', 'true'), ('parado_min', '3') ON CONFLICT DO NOTHING`;
+  }
+
+  // Migração 4: câmeras internas (regras da loja) e horários padrão da loja.
+  const [v4] = await sql`SELECT 1 FROM config WHERE chave = 'migracao_4'`;
+  if (!v4) {
+    await sql`UPDATE cameras SET interna = true WHERE canal IN ('cam3', 'cam4', 'cam5')`;
+    const loja = { abre: 6, fecha: 23, limpeza_de: 14, limpeza_ate: 17, fachada_s: 60, totem_s: 180, regras: { loja_fechada: true, fechamento: true, sala_maquinas: true, camera_caida: true, pet: true, fachada_fechada: true, totem: true } };
+    await sql`INSERT INTO config (chave, valor) VALUES ('loja', ${sql.json(loja)}) ON CONFLICT DO NOTHING`;
+    await sql`INSERT INTO config (chave, valor) VALUES ('migracao_4', 'true')`;
   }
 
   await sql`DELETE FROM sessoes WHERE expira < now()`;

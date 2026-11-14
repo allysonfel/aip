@@ -15,9 +15,11 @@ const NOME_PONTO = ['1 frente-esq.', '2 frente-dir.', '3 fundo-dir.', '4 fundo-e
 export default function EditorCamera({ cam }: { cam: CameraInfo }) {
   const [linha, setLinha] = useState(cam.linha ?? PADRAO);
   const [tipo, setTipo] = useState<string>(cam.tipo_linha ?? '');
-  const [arrastando, setArrastando] = useState<'a' | 'b' | 0 | 1 | 2 | 3 | null>(null);
+  const [arrastando, setArrastando] = useState<'a' | 'b' | 0 | 1 | 2 | 3 | 'z0' | 'z1' | 'z2' | 'z3' | null>(null);
   const [cal, setCal] = useState<Ponto[]>(cam.calibracao?.pontos ?? CAL_PADRAO);
   const [calibrar, setCalibrar] = useState(Boolean(cam.calibracao));
+  const [zona, setZona] = useState<Ponto[]>(cam.zona_totem ?? [[0.3, 0.3], [0.5, 0.3], [0.5, 0.6], [0.3, 0.6]]);
+  const [temZona, setTemZona] = useState(Boolean(cam.zona_totem));
   const [salvo, setSalvo] = useState(false);
   const caixa = useRef<HTMLDivElement>(null);
   const proporcao = cam.largura && cam.altura ? cam.largura / cam.altura : 704 / 480;
@@ -28,6 +30,7 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
     const p: Ponto = [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))];
     const r3: Ponto = [Math.round(p[0] * 1000) / 1000, Math.round(p[1] * 1000) / 1000];
     if (typeof arrastando === 'number') setCal((c) => c.map((x, i) => (i === arrastando ? r3 : x)));
+    else if (arrastando.startsWith('z')) setZona((z) => z.map((x, i) => (i === Number(arrastando[1]) ? r3 : x)));
     else setLinha((l) => ({ ...l, [arrastando]: r3 }));
     setSalvo(false);
   };
@@ -67,6 +70,25 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
           ) : (
             <p className="absolute inset-0 flex items-center justify-center text-sm text-white/70">Esperando o primeiro quadro do motor...</p>
           )}
+          {temZona && (
+            <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+              <polygon points={zona.map((p) => p.join(',')).join(' ')} fill="rgba(245,158,11,0.18)" stroke="#f59e0b" style={{ strokeWidth: 2 }} vectorEffect="non-scaling-stroke" />
+            </svg>
+          )}
+          {temZona &&
+            zona.map((p, i) => (
+              <button
+                key={`z${i}`}
+                type="button"
+                aria-label={`Canto ${i + 1} da zona do totem (arraste)`}
+                onPointerDown={(e) => {
+                  (e.target as HTMLElement).setPointerCapture(e.pointerId);
+                  setArrastando(`z${i}` as 'z0');
+                }}
+                className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-grab rounded-sm border-2 border-white bg-[#f59e0b] shadow"
+                style={{ left: `${p[0] * 100}%`, top: `${p[1] * 100}%` }}
+              />
+            ))}
           {tipo === 'veiculos' && calibrar && (
             <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
               <polygon points={cal.map((p) => p.join(',')).join(' ')} fill="rgba(168,85,247,0.15)" stroke="#a855f7" style={{ strokeWidth: 2 }} vectorEffect="non-scaling-stroke" />
@@ -154,6 +176,15 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
           <input type="checkbox" name="fachada" defaultChecked={cam.fachada} />
           Esta câmera vê a calçada (conversão da fachada)
         </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" name="interna" defaultChecked={cam.interna} />
+          Câmera interna (regras de loja fechada e pet)
+        </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" checked={temZona} onChange={(e) => { setTemZona(e.target.checked); setSalvo(false); }} />
+          Zona do totem (quadrado laranja: arraste os cantos)
+        </label>
+        {temZona && <input type="hidden" name="zona_totem" value={JSON.stringify(zona)} />}
         {tipo === 'veiculos' && (
           <fieldset className="space-y-3 rounded-sm border border-outline-variant p-3">
             <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Velocidade</legend>

@@ -11,8 +11,8 @@ type Linha = { a: [number, number]; b: [number, number] } | null;
 // vídeo (HLS) traz a hora em que o mediamtx recebeu cada trecho. A leitura
 // do motor chega um pouco depois da gravação: este é esse pequeno atraso.
 const ATRASO_MOTOR_MS = 350;
-const COR: Record<string, string> = { pessoa: '#38bdf8', carro: '#f59e0b', moto: '#f97316', caminhao: '#eab308', onibus: '#eab308', bicicleta: '#a3e635' };
-const NOME: Record<string, string> = { pessoa: 'pessoa', carro: 'carro', moto: 'moto', caminhao: 'caminhão', onibus: 'ônibus', bicicleta: 'bicicleta' };
+const COR: Record<string, string> = { pessoa: '#38bdf8', carro: '#f59e0b', moto: '#f97316', caminhao: '#eab308', onibus: '#eab308', bicicleta: '#a3e635', gato: '#f472b6', cachorro: '#f472b6' };
+const NOME: Record<string, string> = { pessoa: 'pessoa', carro: 'carro', moto: 'moto', caminhao: 'caminhão', onibus: 'ônibus', bicicleta: 'bicicleta', gato: 'gato', cachorro: 'cachorro' };
 
 /** Posição de cada objeto no instante t, interpolando entre as duas análises vizinhas. */
 function caixasNoInstante(buf: Quadro[], t: number): Objeto[] {

@@ -10,13 +10,13 @@ export type Calibracao = { pontos: [number, number][]; largura_m: number; compri
 export type CameraInfo = {
   canal: string; caminho: string; nome: string; funcao: string; ativa: boolean; fps: number;
   tipo_linha: 'entrada' | 'veiculos' | null; linha: { a: [number, number]; b: [number, number] } | null;
-  online: boolean; erro: string | null; calibracao: Calibracao | null; fachada: boolean; contagem_hoje: Record<string, number> | null; quadro_em: Date | null; quadro_cru_em: Date | null;
+  online: boolean; erro: string | null; calibracao: Calibracao | null; fachada: boolean; interna: boolean; zona_totem: [number, number][] | null; contagem_hoje: Record<string, number> | null; quadro_em: Date | null; quadro_cru_em: Date | null;
   largura: number | null; altura: number | null; pessoas_agora: number; veiculos_agora: number;
 };
 
 export async function cameras(): Promise<CameraInfo[]> {
   return sql<CameraInfo[]>`
-    SELECT canal, caminho, nome, funcao, ativa, fps, tipo_linha, linha, online, erro, calibracao, fachada, contagem_hoje, quadro_em, quadro_cru_em, largura, altura, pessoas_agora, veiculos_agora
+    SELECT canal, caminho, nome, funcao, ativa, fps, tipo_linha, linha, online, erro, calibracao, fachada, interna, zona_totem, contagem_hoje, quadro_em, quadro_cru_em, largura, altura, pessoas_agora, veiculos_agora
     FROM cameras ORDER BY ordem, canal`;
 }
 
@@ -241,4 +241,90 @@ export async function momento(tipo: 'pessoa' | 'veiculo', id: number) {
   const [v] = await sql<{ id: number; inicio: Date; fim: Date; camera: string; classe: string; atributos: { cor?: Atributo }; velocidade_kmh: number | null }[]>`
     SELECT v.id, v.inicio, v.fim, c.nome AS camera, v.classe, v.atributos, v.velocidade_kmh FROM veiculos v JOIN cameras c ON c.canal = v.canal WHERE v.id = ${id}`;
   return v ? { ...v, quadros, tipo } : null;
+}
+
+// ---------------------------------------------------------------- etapa 4
+
+export type Loja = { abre: number; fecha: number; limpeza_de: number; limpeza_ate: number; fachada_s: number; totem_s: number; regras: Record<string, boolean> };
+
+export const REGRAS: { k: string; t: string; d: string }[] = [
+  { k: 'loja_fechada', t: 'Loja fechada vigiada', d: 'Fora do horário, qualquer pessoa na Recepção, no Salão ou na Sala de Máquinas gera alerta urgente.' },
+  { k: 'fechamento', t: 'Fechamento seguro', d: '15 min antes de fechar avisa se ainda tem gente; 5 min depois confere se a loja fechou vazia (pela contagem da porta).' },
+  { k: 'sala_maquinas', t: 'Sala de Máquinas fora do horário', d: 'Pessoa na Sala de Máquinas fora do horário da limpeza vira alerta.' },
+  { k: 'camera_caida', t: 'Câmera sem imagem', d: 'Avisa quando uma câmera para de mandar imagem por 2 minutos. Todas juntas com a loja fechada: urgente.' },
+  { k: 'pet', t: 'Cachorro ou gato na loja', d: 'Pet não pode entrar. Fica registrado para a higienização da máquina usada depois.' },
+  { k: 'fachada_fechada', t: 'Pessoa parada na fachada (loja fechada)', d: 'Com a loja fechada, alerta quem ficar parado na calçada mais do que o tempo configurado. Quem só passa não conta.' },
+  { k: 'totem', t: 'Cliente parado no totem', d: 'Avisa quando alguém fica no totem mais do que o tempo configurado (desenhe a zona do totem na câmera Recepção).' },
+];
+
+export async function loja(): Promise<Loja> {
+  const [r] = await sql<{ valor: Loja }[]>`SELECT valor FROM config WHERE chave = 'loja'`;
+  return r?.valor ?? { abre: 6, fecha: 23, limpeza_de: 14, limpeza_ate: 17, fachada_s: 60, totem_s: 180, regras: {} };
+}
+
+export type AlertaLinha = { id: number; tipo: string; canal: string | null; nivel: string; mensagem: string; quando: Date; lido_em: Date | null; tem_imagem: boolean; camera: string | null };
+
+export async function alertas(dia?: string, limite = 200): Promise<AlertaLinha[]> {
+  const ini = dia ? sql`(${dia}::date::timestamp AT TIME ZONE 'America/Sao_Paulo')` : sql`now() - interval '7 days'`;
+  return sql<AlertaLinha[]>`
+    SELECT a.id, a.tipo, a.canal, a.nivel, a.mensagem, a.quando, a.lido_em, a.imagem IS NOT NULL AS tem_imagem, c.nome AS camera
+    FROM alertas a LEFT JOIN cameras c ON c.canal = a.canal
+    WHERE a.quando >= ${ini} ${dia ? sql`AND a.quando < ${ini} + interval '1 day'` : sql``}
+    ORDER BY a.quando DESC LIMIT ${limite}`;
+}
+
+export async function alertasNaoLidos(): Promise<number> {
+  const [r] = await sql<{ n: number }[]>`SELECT count(*)::int AS n FROM alertas WHERE lido_em IS NULL AND nivel <> 'info'`;
+  return r?.n ?? 0;
+}
+
+/** Amostra para validar: as mais recentes que ainda têm atributo sem marcação. */
+export async function amostraValidacao(tipo: 'pessoa' | 'veiculo', limite = 12) {
+  if (tipo === 'pessoa') {
+    return sql<{ id: number; inicio: Date; camera: string; atributos: AtributosPessoa; marcados: Record<string, boolean> | null }[]>`
+      SELECT p.id, p.inicio, c.nome AS camera, p.atributos,
+        (SELECT jsonb_object_agg(v.atributo, v.correto) FROM validacoes v WHERE v.tipo = 'pessoa' AND v.ref_id = p.id) AS marcados
+      FROM pessoas p JOIN cameras c ON c.canal = p.canal
+      WHERE NOT (p.atributos ? 'pequeno') AND p.atributos ? 'genero'
+        AND (SELECT count(*) FROM validacoes v WHERE v.tipo = 'pessoa' AND v.ref_id = p.id) < 7
+      ORDER BY p.id DESC LIMIT ${limite}`;
+  }
+  return sql<{ id: number; inicio: Date; camera: string; classe: string; atributos: { cor?: Atributo }; marcados: Record<string, boolean> | null }[]>`
+    SELECT v.id, v.inicio, c.nome AS camera, v.classe, v.atributos,
+      (SELECT jsonb_object_agg(x.atributo, x.correto) FROM validacoes x WHERE x.tipo = 'veiculo' AND x.ref_id = v.id) AS marcados
+    FROM veiculos v JOIN cameras c ON c.canal = v.canal
+    WHERE (SELECT count(*) FROM validacoes x WHERE x.tipo = 'veiculo' AND x.ref_id = v.id) < 2
+    ORDER BY v.id DESC LIMIT ${limite}`;
+}
+
+export async function precisao() {
+  const linhas = await sql<{ atributo: string; certos: number; total: number }[]>`
+    SELECT atributo, count(*) FILTER (WHERE correto)::int AS certos, count(*)::int AS total FROM validacoes GROUP BY 1`;
+  const manuais = await sql<{ de: Date; ate: Date; manual: number; automatico: number }[]>`SELECT de, ate, manual, automatico FROM contagens_manuais ORDER BY em DESC LIMIT 20`;
+  return { linhas, manuais };
+}
+
+export async function resumoDoDia(dia: string) {
+  const ini = sql`(${dia}::date::timestamp AT TIME ZONE 'America/Sao_Paulo')`;
+  const ev = await sql<{ t: Date; tipo: string }[]>`SELECT ocorrido_em AS t, tipo FROM eventos WHERE tipo IN ('entrada','saida') AND ocorrido_em >= ${ini} AND ocorrido_em < ${ini} + interval '1 day' ORDER BY 1`;
+  let oc = 0, pico = 0, picoEm: Date | null = null, entradas = 0, area = 0;
+  let ult = ev.length ? new Date(ev[0].t).getTime() : 0;
+  for (const e of ev) {
+    const t = new Date(e.t).getTime();
+    area += oc * ((t - ult) / 1000);
+    ult = t;
+    if (e.tipo === 'entrada') { oc++; entradas++; } else oc = Math.max(0, oc - 1);
+    if (oc > pico) { pico = oc; picoEm = e.t; }
+  }
+  const veic = await sql<{ classe: string; n: number }[]>`SELECT classe, count(*)::int AS n FROM eventos WHERE tipo = 'veiculo' AND ocorrido_em >= ${ini} AND ocorrido_em < ${ini} + interval '1 day' GROUP BY 1 ORDER BY 2 DESC`;
+  const [vel] = await sql<{ media: number | null }[]>`SELECT avg(velocidade_kmh)::real AS media FROM veiculos WHERE inicio >= ${ini} AND inicio < ${ini} + interval '1 day'`;
+  const [fach] = await sql<{ n: number }[]>`SELECT count(*)::int AS n FROM pessoas p JOIN cameras c ON c.canal = p.canal AND c.fachada WHERE p.inicio >= ${ini} AND p.inicio < ${ini} + interval '1 day'`;
+  const perfil = await sql<{ atributo: string; valor: string; n: number }[]>`
+    SELECT k AS atributo, p.atributos->k->>'valor' AS valor, count(*)::int AS n
+    FROM pessoas p CROSS JOIN unnest(ARRAY['genero','cima','baixo_tipo']) AS k
+    WHERE p.inicio >= ${ini} AND p.inicio < ${ini} + interval '1 day' AND (p.atributos->k->>'conf')::real >= (SELECT (valor)::text::real FROM config WHERE chave = 'limiar_confianca')
+    GROUP BY 1, 2 ORDER BY 1, 3 DESC`;
+  const [pessoasTot] = await sql<{ n: number }[]>`SELECT count(*)::int AS n FROM pessoas WHERE inicio >= ${ini} AND inicio < ${ini} + interval '1 day'`;
+  const al = await sql<{ nivel: string; mensagem: string; quando: Date }[]>`SELECT nivel, mensagem, quando FROM alertas WHERE quando >= ${ini} AND quando < ${ini} + interval '1 day' ORDER BY quando`;
+  return { entradas, pico, picoEm, permanencia: entradas ? area / entradas : null, veic, velMedia: vel?.media ?? null, passaramCalcada: fach?.n ?? 0, perfil, pessoasTot: pessoasTot?.n ?? 0, alertas: al };
 }

@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn';
 import { sair } from '@/app/login/actions';
 import { ThemeToggle } from './ThemeToggle';
 import { LogoAIP } from './Logo';
-import { IconeAtividade, IconeCamera, IconeConfig, IconePessoas, IconeSair, IconeVisaoGeral, IconeRotas, IconeBusca } from './ui/icones';
+import { IconeAtividade, IconeCamera, IconeConfig, IconePessoas, IconeSair, IconeVisaoGeral, IconeRotas, IconeBusca, IconeAlerta, IconeComparar, IconeCalendario } from './ui/icones';
 
 // Menu no mesmo desenho do painel do Shopping Caruaru. As próximas etapas
 // (pessoas, veículos, busca, validação, alertas, resumo) entram aqui.
@@ -25,6 +25,14 @@ const GRUPOS = [
       { href: '/pessoas', label: 'Pessoas', Icone: IconePessoas },
       { href: '/veiculos', label: 'Veículos', Icone: IconeRotas },
       { href: '/busca', label: 'Busca por características', Icone: IconeBusca },
+      { href: '/resumo', label: 'Resumo do dia', Icone: IconeCalendario },
+    ],
+  },
+  {
+    titulo: 'Segurança e qualidade',
+    abas: [
+      { href: '/alertas', label: 'Alertas', Icone: IconeAlerta },
+      { href: '/validacao', label: 'Validação de precisão', Icone: IconeComparar },
     ],
   },
   {
@@ -36,7 +44,7 @@ const GRUPOS = [
   },
 ];
 
-function Navegacao({ aoNavegar }: { aoNavegar?: () => void }) {
+function Navegacao({ aoNavegar, alertas = 0 }: { aoNavegar?: () => void; alertas?: number }) {
   const pathname = usePathname();
   return (
     <nav className="flex flex-1 flex-col gap-4 overflow-y-auto px-3 pb-4">
@@ -60,6 +68,7 @@ function Navegacao({ aoNavegar }: { aoNavegar?: () => void }) {
                 >
                   <Icone strokeWidth={ativa ? 2 : 1.75} className="shrink-0" />
                   {label}
+                  {href === '/alertas' && alertas > 0 && <span className="ml-auto rounded-full bg-error px-1.5 text-[11px] font-semibold text-on-error">{alertas}</span>}
                 </Link>
               );
             })}
@@ -99,17 +108,17 @@ function Rodape({ nome }: { nome: string }) {
   );
 }
 
-export function Menu({ nome }: { nome: string }) {
+export function Menu({ nome, alertas }: { nome: string; alertas: number }) {
   return (
     <aside className="fixed inset-y-0 left-0 z-40 hidden w-64 flex-col border-r border-outline-variant bg-surface lg:flex print:hidden">
       <Cabecalho />
-      <Navegacao />
+      <Navegacao alertas={alertas} />
       <Rodape nome={nome} />
     </aside>
   );
 }
 
-export function MenuMovel({ nome }: { nome: string }) {
+export function MenuMovel({ nome, alertas }: { nome: string; alertas: number }) {
   const [aberto, setAberto] = useState(false);
   return (
     <div className="lg:hidden print:hidden">
@@ -123,7 +132,7 @@ export function MenuMovel({ nome }: { nome: string }) {
         <div className="fixed inset-0 z-50 flex">
           <div className="flex w-72 flex-col bg-surface">
             <Cabecalho />
-            <Navegacao aoNavegar={() => setAberto(false)} />
+            <Navegacao alertas={alertas} aoNavegar={() => setAberto(false)} />
             <Rodape nome={nome} />
           </div>
           <button className="flex-1 bg-black/40" aria-label="Fechar menu" onClick={() => setAberto(false)} />

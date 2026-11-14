@@ -33,6 +33,7 @@ import supervision as sv
 import torch
 
 from captura import FonteVideo
+from regras import Regras
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 RTSP_BASE = os.environ.get("MEDIAMTX_RTSP", "rtsp://mediamtx:8554").rstrip("/")
@@ -43,7 +44,8 @@ torch.set_num_threads(THREADS)
 cv2.setNumThreads(1)
 
 # Rótulos COCO originais usados pelo RF-DETR.
-CLASSES = {1: "pessoa", 2: "bicicleta", 3: "carro", 4: "moto", 6: "onibus", 8: "caminhao"}
+CLASSES = {1: "pessoa", 2: "bicicleta", 3: "carro", 4: "moto", 6: "onibus", 8: "caminhao", 17: "gato", 18: "cachorro"}
+PETS = {"gato", "cachorro"}
 VEICULOS = {"bicicleta", "carro", "moto", "onibus", "caminhao"}
 
 PARAR = threading.Event()
@@ -237,6 +239,9 @@ class Camera:
     tipo_linha: str | None
     linha: dict | None
     calibracao: dict | None = None
+    interna: bool = False
+    fachada: bool = False
+    zona_totem: list | None = None
     fonte: FonteVideo | None = None
     proximo: float = 0.0
     rastreador: sv.ByteTrack | None = None
@@ -496,6 +501,8 @@ class Motor:
         self.detector = Detector()
         self.analisador = Analisador()
         self.analisador.start()
+        self.regras = Regras(self.salvar_alerta)
+        self.ocupacao = 0
 
     # ---------- banco
 
@@ -526,8 +533,14 @@ class Motor:
             cfg = {k: v for k, v in c.fetchall()}
             self.borrar = bool(cfg.get("borrar_rostos", True))
             self.retencao_dias = int(cfg.get("retencao_dias", 30))
-            c.execute("SELECT canal, caminho, nome, ativa, fps, tipo_linha, linha, calibracao FROM cameras ORDER BY canal")
+            c.execute("SELECT canal, caminho, nome, ativa, fps, tipo_linha, linha, calibracao, interna, fachada, zona_totem FROM cameras ORDER BY canal")
             linhas = c.fetchall()
+            c.execute("SELECT valor FROM config WHERE chave = 'loja'")
+            loja = c.fetchone()
+        if loja:
+            self.regras.configurar(loja[0])
+        extras = {r[0]: (r[8], r[9], r[10]) for r in linhas}
+        linhas = [r[:8] for r in linhas]
         ativas = {r[0] for r in linhas if r[3]}
         for canal in list(self.cameras):
             if canal not in ativas:
@@ -536,11 +549,14 @@ class Motor:
             if not ativa:
                 continue
             cam = self.cameras.get(canal)
+            if cam is not None:
+                cam.interna, cam.fachada, cam.zona_totem = extras[canal]
             if cam and cam.caminho != caminho:
                 self._parar_camera(canal)
                 cam = None
             if cam is None:
                 cam = Camera(canal, caminho, nome, float(fps), tipo_linha, linha, calibracao)
+                cam.interna, cam.fachada, cam.zona_totem = extras[canal]
                 cam.fonte = FonteVideo(f"{RTSP_BASE}/lavateria/{caminho}", eh_arquivo=False)
                 cam.fonte.iniciar()
                 self.cameras[canal] = cam
@@ -561,6 +577,14 @@ class Motor:
         if cam and cam.fonte:
             cam.fonte.parar()
             log(f"câmera {canal} desligada")
+
+    def salvar_alerta(self, tipo: str, canal: str | None, nivel: str, mensagem: str, img) -> None:
+        log(f"alerta [{nivel}] {mensagem}")
+        with self.db.cursor() as c:
+            c.execute(
+                "INSERT INTO alertas (tipo, canal, nivel, mensagem, imagem) VALUES (%s, %s, %s, %s, %s)",
+                (tipo, canal, nivel, mensagem, jpeg(img, 75) if img is not None else None),
+            )
 
     def salvar_evento(self, canal: str, tipo: str, classe: str, sentido: str | None, tid: int) -> None:
         with self.db.cursor() as c:
@@ -667,6 +691,17 @@ class Motor:
         if mudou:
             self.contagem_hoje(cam)
 
+        # Regras da loja (alertas)
+        pets = [i for i, n in enumerate(nomes) if n in PETS]
+        zona = None
+        if cam.zona_totem and len(cam.zona_totem) >= 3:
+            zona = [(p[0] * w, p[1] * h) for p in cam.zona_totem]
+        self.regras.avaliar(
+            cam.canal, cam.nome, q.ts, img,
+            [(int(t), tuple(map(float, b))) for b, t in zip(pessoas.xyxy, pessoas.tracker_id)],
+            len(pets) if cam.interna else 0, cam.fachada, cam.interna, zona,
+        )
+
         # Caixas para o navegador desenhar por cima do vídeo (posições de 0 a 1).
         objetos = [
             {"id": int(t), "c": "pessoa", "b": [round(float(x1) / w, 4), round(float(y1) / h, 4), round(float(x2) / w, 4), round(float(y2) / h, 4)]}
@@ -674,6 +709,9 @@ class Motor:
         ] + [
             {"id": 100000 + v.id, "c": v.classe, "b": [round(float(v.caixa[0]) / w, 4), round(float(v.caixa[1]) / h, 4), round(float(v.caixa[2]) / w, 4), round(float(v.caixa[3]) / h, 4)]}
             for v in veiculos
+        ] + [
+            {"id": 200000 + k, "c": nomes[i], "b": [round(float(x) / d, 4) for x, d in zip(dets.xyxy[i], (w, h, w, h))]}
+            for k, i in enumerate(pets)
         ]
         cam.processados.append(time.time())
         agora = time.time()
@@ -748,6 +786,7 @@ class Motor:
             c.execute("DELETE FROM pessoas WHERE inicio < now() - make_interval(days => %s)", (self.retencao_dias,))
             c.execute("DELETE FROM veiculos WHERE inicio < now() - make_interval(days => %s)", (self.retencao_dias,))
             c.execute("DELETE FROM quadros_momento WHERE ts < now() - make_interval(days => %s)", (self.retencao_dias,))
+            c.execute("DELETE FROM alertas WHERE quando < now() - make_interval(days => %s)", (self.retencao_dias,))
             c.execute("DELETE FROM motor_amostras WHERE em < now() - interval '30 days'")
 
     def rodar(self) -> None:
@@ -776,6 +815,13 @@ class Motor:
                     self._ultimo_status = time.time()
                     self.atualizar_offline()
                     self.escrever_status()
+                    with self.db.cursor() as c:
+                        c.execute(
+                            """SELECT count(*) FILTER (WHERE tipo='entrada') - count(*) FILTER (WHERE tipo='saida') FROM eventos
+                               WHERE ocorrido_em >= (date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') AT TIME ZONE 'America/Sao_Paulo')"""
+                        )
+                        self.ocupacao = max(0, int(c.fetchone()[0] or 0))
+                    self.regras.avaliar_geral({k: (c.nome, bool(c.fonte and c.fonte.online)) for k, c in self.cameras.items()}, self.ocupacao)
                     with self.db.cursor() as c:
                         c.execute("DELETE FROM deteccoes WHERE criado_em < now() - interval '2 minutes'")
                 if not trabalhou:
