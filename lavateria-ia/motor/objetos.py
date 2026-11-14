@@ -25,6 +25,8 @@ MAX_RECORTES = 5
 JUNTAR_S = 6.0  # até quantos segundos depois de sumir ainda dá para juntar
 JUNTAR_DIST = 0.12  # distância máxima (fração da largura) para juntar
 JUNTAR_APARENCIA = 0.55  # correlação mínima de histograma para juntar
+JUNTAR_PARADO_S = 60.0  # objeto que nunca se mexeu: junta com o mesmo ponto até 60 s depois
+PARADO = 0.03  # deslocamento máximo (fração da largura) para "nunca se mexeu"
 
 
 def aparencia(img: np.ndarray, caixa) -> np.ndarray | None:
@@ -112,14 +114,20 @@ class Objetos:
         self.sumidos: list[Objeto] = []  # esperando a janela de junção
         self._prox = 1
         self.finalizados: list[Objeto] = []  # prontos para registrar (saíram de vez)
+        # Pontos onde "pessoas" que nunca se mexeram aparecem de novo e de novo
+        # (o lixo ao lado do carro): [posição, último, vezes]
+        self.pontos_parados: list[list] = []
 
     def _juntar(self, pos: np.ndarray, hist, classe: str, ts: float) -> Objeto | None:
         melhor, nota = None, 0.0
         for o in self.sumidos:
-            if ts - o.ultimo > JUNTAR_S or (self.tipo == "veiculo" and o.classe != classe and {o.classe, classe} - {"carro", "caminhao", "onibus"}):
+            if self.tipo == "veiculo" and o.classe != classe and {o.classe, classe} - {"carro", "caminhao", "onibus"}:
                 continue
             d = float(np.hypot(*(o.pos - pos))) / self.largura
-            if d > JUNTAR_DIST * (1 + (ts - o.ultimo) / JUNTAR_S):
+            parado = o.desloc_max < PARADO and d < PARADO + 0.01
+            if ts - o.ultimo > (JUNTAR_PARADO_S if parado else JUNTAR_S):
+                continue
+            if not parado and d > JUNTAR_DIST * (1 + (ts - o.ultimo) / JUNTAR_S):
                 continue
             ap = float(cv2.compareHist(o.hist, hist, cv2.HISTCMP_CORREL)) if o.hist is not None and hist is not None else 0.5
             if ap < JUNTAR_APARENCIA:
@@ -167,7 +175,7 @@ class Objetos:
             if ts - o.ultimo > sumir_s:
                 del self.vivos[uid]
                 self.sumidos.append(o)
-        for o in [o for o in self.sumidos if ts - o.ultimo > JUNTAR_S]:
+        for o in [o for o in self.sumidos if ts - o.ultimo > (JUNTAR_PARADO_S if o.desloc_max < PARADO else JUNTAR_S)]:
             self.sumidos.remove(o)
             self.finalizados.append(o)
         vivos = set(self.vivos)
@@ -176,3 +184,16 @@ class Objetos:
     def parado_demais(self, o: Objeto) -> bool:
         """Pessoa que nunca se mexeu (desde que surgiu) por mais de parado_s."""
         return self.tipo == "pessoa" and not self.interna and o.ultimo - o.inicio >= self.parado_s and o.desloc_max < 0.03
+
+    # ---------- pontos suspeitos (objetos parados que se repetem no mesmo lugar)
+
+    def ponto_suspeito(self, pos: np.ndarray, ts: float) -> bool:
+        return any(v >= 2 and ts - u < 1800 and float(np.hypot(*(p - pos))) / self.largura < 0.04 for p, u, v in self.pontos_parados)
+
+    def registrar_parado(self, pos: np.ndarray, ts: float) -> None:
+        for item in self.pontos_parados:
+            if float(np.hypot(*(item[0] - pos))) / self.largura < 0.04:
+                item[1], item[2] = ts, item[2] + 1
+                return
+        self.pontos_parados.append([pos.copy(), ts, 1])
+        self.pontos_parados = [i for i in self.pontos_parados if ts - i[1] < 3600][-50:]

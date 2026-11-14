@@ -712,6 +712,11 @@ class Motor:
 
         fps = cam.fps
         for o in po:
+            # parado num ponto onde já se repetiram "pessoas" que nunca andaram (lixo, sombra)
+            if not o.descartado and rua and o.desloc_max < 0.03 and o.ultimo - o.inicio >= 1.0 and cam.objs_p.ponto_suspeito(o.pos, ts):
+                o.descartado = True
+                if o.registrado_em:
+                    self.analisador.enviar(("apagar_pessoa", (cam.canal, o.uid, o.inicio)))
             if not o.descartado and cam.objs_p.parado_demais(o):
                 o.descartado = True  # nunca se mexeu: não é pessoa passando
                 if o.registrado_em:
@@ -728,6 +733,10 @@ class Motor:
         cam.objs_p.manutencao(ts, 3.0)
         cam.objs_v.manutencao(ts, 2.5)
         for o in cam.objs_p.finalizados:
+            if rua and o.desloc_max < 0.03:
+                if cam.objs_p.ponto_suspeito(o.pos, ts):
+                    o.descartado = True
+                cam.objs_p.registrar_parado(o.pos, ts)
             if o.confirmado(fps) and not o.descartado and o.recortes:
                 self._enviar_pessoa(cam, o, ganhos)
             elif o.registrado_em:
