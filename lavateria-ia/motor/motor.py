@@ -277,11 +277,14 @@ class Motor:
         from rfdetr import RFDETRNano
 
         self.modelo = RFDETRNano(device="cpu")
+        # Preditor otimizado (TorchScript) do próprio RF-DETR: mesmo resultado,
+        # menos tempo por quadro na CPU. Se falhar, segue com o modelo normal.
+        self.preditor = self.modelo
         try:
-            self.modelo.optimize_for_inference()
-            log("modelo otimizado para inferência")
-        except Exception as e:  # versões sem otimização: segue normal
-            log("sem otimização de inferência:", e)
+            self.preditor = self.modelo.inference()
+            log("preditor otimizado pronto")
+        except Exception as e:
+            log("sem preditor otimizado, usando o modelo normal:", repr(e))
 
     # ---------- banco
 
@@ -369,7 +372,7 @@ class Motor:
         rgb = cv2.cvtColor(bgr, cv2.COLOR_BGR2RGB)
         t0 = time.perf_counter()
         with torch.inference_mode():
-            dets = self.modelo.predict(rgb, threshold=CONF_MIN)
+            dets = self.preditor.predict(rgb, threshold=CONF_MIN)
         self.ms_inferencia.append((time.perf_counter() - t0) * 1000)
         self.ms_inferencia = self.ms_inferencia[-50:]
         manter = np.isin(dets.class_id, list(CLASSES))
@@ -390,7 +393,9 @@ class Motor:
         pessoas = cam.rastreador.update_with_detections(dets[e_pessoa]) if len(dets) else cam.rastreador.update_with_detections(sv.Detections.empty())
         if pessoas.tracker_id is None:
             pessoas.tracker_id = np.array([], dtype=int)
-        idx_v = [i for i, n in enumerate(nomes) if n in VEICULOS]
+        # Veículos só contam (e aparecem) na câmera da rua: nas internas, o
+        # carro visto pela porta de vidro não interessa.
+        idx_v = [i for i, n in enumerate(nomes) if n in VEICULOS] if cam.tipo_linha == "veiculos" else []
         veiculos = cam.veiculos.atualizar(dets.xyxy[idx_v] if idx_v else np.zeros((0, 4)), [nomes[i] for i in idx_v], q.ts)
 
         mudou_contagem = False
