@@ -26,9 +26,10 @@ export default function LoginPage() {
               <img src="/caruaru-shopping.png" alt="Caruaru Shopping" className="h-full w-full object-contain" />
             </span>
             <span className="h-10 w-px bg-white/30" />
-            <span className="flex flex-col items-start">
+            {/* Mesmo desenho do rodapé do site: nome centralizado sob o logo, passando só um pouco das bordas (a fonte daqui é mais larga que a Barlow, por isso o texto é menor). */}
+            <span className="flex flex-col items-center">
               <LogoAIP className="h-12 text-white" />
-              <span className="mt-1.5 whitespace-nowrap text-[8.5px] font-medium uppercase tracking-[0.1em] text-white/70">Agência de Inteligência Patrimonial</span>
+              <span className="mt-[0.55em] whitespace-nowrap text-[7.7px] font-medium uppercase tracking-[0.14em] text-white/70">Agência de Inteligência Patrimonial</span>
             </span>
           </div>
           <h1 className="text-3xl font-semibold leading-tight sm:text-4xl lg:text-5xl">O Caruaru Shopping inteiro, em tempo real.</h1>
