@@ -12,3 +12,6 @@ onnxscript
 onnxsim
 # Atributos (etapa 2): CLIP para gênero, parte de baixo e acessórios.
 open_clip_torch
+# Calça x short: pose (RTMPose-t, OpenMMLab, Apache 2.0) via rtmlib.
+rtmlib
+onnxruntime

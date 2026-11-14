@@ -177,13 +177,33 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado }: { canal:
         g.moveTo(ox + linha.a[0] * dw, oy + linha.a[1] * dh);
         g.lineTo(ox + linha.b[0] * dw, oy + linha.b[1] * dh);
         g.stroke();
-        const txt = tipoLinha === 'entrada' ? `entradas ${contagem.entrada ?? 0} · saídas ${contagem.saida ?? 0}` : `sentido A ${contagem.a ?? 0} · sentido B ${contagem.b ?? 0}`;
-        g.font = '600 12px system-ui, sans-serif';
-        const tw = g.measureText(txt).width + 12;
-        g.fillStyle = 'rgba(0,0,0,0.65)';
-        g.fillRect(ox + 8, oy + dh - 30, tw, 22);
-        g.fillStyle = '#4ade80';
-        g.fillText(txt, ox + 14, oy + dh - 14);
+        // Setas perpendiculares à linha, uma para cada sentido, com o contador ao lado.
+        const ax = ox + linha.a[0] * dw, ay = oy + linha.a[1] * dh, bx = ox + linha.b[0] * dw, by = oy + linha.b[1] * dh;
+        const mx = (ax + bx) / 2, my = (ay + by) / 2;
+        const vx = bx - ax, vy = by - ay, n = Math.hypot(vx, vy) || 1;
+        const nx = -vy / n, ny = vx / n; // aponta para o lado "A" (o que o motor conta como sentido A / entrada)
+        const seta = (dir: number, rot: string, cor: string) => {
+          const L = 34;
+          const x0 = mx - nx * dir * L * 0.2, y0 = my - ny * dir * L * 0.2;
+          const x1 = mx + nx * dir * L, y1 = my + ny * dir * L;
+          g.strokeStyle = cor; g.fillStyle = cor; g.lineWidth = 3;
+          g.beginPath(); g.moveTo(x0, y0); g.lineTo(x1, y1); g.stroke();
+          const ang = Math.atan2(y1 - y0, x1 - x0);
+          g.beginPath(); g.moveTo(x1, y1);
+          g.lineTo(x1 - 10 * Math.cos(ang - 0.5), y1 - 10 * Math.sin(ang - 0.5));
+          g.lineTo(x1 - 10 * Math.cos(ang + 0.5), y1 - 10 * Math.sin(ang + 0.5));
+          g.closePath(); g.fill();
+          g.font = '700 13px system-ui, sans-serif';
+          const tw = g.measureText(rot).width + 12;
+          const tx = x1 + nx * dir * 6 - tw / 2, ty = y1 + ny * dir * 14;
+          g.fillStyle = 'rgba(0,0,0,0.72)'; g.fillRect(tx, ty - 13, tw, 20);
+          g.fillStyle = cor; g.fillText(rot, tx + 6, ty + 2);
+        };
+        // deslocadas ao longo da linha para as duas setas não se sobreporem
+        const desloca = (f: number) => [vx / n * f, vy / n * f];
+        const [dax, day] = desloca(-26), [dbx, dby] = desloca(26);
+        g.save(); g.translate(dax, day); seta(1, tipoLinha === 'entrada' ? `entradas ${contagem.entrada ?? 0}` : `A ${contagem.a ?? 0}`, '#4ade80'); g.restore();
+        g.save(); g.translate(dbx, dby); seta(-1, tipoLinha === 'entrada' ? `saídas ${contagem.saida ?? 0}` : `B ${contagem.b ?? 0}`, '#fbbf24'); g.restore();
       }
     };
     raf = requestAnimationFrame(desenhar);

@@ -16,7 +16,7 @@ export function ChipAtributo({ rotulo, a, limiar, formatar }: { rotulo: string; 
   } else if (a.motivo) {
     texto = a.motivo;
     fraco = true;
-  } else if (a.valor == null || (a.conf ?? 0) < limiar) {
+  } else if (a.valor == null || (a.conf ?? 0) < limiar || a.acordo === false || (a.concordancia ?? 1) < 0.6) {
     texto = 'indefinido';
     fraco = true;
   } else {

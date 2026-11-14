@@ -16,14 +16,14 @@ export type CameraInfo = {
   canal: string; caminho: string; nome: string; funcao: string; ativa: boolean; fps: number;
   tipo_linha: 'entrada' | 'veiculos' | null; linha: { a: [number, number]; b: [number, number] } | null;
   online: boolean; erro: string | null; calibracao: Calibracao | null; fachada: boolean; interna: boolean; zona_totem: [number, number][] | null;
-  conf_min: number | null; exclusao: [number, number][][] | null;
+  conf_min: number | null; exclusao: [number, number][][] | null; zona_atributos: [number, number][] | null;
   contagem_hoje: Record<string, number> | null; quadro_em: Date | null; quadro_cru_em: Date | null;
   largura: number | null; altura: number | null; pessoas_agora: number; veiculos_agora: number;
 };
 
 export async function cameras(): Promise<CameraInfo[]> {
   return sql<CameraInfo[]>`
-    SELECT canal, caminho, nome, funcao, ativa, fps, tipo_linha, linha, online, erro, calibracao, fachada, interna, zona_totem, conf_min, exclusao,
+    SELECT canal, caminho, nome, funcao, ativa, fps, tipo_linha, linha, online, erro, calibracao, fachada, interna, zona_totem, conf_min, exclusao, zona_atributos,
            contagem_hoje, quadro_em, quadro_cru_em, largura, altura, pessoas_agora, veiculos_agora
     FROM cameras ORDER BY ordem, canal`;
 }
@@ -31,7 +31,7 @@ export async function cameras(): Promise<CameraInfo[]> {
 export async function config() {
   const linhas = await sql<{ chave: string; valor: unknown }[]>`SELECT chave, valor FROM config`;
   const c = Object.fromEntries(linhas.map((l) => [l.chave, l.valor]));
-  return { borrarRostos: c.borrar_rostos === true, retencaoDias: Number(c.retencao_dias ?? 30), limiar: Number(c.limiar_confianca ?? 0.65), paradoMin: Number(c.parado_min ?? 3) };
+  return { borrarRostos: c.borrar_rostos === true, retencaoDias: Number(c.retencao_dias ?? 30), limiar: Number(c.limiar_confianca ?? 0.7), paradoMin: Number(c.parado_min ?? 3) };
 }
 
 /** Números do período + série por hora (1 dia) ou por dia. Ocupação é sempre a de agora. */
@@ -74,8 +74,8 @@ export async function statusMotor() {
 
 // ---------------------------------------------------------------- pessoas e veículos
 
-export type Atributo = { valor: string | boolean | null; conf?: number; motivo?: string; concordancia?: number; recortes?: number };
-export type AtributosPessoa = Partial<Record<'genero' | 'baixo_tipo' | 'bone' | 'mochila' | 'bolsa' | 'cima' | 'baixo_cor', Atributo>> & { pequeno?: boolean; papel?: 'pedestre' | 'condutor' };
+export type Atributo = { valor: string | boolean | null; conf?: number; motivo?: string; concordancia?: number; recortes?: number; acordo?: boolean };
+export type AtributosPessoa = Partial<Record<'genero' | 'baixo_tipo' | 'bone' | 'mochila' | 'bolsa' | 'cima' | 'baixo_cor', Atributo>> & { pequeno?: boolean; papel?: 'pedestre' | 'condutor'; motivo?: string };
 
 export type PessoaLinha = { id: number; canal: string; track_id: number; inicio: Date; fim: Date; atributos: AtributosPessoa; noturna: boolean; camera: string };
 

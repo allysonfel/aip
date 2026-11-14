@@ -21,6 +21,8 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
   const [zona, setZona] = useState<Ponto[]>(cam.zona_totem ?? [[0.3, 0.3], [0.5, 0.3], [0.5, 0.6], [0.3, 0.6]]);
   const [temZona, setTemZona] = useState(Boolean(cam.zona_totem));
   const [exclusao, setExclusao] = useState<Ponto[][]>(cam.exclusao ?? []);
+  const [zonaAttr, setZonaAttr] = useState<Ponto[]>(cam.zona_atributos ?? [[0.5, 0.5], [0.8, 0.5], [0.85, 0.98], [0.45, 0.98]]);
+  const [temZonaAttr, setTemZonaAttr] = useState(Boolean(cam.zona_atributos));
   const [salvo, setSalvo] = useState(false);
   const caixa = useRef<HTMLDivElement>(null);
   const proporcao = cam.largura && cam.altura ? cam.largura / cam.altura : 704 / 480;
@@ -32,6 +34,7 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
     const r3: Ponto = [Math.round(p[0] * 1000) / 1000, Math.round(p[1] * 1000) / 1000];
     if (typeof arrastando === 'number') setCal((c) => c.map((x, i) => (i === arrastando ? r3 : x)));
     else if (arrastando.startsWith('z')) setZona((z) => z.map((x, i) => (i === Number(arrastando[1]) ? r3 : x)));
+    else if (arrastando.startsWith('q')) setZonaAttr((z) => z.map((x, i) => (i === Number(arrastando[1]) ? r3 : x)));
     else if (arrastando.startsWith('x')) {
       const [, zi, pi] = arrastando.split(':').map(Number);
       setExclusao((ex) => ex.map((pol, i) => (i === zi ? pol.map((x, j) => (j === pi ? r3 : x)) : pol)));
@@ -75,6 +78,25 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
           ) : (
             <p className="absolute inset-0 flex items-center justify-center text-sm text-white/70">Esperando o primeiro quadro do motor...</p>
           )}
+          {temZonaAttr && (
+            <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+              <polygon points={zonaAttr.map((p) => p.join(',')).join(' ')} fill="rgba(34,211,238,0.15)" stroke="#22d3ee" strokeDasharray="0.02 0.01" style={{ strokeWidth: 2 }} vectorEffect="non-scaling-stroke" />
+            </svg>
+          )}
+          {temZonaAttr &&
+            zonaAttr.map((p, i) => (
+              <button
+                key={`q${i}`}
+                type="button"
+                aria-label={`Canto ${i + 1} da zona de atributos (arraste)`}
+                onPointerDown={(e) => {
+                  (e.target as HTMLElement).setPointerCapture(e.pointerId);
+                  setArrastando(`q${i}`);
+                }}
+                className="absolute h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-grab rotate-45 border-2 border-white bg-[#22d3ee] shadow"
+                style={{ left: `${p[0] * 100}%`, top: `${p[1] * 100}%` }}
+              />
+            ))}
           {exclusao.length > 0 && (
             <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
               {exclusao.map((pol, i) => (
@@ -204,6 +226,14 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
           <input name="conf_min" type="number" min={20} max={90} defaultValue={Math.round((cam.conf_min ?? 0.4) * 100)} className="mt-1 w-28 rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
           <span className="mt-1 block text-xs text-on-surface-variant">Mais alta nas câmeras da rua evita lixo e sombra virando pessoa.</span>
         </label>
+        <label className="flex items-start gap-2">
+          <input type="checkbox" checked={temZonaAttr} onChange={(e) => { setTemZonaAttr(e.target.checked); setSalvo(false); }} className="mt-0.5" />
+          <span>
+            Zona de atributos (polígono ciano)
+            <span className="block text-xs text-on-surface-variant">Só quem passa dentro dela recebe gênero, roupa, cor e acessórios. Fora dela a pessoa é contada, sem atributos. Sem zona: a imagem toda.</span>
+          </span>
+        </label>
+        {temZonaAttr && <input type="hidden" name="zona_atributos" value={JSON.stringify(zonaAttr)} />}
         <div className="rounded-sm border border-outline-variant p-3">
           <p className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Zonas de exclusão</p>
           <p className="mt-1 text-xs text-on-surface-variant">Áreas vermelhas onde nada é detectado (ex.: o ponto do lixo). Arraste os cantos sobre a imagem.</p>

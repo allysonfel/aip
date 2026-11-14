@@ -63,7 +63,7 @@ export default async function Pessoas({ searchParams }: { searchParams: Promise<
                     </p>
                   )}
                   {a.pequeno ? (
-                    <p className="pt-2 text-xs italic text-on-surface-variant">Recorte pequeno demais para estimar.</p>
+                    <p className="pt-2 text-xs italic text-on-surface-variant">Sem atributos: {a.motivo ?? 'recorte pequeno demais para estimar'}.</p>
                   ) : (
                     <div className="space-y-0.5 pt-1">
                       <ChipAtributo rotulo="Gênero (estimado)" a={a.genero} limiar={cfg.limiar} />

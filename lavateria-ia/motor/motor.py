@@ -41,6 +41,7 @@ DATABASE_URL = os.environ["DATABASE_URL"]
 RTSP_BASE = os.environ.get("MEDIAMTX_RTSP", "rtsp://mediamtx:8554").rstrip("/")
 THREADS = int(os.environ.get("MOTOR_THREADS", "2"))
 CONF_MIN = float(os.environ.get("MOTOR_CONFIANCA", "0.35"))
+CONF_MIN_MOTO = 0.25
 
 torch.set_num_threads(THREADS)
 cv2.setNumThreads(1)
@@ -109,17 +110,27 @@ class Detector:
         prob = 1.0 / (1.0 + np.exp(-logits))
         plano = prob.reshape(-1)
         topo = np.argpartition(-plano, 300)[:300]
-        topo = topo[plano[topo] > CONF_MIN]
+        topo = topo[plano[topo] > min(CONF_MIN, CONF_MIN_MOTO)]
         if not len(topo):
             return sv.Detections.empty()
         q, cls = topo // prob.shape[1], topo % prob.shape[1]
-        manter = np.isin(cls, list(CLASSES))
-        q, cls, conf = q[manter], cls[manter], plano[topo][manter]
+        conf = plano[topo]
+        # moto e bicicleta com confiança mínima menor (passam coladas a carros e saem "apagadas")
+        minimo = np.where(np.isin(cls, (2, 4)), CONF_MIN_MOTO, CONF_MIN)
+        manter = np.isin(cls, list(CLASSES)) & (conf >= minimo)
+        q, cls, conf = q[manter], cls[manter], conf[manter]
+        if not len(q):
+            return sv.Detections.empty()
         cx, cy, bw, bh = caixas[q].T
         xyxy = np.stack([(cx - bw / 2) * w, (cy - bh / 2) * h, (cx + bw / 2) * w, (cy + bh / 2) * h], axis=1).clip(0, [w, h, w, h])
         d = sv.Detections(xyxy=xyxy.astype(np.float32), confidence=conf.astype(np.float32), class_id=cls.astype(int))
-        # A mesma consulta pode aparecer em duas classes (ex.: carro e caminhão): fica a mais provável.
-        return d.with_nms(threshold=0.7, class_agnostic=True)
+        # Supressão POR CLASSE: o carro não apaga a moto colada nele. Só carro,
+        # caminhão e ônibus (a mesma caixa em duas classes) se juntam entre si.
+        d = d.with_nms(threshold=0.6, class_agnostic=False)
+        grandes = np.isin(d.class_id, (3, 6, 8))
+        if grandes.sum() > 1:
+            d = sv.Detections.merge([d[~grandes], d[grandes].with_nms(threshold=0.7, class_agnostic=True)])
+        return d
 
 
 # ---------------------------------------------------------------- linhas
@@ -246,6 +257,7 @@ class Camera:
     zona_totem: list | None = None
     conf_min: float = 0.4
     exclusao: list | None = None  # polígonos (0 a 1) onde nada é detectado
+    zona_atributos: list | None = None  # polígono (0 a 1): só aí se estimam atributos
     fonte: FonteVideo | None = None
     proximo: float = 0.0
     rastreador: sv.ByteTrack | None = None
@@ -264,6 +276,7 @@ class Camera:
     jpeg_cena: tuple[int, bytes] | None = None
     poligono: np.ndarray | None = None
     exclusao_px: list = field(default_factory=list)
+    zona_atributos_px: list = field(default_factory=list)
     ganhos: np.ndarray | None = None  # balanço de branco (B, G, R)
     ganhos_em: float = 0.0
 
@@ -285,9 +298,11 @@ def montar_rastreio(cam: Camera, largura: int, altura: int) -> None:
     cam.veiculos = RastreadorVeiculos(largura)
     # Pessoa que nunca se mexeu: 20 s nas câmeras de rua (lixo, sombra); nas
     # internas não se descarta (cliente sentado esperando a roupa).
-    cam.objs_p = Objetos("pessoa", largura, cam.interna, parado_s=20.0)
+    cam.objs_p = Objetos("pessoa", largura, cam.interna, parado_s=8.0)
     cam.objs_v = Objetos("veiculo", largura, cam.interna, parado_s=1e9)
     cam.exclusao_px = [np.array([[p[0] * largura, p[1] * altura] for p in z], dtype=np.float32) for z in (cam.exclusao or []) if len(z) >= 3]
+    z = cam.zona_atributos
+    cam.zona_atributos_px = [np.array([[p[0] * largura, p[1] * altura] for p in z], dtype=np.float32)] if z and len(z) >= 3 else []
     cam.transformador = None
     cal = cam.calibracao or {}
     pts = cal.get("pontos")
@@ -392,7 +407,12 @@ class Analisador(threading.Thread):
         self.ms: list[float] = []
         self.descartados = 0
         self.nao_pessoa = 0
+        self.juntados = 0
         self.modelos = None
+        # Cartões recentes por câmera, para juntar a mesma passagem num cartão só:
+        # {canal: [ {id, emb, inicio, fim, recs_attr, recorte, pont} ]}
+        self.recentes: dict[str, list[dict]] = {}
+        self.ids: dict[tuple, int] = {}  # chave do objeto -> id do cartão
 
     def enviar(self, tarefa: tuple) -> None:
         try:
@@ -461,23 +481,91 @@ class Analisador(threading.Thread):
             for (ref,) in c.fetchall():
                 c.execute("DELETE FROM quadros_momento WHERE tipo = %s AND ref_id = %s", (tipo, ref))
 
+    def _pessoa(self, db, tarefa: tuple) -> None:
+        """UM cartão por passagem: se a mesma pessoa (assinatura visual parecida,
+        mesma câmera, que já tinha saído de cena há pouco) aparecer de novo com
+        outro ID, a análise nova ATUALIZA o cartão existente, juntando os recortes."""
+        _, chave, fim, recortes, recs_attr, noturna, condutor, ganhos, quadros = tarefa
+        canal, _, inicio = chave
+        if not self.modelos or not recortes:
+            return
+        emb = self.modelos.assinatura(recortes[0])
+        agora = time.time()
+        lista = [r for r in self.recentes.get(canal, []) if agora - r["visto"] < 900]
+        self.recentes[canal] = lista
+        alvo = None
+        rid = self.ids.get(chave)
+        if rid is not None:
+            alvo = next((r for r in lista if r["id"] == rid), None)
+        else:
+            melhor = 0.86
+            for r in lista:
+                # só junta com quem já tinha saído (duas pessoas ao mesmo tempo são duas pessoas)
+                if inicio < r["fim"] - 2 or inicio - r["fim"] > 90:
+                    continue
+                sim = float(np.dot(emb, r["emb"]))
+                if sim >= melhor:
+                    alvo, melhor = r, sim
+        # recortes: os do cartão existente + os novos (os maiores primeiro)
+        todos_attr = (alvo["recs_attr"] if alvo else []) + list(recs_attr)
+        todos_attr = sorted(todos_attr, key=lambda r: -(r.shape[0] * r.shape[1]))[:5]
+        attrs = self.modelos.pessoa(recortes, todos_attr, noturna, condutor or bool(alvo and alvo.get("condutor")), ganhos)
+        if attrs is None:  # não é pessoa: não grava (e apaga o cartão desta chave, se houver)
+            self.nao_pessoa += 1
+            if rid is not None:
+                with db.cursor() as c:
+                    c.execute("DELETE FROM quadros_momento WHERE tipo = 'pessoa' AND ref_id = %s", (rid,))
+                    c.execute("DELETE FROM pessoas WHERE id = %s", (rid,))
+                self.recentes[canal] = [r for r in lista if r["id"] != rid]
+            return
+        attrs.pop("_assinatura", None)
+        recorte_novo = recortes[0]
+        pont_novo = recorte_novo.shape[0] * recorte_novo.shape[1]
+        with db.cursor() as c:
+            if alvo is not None:
+                melhor_rec = recorte_novo if pont_novo > alvo["pont"] else None
+                c.execute(
+                    """UPDATE pessoas SET fim = greatest(fim, %s), atributos = %s, noturna = %s,
+                       recorte = coalesce(%s, recorte), assinatura = coalesce(%s, assinatura) WHERE id = %s""",
+                    (datetime_utc(fim), json.dumps(attrs), noturna, jpeg(melhor_rec, 88) if melhor_rec is not None else None,
+                     [round(float(x), 4) for x in emb] if melhor_rec is not None else None, alvo["id"]),
+                )
+                ref = alvo["id"]
+                if rid is None:
+                    self.juntados += 1
+                alvo.update(fim=max(alvo["fim"], fim), recs_attr=todos_attr, visto=agora, condutor=attrs.get("papel") == "condutor")
+                if melhor_rec is not None:
+                    alvo.update(emb=emb, pont=pont_novo)
+            else:
+                c.execute(
+                    """INSERT INTO pessoas (canal, track_id, inicio, fim, recorte, atributos, noturna, assinatura)
+                       VALUES (%s, %s, to_timestamp(%s), %s, %s, %s, %s, %s) RETURNING id""",
+                    (canal, chave[1], inicio, datetime_utc(fim), jpeg(recorte_novo, 88), json.dumps(attrs), noturna, [round(float(x), 4) for x in emb]),
+                )
+                ref = c.fetchone()[0]
+                lista.append({"id": ref, "emb": emb, "inicio": inicio, "fim": fim, "recs_attr": todos_attr, "pont": pont_novo, "visto": agora, "condutor": attrs.get("papel") == "condutor"})
+            self.ids[chave] = ref
+            if len(self.ids) > 5000:
+                self.ids = dict(list(self.ids.items())[-2000:])
+            if quadros:
+                c.execute("DELETE FROM quadros_momento WHERE tipo = 'pessoa' AND ref_id = %s AND ts >= to_timestamp(%s)", (ref, inicio))
+                for ts, img in quadros:
+                    c.execute("INSERT INTO quadros_momento (tipo, ref_id, ts, img) VALUES ('pessoa', %s, to_timestamp(%s), %s)", (ref, ts, img))
+
     def _fazer(self, db, tarefa: tuple) -> None:
         tipo = tarefa[0]
         t0 = time.perf_counter()
         if tipo == "apagar_pessoa":
-            self._apagar(db, "pessoas", tarefa[1])
+            rid = self.ids.pop(tarefa[1], None)
+            if rid is not None:
+                with db.cursor() as c:
+                    c.execute("DELETE FROM quadros_momento WHERE tipo = 'pessoa' AND ref_id = %s", (rid,))
+                    c.execute("DELETE FROM pessoas WHERE id = %s", (rid,))
+                for canal, lista in self.recentes.items():
+                    self.recentes[canal] = [r for r in lista if r["id"] != rid]
             return
         if tipo == "pessoa":
-            _, chave, fim, recortes, noturna, condutor, ganhos, quadros = tarefa
-            attrs = self.modelos.pessoa(recortes, noturna, condutor, ganhos) if self.modelos else {}
-            if attrs is None:  # não é pessoa: não grava (e apaga o preliminar, se houver)
-                self.nao_pessoa += 1
-                self._apagar(db, "pessoas", chave)
-                return
-            assinatura = attrs.pop("_assinatura", None)
-            self._gravar(db, "pessoas", chave, {
-                "fim": datetime_utc(fim), "recorte": jpeg(recortes[0], 88), "atributos": json.dumps(attrs), "noturna": noturna, "assinatura": assinatura,
-            }, quadros)
+            self._pessoa(db, tarefa)
         elif tipo == "veiculo":
             _, chave, classe, fim, sentido, recortes, noturna, ganhos, vel, desloc, quadros = tarefa
             attrs = self.modelos.veiculo(recortes, noturna, ganhos) if self.modelos else {}
@@ -541,14 +629,14 @@ class Motor:
             cfg = {k: v for k, v in c.fetchall()}
             self.borrar = bool(cfg.get("borrar_rostos", True))
             self.retencao_dias = int(cfg.get("retencao_dias", 30))
-            c.execute("SELECT canal, caminho, nome, ativa, fps, tipo_linha, linha, calibracao, interna, fachada, zona_totem, conf_min, exclusao FROM cameras ORDER BY canal")
+            c.execute("SELECT canal, caminho, nome, ativa, fps, tipo_linha, linha, calibracao, interna, fachada, zona_totem, conf_min, exclusao, zona_atributos FROM cameras ORDER BY canal")
             linhas = c.fetchall()
             c.execute("SELECT valor FROM config WHERE chave = 'loja'")
             loja = c.fetchone()
         if loja:
             self.regras.configurar(loja[0])
         extras = {r[0]: (r[8], r[9], r[10]) for r in linhas}
-        filtros = {r[0]: (float(r[11]) if r[11] is not None else 0.4, r[12]) for r in linhas}
+        filtros = {r[0]: (float(r[11]) if r[11] is not None else 0.4, r[12], r[13]) for r in linhas}
         linhas = [r[:8] for r in linhas]
         ativas = {r[0] for r in linhas if r[3]}
         for canal in list(self.cameras):
@@ -560,18 +648,20 @@ class Motor:
             cam = self.cameras.get(canal)
             if cam is not None:
                 cam.interna, cam.fachada, cam.zona_totem = extras[canal]
-                if (cam.conf_min, json.dumps(cam.exclusao)) != (filtros[canal][0], json.dumps(filtros[canal][1])):
-                    cam.conf_min, cam.exclusao = filtros[canal]
+                if (cam.conf_min, json.dumps(cam.exclusao), json.dumps(cam.zona_atributos)) != (filtros[canal][0], json.dumps(filtros[canal][1]), json.dumps(filtros[canal][2])):
+                    cam.conf_min, cam.exclusao, cam.zona_atributos = filtros[canal]
                     if cam.tamanho:
                         w, h = cam.tamanho
                         cam.exclusao_px = [np.array([[p[0] * w, p[1] * h] for p in z], dtype=np.float32) for z in (cam.exclusao or []) if len(z) >= 3]
+                        za = cam.zona_atributos
+                        cam.zona_atributos_px = [np.array([[p[0] * w, p[1] * h] for p in za], dtype=np.float32)] if za and len(za) >= 3 else []
             if cam and cam.caminho != caminho:
                 self._parar_camera(canal)
                 cam = None
             if cam is None:
                 cam = Camera(canal, caminho, nome, float(fps), tipo_linha, linha, calibracao)
                 cam.interna, cam.fachada, cam.zona_totem = extras[canal]
-                cam.conf_min, cam.exclusao = filtros[canal]
+                cam.conf_min, cam.exclusao, cam.zona_atributos = filtros[canal]
                 cam.fonte = FonteVideo(f"{RTSP_BASE}/lavateria/{caminho}", eh_arquivo=False)
                 cam.fonte.iniciar()
                 self.cameras[canal] = cam
@@ -667,7 +757,7 @@ class Motor:
         idx_v = []
         if cam.tipo_linha == "veiculos":
             for i, n in enumerate(nomes):
-                if n not in VEICULOS or confs[i] < max(0.4, cam.conf_min - 0.05):
+                if n not in VEICULOS or confs[i] < (0.28 if n in ("moto", "bicicleta") else max(0.4, cam.conf_min - 0.05)):
                     continue
                 x1, y1, x2, y2 = dets.xyxy[i]
                 if (x2 - x1) * (y2 - y1) < (0.025 * w) ** 2:
@@ -679,7 +769,8 @@ class Motor:
         cam.veiculos.saiu = []
 
         # ---- objetos estáveis (um registro por objeto)
-        po = cam.objs_p.atualizar(pessoas.tracker_id, pessoas.xyxy, pconf, ["pessoa"] * len(pessoas), ts, img, lambda c: ((c[0] + c[2]) / 2, c[3]))
+        na_zona = (lambda pt: no_poligono(cam.zona_atributos_px, pt)) if cam.zona_atributos_px else None
+        po = cam.objs_p.atualizar(pessoas.tracker_id, pessoas.xyxy, pconf, ["pessoa"] * len(pessoas), ts, img, lambda c: ((c[0] + c[2]) / 2, c[3]), na_zona)
         vo = cam.objs_v.atualizar([v.id for v in veiculos], [v.caixa for v in veiculos], [1.0] * len(veiculos), [v.classe for v in veiculos], ts, img, lambda c: ((c[0] + c[2]) / 2, (c[1] + c[3]) / 2))
 
         # condutor/passageiro: pessoa sobreposta a moto ou bicicleta (em qualquer câmera)
@@ -803,7 +894,8 @@ class Motor:
 
     def _enviar_pessoa(self, cam: Camera, o, ganhos) -> None:
         recs = [r for _, _, r in o.recortes]
-        self.analisador.enviar(("pessoa", (cam.canal, o.uid, o.inicio), o.ultimo, recs, bool(cam.noturna), o.eh_condutor(), ganhos, list(o.quadros)))
+        attr = [r for _, _, r in o.recortes_attr]
+        self.analisador.enviar(("pessoa", (cam.canal, o.uid, o.inicio), o.ultimo, recs, attr, bool(cam.noturna), o.eh_condutor(), ganhos, list(o.quadros)))
 
     def _enviar_veiculo(self, cam: Camera, o, ganhos, w: int) -> None:
         recs = [r for _, _, r in o.recortes]
@@ -842,7 +934,7 @@ class Motor:
             for k, c in self.cameras.items()
         }
         ms = float(np.mean(self.ms_inferencia)) if self.ms_inferencia else None
-        cams["_atributos"] = {"nome": "atributos", "fila": self.analisador.fila.qsize(), "ms": round(float(np.mean(self.analisador.ms)), 1) if self.analisador.ms else None, "descartados": self.analisador.descartados, "nao_pessoa": self.analisador.nao_pessoa}
+        cams["_atributos"] = {"nome": "atributos", "fila": self.analisador.fila.qsize(), "ms": round(float(np.mean(self.analisador.ms)), 1) if self.analisador.ms else None, "descartados": self.analisador.descartados, "nao_pessoa": self.analisador.nao_pessoa, "juntados": self.analisador.juntados}
         with self.db.cursor() as c:
             c.execute(
                 """INSERT INTO motor_status (id, cpu_pct, mem_mb, ms_inferencia, threads, cameras, detector, atualizado_em)

@@ -40,6 +40,11 @@ export async function salvarCamera(canal: string, form: FormData) {
     if (exclusao && !exclusao.length) exclusao = null;
   } catch {}
   const confMin = num(form.get('conf_min'), 20, 90, 40) / 100;
+  let zonaAttr: [number, number][] | null = null;
+  try {
+    const z = JSON.parse(String(form.get('zona_atributos') ?? 'null'));
+    if (Array.isArray(z) && z.length >= 3 && z.every((p: unknown) => Array.isArray(p) && p.length === 2 && p.every((x) => typeof x === 'number' && x >= 0 && x <= 1))) zonaAttr = z;
+  } catch {}
   await sql`
     UPDATE cameras SET
       nome = ${String(form.get('nome') ?? '').trim().slice(0, 40) || canal},
@@ -53,7 +58,8 @@ export async function salvarCamera(canal: string, form: FormData) {
       interna = ${form.get('interna') === 'on'},
       zona_totem = ${zonaTotem ? sql.json(zonaTotem) : null},
       exclusao = ${exclusao ? sql.json(exclusao) : null},
-      conf_min = ${confMin}
+      conf_min = ${confMin},
+      zona_atributos = ${zonaAttr ? sql.json(zonaAttr) : null}
     WHERE canal = ${canal}`;
   revalidatePath('/', 'layout');
 }

@@ -76,7 +76,7 @@ export default async function Busca({ searchParams }: { searchParams: Promise<Pa
           {f.tipo === 'pessoas' ? (
             <>
               <Campo nome="cima" rotulo="Cor de cima" valor={f.cima} opcoes={cores(CORES_PESSOA)} />
-              <Campo nome="baixo_tipo" rotulo="Parte de baixo" valor={f.baixo_tipo} opcoes={[['calça', 'calça'], ['bermuda/short', 'bermuda/short'], ['saia/vestido', 'saia/vestido']]} />
+              <Campo nome="baixo_tipo" rotulo="Parte de baixo" valor={f.baixo_tipo} opcoes={[['calça', 'calça'], ['bermuda/short', 'bermuda/short']]} />
               <Campo nome="baixo_cor" rotulo="Cor de baixo" valor={f.baixo_cor} opcoes={cores(CORES_PESSOA)} />
               <Campo nome="genero" rotulo="Gênero (estimado)" valor={f.genero} opcoes={[['masculino', 'masculino'], ['feminino', 'feminino']]} />
               <Campo nome="bone" rotulo="Boné/chapéu" valor={f.bone} opcoes={simNao} />

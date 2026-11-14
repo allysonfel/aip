@@ -133,6 +133,7 @@ export async function garantirSchema() {
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS zona_totem JSONB;
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS conf_min REAL;
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS exclusao JSONB;
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS zona_atributos JSONB;
     CREATE TABLE IF NOT EXISTS alertas (
       id BIGSERIAL PRIMARY KEY,
       tipo TEXT NOT NULL,
@@ -168,7 +169,7 @@ export async function garantirSchema() {
   `);
 
 
-  await sql`INSERT INTO config (chave, valor) VALUES ('borrar_rostos', 'false'), ('retencao_dias', '30'), ('limiar_confianca', '0.65') ON CONFLICT DO NOTHING`;
+  await sql`INSERT INTO config (chave, valor) VALUES ('borrar_rostos', 'false'), ('retencao_dias', '30'), ('limiar_confianca', '0.7') ON CONFLICT DO NOTHING`;
 
   // As 5 câmeras da unidade Bezerros (canais conferidos no mediamtx em
   // 14/11/2026). Começa com 3 ligadas, a 2 quadros por segundo.
@@ -223,6 +224,13 @@ export async function garantirSchema() {
   if (!v5) {
     await sql`UPDATE cameras SET conf_min = CASE WHEN canal IN ('cam1', 'cam2') THEN 0.5 ELSE 0.4 END WHERE conf_min IS NULL`;
     await sql`INSERT INTO config (chave, valor) VALUES ('migracao_5', 'true')`;
+  }
+
+  // Migração 6: confiança mínima de 70% para mostrar um atributo.
+  const [v6] = await sql`SELECT 1 FROM config WHERE chave = 'migracao_6'`;
+  if (!v6) {
+    await sql`UPDATE config SET valor = '0.7' WHERE chave = 'limiar_confianca' AND (valor)::text::real < 0.7`;
+    await sql`INSERT INTO config (chave, valor) VALUES ('migracao_6', 'true')`;
   }
 
   await sql`DELETE FROM sessoes WHERE expira < now()`;

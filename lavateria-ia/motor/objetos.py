@@ -68,7 +68,8 @@ class Objeto:
     hist: np.ndarray | None
     vistos: int = 1
     desloc_max: float = 0.0  # fração da largura
-    recortes: list = field(default_factory=list)  # (pontuação, ts, recorte)
+    recortes: list = field(default_factory=list)  # (pontuação, ts, recorte): os melhores, para mostrar
+    recortes_attr: list = field(default_factory=list)  # só os tirados dentro da zona de atributos
     quadros: list = field(default_factory=list)  # (ts, jpeg)
     condutor: int = 0  # quadros sobreposto a moto/bicicleta
     contado: bool = False
@@ -83,22 +84,28 @@ class Objeto:
     def eh_condutor(self) -> bool:
         return self.tipo == "pessoa" and self.condutor >= max(2, 0.3 * self.vistos)
 
-    def guardar_recorte(self, img: np.ndarray, caixa, conf: float, ts: float) -> None:
+    def guardar_recorte(self, img: np.ndarray, caixa, conf: float, ts: float, na_zona: bool = True) -> None:
         rec, borda = recorte(img, caixa)
         if not rec.size:
             return
         x1, y1, x2, y2 = caixa
         pont = float((x2 - x1) * (y2 - y1)) * float(conf) * (0.35 if borda else 1.0)
-        # Recortes separados no tempo (variedade para a votação)
-        perto = [i for i, (_, t, _) in enumerate(self.recortes) if abs(t - ts) < 0.6]
-        if perto:
-            i = perto[0]
-            if pont > self.recortes[i][0]:
-                self.recortes[i] = (pont, ts, rec)
-            return
-        self.recortes.append((pont, ts, rec))
-        self.recortes.sort(key=lambda r: -r[0])
-        del self.recortes[MAX_RECORTES:]
+        _guardar(self.recortes, pont, ts, rec)
+        if na_zona:
+            _guardar(self.recortes_attr, pont, ts, rec)
+
+
+def _guardar(lista: list, pont: float, ts: float, rec: np.ndarray) -> None:
+    """Mantém os MAX_RECORTES melhores, separados no tempo (variedade para a votação)."""
+    perto = [i for i, (_, t, _) in enumerate(lista) if abs(t - ts) < 0.6]
+    if perto:
+        i = perto[0]
+        if pont > lista[i][0]:
+            lista[i] = (pont, ts, rec)
+        return
+    lista.append((pont, ts, rec))
+    lista.sort(key=lambda r: -r[0])
+    del lista[MAX_RECORTES:]
 
 
 class Objetos:
@@ -139,8 +146,9 @@ class Objetos:
             self.sumidos.remove(melhor)
         return melhor
 
-    def atualizar(self, ids, caixas, confs, classes, ts: float, img: np.ndarray, ponto_de) -> list[Objeto]:
-        """ponto_de(caixa) -> ponto de referência (pé da pessoa, centro do veículo)."""
+    def atualizar(self, ids, caixas, confs, classes, ts: float, img: np.ndarray, ponto_de, na_zona=None) -> list[Objeto]:
+        """ponto_de(caixa) -> ponto de referência (pé da pessoa, centro do veículo).
+        na_zona(ponto) -> se o recorte serve para estimar atributos."""
         vistos = []
         for tid, caixa, conf, classe in zip(ids, caixas, confs, classes):
             tid = int(tid)
@@ -165,7 +173,7 @@ class Objetos:
             if o.classe != classe and self.tipo == "veiculo" and o.vistos < 4:
                 o.classe = classe
             o.desloc_max = max(o.desloc_max, float(np.hypot(*(pos - o.origem))) / self.largura)
-            o.guardar_recorte(img, caixa, conf, ts)
+            o.guardar_recorte(img, caixa, conf, ts, True if na_zona is None else bool(na_zona(pos)))
             vistos.append(o)
         return vistos
 

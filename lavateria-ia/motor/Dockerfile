@@ -17,7 +17,8 @@ RUN mkdir -p /app/modelo/omz && cd /app/modelo/omz \
     && for m in person-attributes-recognition-crossroad-0230 vehicle-attributes-recognition-barrier-0039; do \
          for e in xml bin; do python -c "import urllib.request,sys; urllib.request.urlretrieve(sys.argv[1], sys.argv[2])" \
            https://storage.openvinotoolkit.org/repositories/open_model_zoo/2023.0/models_bin/1/$m/FP32/$m.$e $m.$e; done; done \
-    && python -c "import open_clip; open_clip.create_model_and_transforms('ViT-B-16', pretrained='laion2b_s34b_b88k')"
+    && python -c "import open_clip; open_clip.create_model_and_transforms('ViT-B-16', pretrained='laion2b_s34b_b88k')" \
+    && python -c "from rtmlib import RTMPose; RTMPose(onnx_model='https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-t_simcc-body7_pt-body7_420e-256x192-026a1439_20230504.zip', model_input_size=(192, 256), backend='onnxruntime', device='cpu')"
 
 COPY *.py ./
 ENV PYTHONUNBUFFERED=1
