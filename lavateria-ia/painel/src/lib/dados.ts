@@ -21,7 +21,7 @@ export async function cameras(): Promise<CameraInfo[]> {
 export async function config() {
   const linhas = await sql<{ chave: string; valor: unknown }[]>`SELECT chave, valor FROM config`;
   const c = Object.fromEntries(linhas.map((l) => [l.chave, l.valor]));
-  return { borrarRostos: c.borrar_rostos !== false, retencaoDias: Number(c.retencao_dias ?? 30) };
+  return { borrarRostos: c.borrar_rostos === true, retencaoDias: Number(c.retencao_dias ?? 30), limiar: Number(c.limiar_confianca ?? 0.65) };
 }
 
 export async function resumoHoje() {
@@ -58,4 +58,36 @@ export async function statusMotor() {
   const [media] = await sql<{ cpu: number | null; pico: number | null }[]>`
     SELECT avg(cpu_pct)::real AS cpu, max(cpu_pct)::real AS pico FROM motor_amostras WHERE em > now() - interval '30 minutes'`;
   return { status: s ?? null, amostras, cpuMedia30: media?.cpu ?? null, cpuPico30: media?.pico ?? null };
+}
+
+// ---------------------------------------------------------------- etapa 2
+
+export type Atributo = { valor: string | boolean | null; conf?: number; motivo?: string };
+export type AtributosPessoa = Partial<Record<'genero' | 'baixo_tipo' | 'bone' | 'mochila' | 'bolsa' | 'cima' | 'baixo_cor', Atributo>> & { pequeno?: boolean };
+
+export type PessoaLinha = { id: number; canal: string; track_id: number; inicio: Date; fim: Date; atributos: AtributosPessoa; noturna: boolean; camera: string };
+
+export async function pessoasDoDia(dia?: string, canal?: string, limite = 300): Promise<PessoaLinha[]> {
+  const inicio = dia ? sql`(${dia}::date::timestamp AT TIME ZONE 'America/Sao_Paulo')` : HOJE;
+  return sql<PessoaLinha[]>`
+    SELECT p.id, p.canal, p.track_id, p.inicio, p.fim, p.atributos, p.noturna, c.nome AS camera
+    FROM pessoas p JOIN cameras c ON c.canal = p.canal
+    WHERE p.inicio >= ${inicio} AND p.inicio < ${inicio} + interval '1 day' ${canal ? sql`AND p.canal = ${canal}` : sql``}
+    ORDER BY p.inicio DESC LIMIT ${limite}`;
+}
+
+export type VeiculoLinha = { id: number; canal: string; classe: string; inicio: Date; fim: Date; sentido: string | null; cor: string | null; cor_conf: number | null; noturna: boolean; atributos: { cor?: Atributo; pequeno?: boolean } };
+
+export async function veiculosDoDia(limite = 300): Promise<VeiculoLinha[]> {
+  return sql<VeiculoLinha[]>`
+    SELECT id, canal, classe, inicio, fim, sentido, cor, cor_conf, noturna, atributos FROM veiculos
+    WHERE inicio >= ${HOJE} ORDER BY inicio DESC LIMIT ${limite}`;
+}
+
+export async function resumoVeiculos(limiar: number) {
+  const porCor = await sql<{ cor: string; n: number }[]>`
+    SELECT CASE WHEN cor IS NULL OR cor_conf < ${limiar} THEN 'indefinido' ELSE cor END AS cor, count(*)::int AS n
+    FROM veiculos WHERE inicio >= ${HOJE} GROUP BY 1 ORDER BY 2 DESC`;
+  const porTipo = await sql<{ classe: string; n: number }[]>`SELECT classe, count(*)::int AS n FROM veiculos WHERE inicio >= ${HOJE} GROUP BY 1 ORDER BY 2 DESC`;
+  return { porCor, porTipo };
 }

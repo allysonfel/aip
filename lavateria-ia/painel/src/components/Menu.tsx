@@ -7,7 +7,7 @@ import { cn } from '@/lib/cn';
 import { sair } from '@/app/login/actions';
 import { ThemeToggle } from './ThemeToggle';
 import { LogoAIP } from './Logo';
-import { IconeAtividade, IconeCamera, IconeConfig, IconeSair, IconeVisaoGeral } from './ui/icones';
+import { IconeAtividade, IconeCamera, IconeConfig, IconePessoas, IconeSair, IconeVisaoGeral, IconeRotas } from './ui/icones';
 
 // Menu no mesmo desenho do painel do Shopping Caruaru. As próximas etapas
 // (pessoas, veículos, busca, validação, alertas, resumo) entram aqui.
@@ -17,6 +17,13 @@ const GRUPOS = [
     abas: [
       { href: '/', label: 'Visão geral', Icone: IconeVisaoGeral },
       { href: '/ao-vivo', label: 'Câmeras ao vivo', Icone: IconeCamera },
+    ],
+  },
+  {
+    titulo: 'Análise',
+    abas: [
+      { href: '/pessoas', label: 'Pessoas', Icone: IconePessoas },
+      { href: '/veiculos', label: 'Veículos', Icone: IconeRotas },
     ],
   },
   {

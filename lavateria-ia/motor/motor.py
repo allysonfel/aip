@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import json
 import os
+import queue
 import signal
 import threading
 import time
@@ -176,6 +177,8 @@ class _Veiculo:
     caixa: np.ndarray
     origem: np.ndarray | None = None
     contado: bool = False
+    sentido: str | None = None
+    inicio: float = 0.0
 
 
 class RastreadorVeiculos:
@@ -189,8 +192,10 @@ class RastreadorVeiculos:
         self.validade = validade_s
         self._v: dict[int, _Veiculo] = {}
         self._prox = 1
+        self.saiu: list[_Veiculo] = []
 
     def atualizar(self, caixas: np.ndarray, classes: list[str], ts: float) -> list[_Veiculo]:
+        self.saiu = [v for v in self._v.values() if ts - v.visto > self.validade]
         self._v = {k: v for k, v in self._v.items() if ts - v.visto <= self.validade}
         livres = dict(self._v)
         saida: list[_Veiculo] = []
@@ -210,7 +215,8 @@ class RastreadorVeiculos:
             else:
                 livres.pop(melhor)
             antes = self._v.get(melhor)
-            v = _Veiculo(melhor, classes[i], centros[i], ts, caixas[i], origem=antes.origem if antes else centros[i], contado=bool(antes and antes.contado))
+            v = _Veiculo(melhor, classes[i], centros[i], ts, caixas[i], origem=antes.origem if antes else centros[i], contado=bool(antes and antes.contado),
+                         sentido=antes.sentido if antes else None, inicio=antes.inicio if antes else ts)
             self._v[melhor] = v
             saida.append(v)
         return saida
@@ -241,6 +247,9 @@ class Camera:
     ultimo_seq: int = -1
     processados: list[float] = field(default_factory=list)
     contagem: dict[str, int] = field(default_factory=dict)
+    rastros: dict[int, "Rastro"] = field(default_factory=dict)
+    rastros_v: dict[int, "Rastro"] = field(default_factory=dict)
+    noturna: bool | None = None
 
     def fps_processado(self) -> float:
         agora = time.time()
@@ -287,9 +296,129 @@ def borrar_cabecas(img: np.ndarray, caixas: np.ndarray) -> None:
         img[cy1:cy2, cx1:cx2] = cv2.GaussianBlur(regiao, (k, k), 0)
 
 
+def imagem_noturna_rapida(bgr: np.ndarray) -> bool:
+    peq = cv2.resize(bgr, (96, 64))
+    return float(cv2.cvtColor(peq, cv2.COLOR_BGR2HSV)[..., 1].mean()) < 14
+
+
 def jpeg(img: np.ndarray, qualidade: int = 72) -> bytes:
     ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, qualidade])
     return buf.tobytes() if ok else b""
+
+
+
+# ---------------------------------------------------------------- recortes e atributos
+
+ANALISAR_APOS_S = 6.0  # pessoa presente há 6 s: já dá para analisar com um bom recorte
+PESSOA_SAIU_S = 3.0
+
+
+@dataclass
+class Rastro:
+    inicio: float
+    ultimo: float
+    pontuacao: float = 0.0
+    recorte: np.ndarray | None = None
+    analisado: bool = False
+
+
+def recorte_com_margem(img: np.ndarray, caixa, margem: float = 0.08) -> tuple[np.ndarray, bool]:
+    h, w = img.shape[:2]
+    x1, y1, x2, y2 = caixa
+    mx, my = (x2 - x1) * margem, (y2 - y1) * margem
+    a, b, c, d = int(max(0, x1 - mx)), int(max(0, y1 - my)), int(min(w, x2 + mx)), int(min(h, y2 + my))
+    borda = x1 <= 2 or y1 <= 2 or x2 >= w - 2 or y2 >= h - 2
+    return img[b:d, a:c].copy(), borda
+
+
+def atualizar_rastro(rastros: dict, chave: int, img: np.ndarray, caixa, conf: float, ts: float) -> "Rastro":
+    r = rastros.get(chave)
+    if r is None:
+        r = Rastro(inicio=ts, ultimo=ts)
+        rastros[chave] = r
+    r.ultimo = ts
+    x1, y1, x2, y2 = caixa
+    rec, borda = recorte_com_margem(img, caixa)
+    # Melhor recorte: maior área, mais confiança e sem encostar na borda da imagem.
+    pont = (x2 - x1) * (y2 - y1) * float(conf) * (0.35 if borda else 1.0)
+    if pont > r.pontuacao and rec.size:
+        r.pontuacao, r.recorte = pont, rec
+    return r
+
+
+class Analisador(threading.Thread):
+    """Fila de análise de atributos em segundo plano (uma pessoa ou veículo por
+    vez), com conexão própria ao banco: não atrasa a detecção das câmeras."""
+
+    def __init__(self) -> None:
+        super().__init__(daemon=True, name="atributos")
+        self.fila: queue.Queue = queue.Queue(maxsize=200)
+        self.ms: list[float] = []
+        self.descartados = 0
+        self.modelos = None
+
+    def enviar(self, tarefa: tuple) -> None:
+        try:
+            self.fila.put_nowait(tarefa)
+        except queue.Full:
+            self.descartados += 1
+
+    def run(self) -> None:
+        from atributos import Atributos
+
+        try:
+            self.modelos = Atributos(threads=1)
+            log("atributos: modelos carregados (CLIP + Intel)")
+        except Exception as e:
+            log("atributos indisponíveis:", repr(e)[:300])
+        db = psycopg.connect(DATABASE_URL, autocommit=True)
+        while not PARAR.is_set():
+            try:
+                tarefa = self.fila.get(timeout=1)
+            except queue.Empty:
+                continue
+            try:
+                self._fazer(db, tarefa)
+            except psycopg.Error as e:
+                log("atributos: erro de banco:", e)
+                try:
+                    db.close()
+                except Exception:
+                    pass
+                time.sleep(2)
+                db = psycopg.connect(DATABASE_URL, autocommit=True)
+            except Exception as e:
+                log("atributos: erro:", repr(e)[:300])
+
+    def _fazer(self, db, tarefa: tuple) -> None:
+        tipo = tarefa[0]
+        if tipo == "pessoa_fim":
+            _, canal, tid, inicio, fim = tarefa
+            with db.cursor() as c:
+                c.execute("UPDATE pessoas SET fim = to_timestamp(%s) WHERE canal = %s AND track_id = %s AND inicio = to_timestamp(%s)", (fim, canal, tid, inicio))
+            return
+        t0 = time.perf_counter()
+        if tipo == "pessoa":
+            _, canal, tid, inicio, fim, rec, noturna = tarefa
+            attrs = self.modelos.pessoa(rec, noturna) if self.modelos else {}
+            with db.cursor() as c:
+                c.execute(
+                    """INSERT INTO pessoas (canal, track_id, inicio, fim, recorte, atributos, noturna)
+                       VALUES (%s, %s, to_timestamp(%s), to_timestamp(%s), %s, %s, %s)""",
+                    (canal, tid, inicio, fim, jpeg(rec, 88), json.dumps(attrs), noturna),
+                )
+        elif tipo == "veiculo":
+            _, canal, vid, classe, inicio, fim, sentido, rec, noturna = tarefa
+            attrs = self.modelos.veiculo(rec, noturna) if self.modelos else {}
+            cor = attrs.get("cor", {})
+            with db.cursor() as c:
+                c.execute(
+                    """INSERT INTO veiculos (canal, track_id, classe, inicio, fim, sentido, recorte, cor, cor_conf, atributos, noturna)
+                       VALUES (%s, %s, %s, to_timestamp(%s), to_timestamp(%s), %s, %s, %s, %s, %s, %s)""",
+                    (canal, vid, classe, inicio, fim, sentido, jpeg(rec, 88), cor.get("valor"), cor.get("conf"), json.dumps(attrs), noturna),
+                )
+        self.ms.append((time.perf_counter() - t0) * 1000)
+        self.ms = self.ms[-50:]
 
 
 # ---------------------------------------------------------------- motor
@@ -309,6 +438,8 @@ class Motor:
         self._ultima_limpeza = 0.0
         self._ultimo_cru_inativas = 0.0
         self.detector = Detector()
+        self.analisador = Analisador()
+        self.analisador.start()
 
     # ---------- banco
 
@@ -420,6 +551,30 @@ class Motor:
         idx_v = [i for i, n in enumerate(nomes) if n in VEICULOS] if cam.tipo_linha == "veiculos" else []
         veiculos = cam.veiculos.atualizar(dets.xyxy[idx_v] if idx_v else np.zeros((0, 4)), [nomes[i] for i in idx_v], q.ts)
 
+        # Recortes para os atributos (uma análise por pessoa ou veículo).
+        cam.noturna = imagem_noturna_rapida(img)  # barato: imagem de 96x64
+        vivos = set()
+        for caixa, tid, conf in zip(pessoas.xyxy, pessoas.tracker_id, pessoas.confidence if pessoas.confidence is not None else np.ones(len(pessoas))):
+            tid = int(tid)
+            vivos.add(tid)
+            r = atualizar_rastro(cam.rastros, tid, img, caixa, conf, q.ts)
+            if not r.analisado and q.ts - r.inicio >= ANALISAR_APOS_S and r.recorte is not None:
+                r.analisado = True
+                self.analisador.enviar(("pessoa", cam.canal, tid, r.inicio, q.ts, r.recorte, cam.noturna))
+        for tid in [t for t, r in cam.rastros.items() if t not in vivos and q.ts - r.ultimo > PESSOA_SAIU_S]:
+            r = cam.rastros.pop(tid)
+            if r.analisado:
+                self.analisador.enviar(("pessoa_fim", cam.canal, tid, r.inicio, r.ultimo))
+            elif r.recorte is not None and r.ultimo - r.inicio >= 1.0:
+                self.analisador.enviar(("pessoa", cam.canal, tid, r.inicio, r.ultimo, r.recorte, cam.noturna))
+        for v in veiculos:
+            atualizar_rastro(cam.rastros_v, v.id, img, v.caixa, 1.0, q.ts)
+        for v in cam.veiculos.saiu:
+            r = cam.rastros_v.pop(v.id, None)
+            if r is not None and r.recorte is not None:
+                self.analisador.enviar(("veiculo", cam.canal, v.id, v.classe, v.inicio, v.visto, v.sentido, r.recorte, cam.noturna))
+        cam.veiculos.saiu = []
+
         mudou = False
         if cam.contador is not None:
             if cam.tipo_linha == "entrada":
@@ -437,6 +592,7 @@ class Motor:
                     andou = v.origem is not None and float(np.hypot(*(v.centro - v.origem))) >= 0.06 * w
                     if s and not v.contado and andou:
                         v.contado = True
+                        v.sentido = s
                         self.salvar_evento(cam.canal, "veiculo", v.classe, s, v.id)
                         mudou = True
                 cam.contador.esquecer(cam.veiculos.vivos())
@@ -504,6 +660,7 @@ class Motor:
             for k, c in self.cameras.items()
         }
         ms = float(np.mean(self.ms_inferencia)) if self.ms_inferencia else None
+        cams["_atributos"] = {"nome": "atributos", "fila": self.analisador.fila.qsize(), "ms": round(float(np.mean(self.analisador.ms)), 1) if self.analisador.ms else None, "descartados": self.analisador.descartados}
         with self.db.cursor() as c:
             c.execute(
                 """INSERT INTO motor_status (id, cpu_pct, mem_mb, ms_inferencia, threads, cameras, detector, atualizado_em)
@@ -514,12 +671,14 @@ class Motor:
             )
             c.execute(
                 "INSERT INTO motor_amostras (cpu_pct, mem_mb, ms_inferencia, cameras_ativas, fps_total) VALUES (%s, %s, %s, %s, %s)",
-                (round(cpu, 1), round(mem), ms and round(ms, 1), len(self.cameras), sum(v["fps_processado"] for v in cams.values())),
+                (round(cpu, 1), round(mem), ms and round(ms, 1), len(self.cameras), sum(v.get("fps_processado", 0) for v in cams.values())),
             )
 
     def limpar(self) -> None:
         with self.db.cursor() as c:
             c.execute("DELETE FROM eventos WHERE ocorrido_em < now() - make_interval(days => %s)", (self.retencao_dias,))
+            c.execute("DELETE FROM pessoas WHERE inicio < now() - make_interval(days => %s)", (self.retencao_dias,))
+            c.execute("DELETE FROM veiculos WHERE inicio < now() - make_interval(days => %s)", (self.retencao_dias,))
             c.execute("DELETE FROM motor_amostras WHERE em < now() - interval '30 days'")
 
     def rodar(self) -> None:
@@ -540,7 +699,8 @@ class Motor:
                 trabalhou = False
                 for cam in list(self.cameras.values()):
                     if time.time() >= cam.proximo:
-                        cam.proximo = time.time() + 1.0 / max(0.2, cam.fps)
+                        periodo = 1.0 / max(0.2, cam.fps)
+                        cam.proximo = max(cam.proximo + periodo, time.time() - periodo)
                         self.processar(cam)
                         trabalhou = True
                 if time.time() - self._ultimo_status > 5:

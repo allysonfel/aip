@@ -35,5 +35,7 @@ export async function salvarGeral(form: FormData) {
   await exigirUsuario();
   await sql`UPDATE config SET valor = ${sql.json(form.get('borrar') === 'on')} WHERE chave = 'borrar_rostos'`;
   await sql`UPDATE config SET valor = ${sql.json(Math.round(num(form.get('retencao'), 1, 90, 30)))} WHERE chave = 'retencao_dias'`;
+  const limiar = num(form.get('limiar'), 50, 95, 65) / 100;
+  await sql`INSERT INTO config (chave, valor) VALUES ('limiar_confianca', ${sql.json(limiar)}) ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor`;
   revalidatePath('/', 'layout');
 }

@@ -83,11 +83,41 @@ export async function garantirSchema() {
     );
     CREATE INDEX IF NOT EXISTS deteccoes_canal_ts ON deteccoes (canal, ts);
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS contagem_hoje JSONB;
+    -- Etapa 2: uma linha por pessoa ou veículo rastreado, com o melhor recorte e os atributos.
+    CREATE TABLE IF NOT EXISTS pessoas (
+      id BIGSERIAL PRIMARY KEY,
+      canal TEXT NOT NULL,
+      track_id INT NOT NULL,
+      inicio TIMESTAMPTZ NOT NULL,
+      fim TIMESTAMPTZ NOT NULL,
+      recorte BYTEA,
+      atributos JSONB NOT NULL DEFAULT '{}',
+      noturna BOOLEAN NOT NULL DEFAULT false,
+      criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS pessoas_inicio ON pessoas (inicio);
+    CREATE INDEX IF NOT EXISTS pessoas_canal_track ON pessoas (canal, track_id, inicio);
+    CREATE TABLE IF NOT EXISTS veiculos (
+      id BIGSERIAL PRIMARY KEY,
+      canal TEXT NOT NULL,
+      track_id INT NOT NULL,
+      classe TEXT NOT NULL,
+      inicio TIMESTAMPTZ NOT NULL,
+      fim TIMESTAMPTZ NOT NULL,
+      sentido TEXT,
+      recorte BYTEA,
+      cor TEXT,
+      cor_conf REAL,
+      atributos JSONB NOT NULL DEFAULT '{}',
+      noturna BOOLEAN NOT NULL DEFAULT false,
+      criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE INDEX IF NOT EXISTS veiculos_inicio ON veiculos (inicio);
     ALTER TABLE motor_status ADD COLUMN IF NOT EXISTS detector TEXT;
   `);
 
 
-  await sql`INSERT INTO config (chave, valor) VALUES ('borrar_rostos', 'false'), ('retencao_dias', '30') ON CONFLICT DO NOTHING`;
+  await sql`INSERT INTO config (chave, valor) VALUES ('borrar_rostos', 'false'), ('retencao_dias', '30'), ('limiar_confianca', '0.65') ON CONFLICT DO NOTHING`;
 
   // As 5 câmeras da unidade Bezerros (canais conferidos no mediamtx em
   // 14/11/2026). Começa com 3 ligadas, a 2 quadros por segundo.

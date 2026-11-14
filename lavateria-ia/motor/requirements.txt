@@ -10,3 +10,5 @@ openvino>=2025.0
 onnx
 onnxscript
 onnxsim
+# Atributos (etapa 2): CLIP para gênero, parte de baixo e acessórios.
+open_clip_torch
