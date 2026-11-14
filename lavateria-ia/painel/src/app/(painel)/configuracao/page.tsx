@@ -1,0 +1,33 @@
+import { Secao, TituloPagina } from '@/components/Comum';
+import { cameras, config } from '@/lib/dados';
+import { salvarGeral } from './acoes';
+import EditorCamera from './EditorCamera';
+
+export default async function Configuracao() {
+  const [cams, cfg] = await Promise.all([cameras(), config()]);
+  return (
+    <>
+      <TituloPagina titulo="Configuração" descricao="Câmeras, linhas de contagem e privacidade. Os quadros abaixo são atuais: confira o nome e a função de cada câmera." />
+      <Secao titulo="Privacidade e retenção" className="mb-4">
+        <form action={salvarGeral} className="flex flex-wrap items-end gap-6 text-sm">
+          <label className="flex items-center gap-2">
+            <input type="checkbox" name="borrar" defaultChecked={cfg.borrarRostos} />
+            Borrar as cabeças nas imagens (recomendado em demonstrações). Com isso ligado, o vídeo cru fica desligado.
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Guardar eventos por (dias)</span>
+            <input name="retencao" type="number" min={1} max={90} defaultValue={cfg.retencaoDias} className="mt-1 w-28 rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
+          </label>
+          <button className="rounded-sm bg-primary px-4 py-2 font-semibold text-on-primary">Salvar</button>
+        </form>
+      </Secao>
+      <div className="space-y-4">
+        {cams.map((c) => (
+          <Secao key={c.canal} titulo={`${c.nome} (${c.canal})`} descricao={c.ativa ? `Analisada a ${c.fps} quadros por segundo` : 'Não analisada (o quadro é atualizado a cada 10 minutos)'}>
+            <EditorCamera cam={c} />
+          </Secao>
+        ))}
+      </div>
+    </>
+  );
+}

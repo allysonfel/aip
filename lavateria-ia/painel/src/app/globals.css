@@ -1,0 +1,239 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens vindos do DESIGN.md do outro produto Logos Company (mesma marca,
+ * mesmo cliente) — reaproveitados aqui integralmente porque a variante
+ * "admin/dashboard" descrita lá (cantos retos rounded-sm em controles,
+ * hairline borders em vez de sombra, azul só em estado ativo/CTA, ícones
+ * finos na sidebar) é exatamente o estilo pedido pra AIP. Ver
+ * DECISIONS.md. AIP é só painel administrativo — não usamos a variante
+ * "site público" (botões em pílula) daquele arquivo.
+ */
+
+:root {
+  --color-surface: #ffffff;
+  --color-surface-dim: #f9f9f9;
+  --color-surface-bright: #ffffff;
+  --color-surface-container-lowest: #f4f7f6;
+  --color-surface-container-low: #f3f3f3;
+  --color-surface-container: #efefef;
+  --color-surface-container-high: #e8e8e8;
+  --color-surface-container-highest: #dcdcdc;
+  --color-on-surface: #1e2124;
+  --color-on-surface-variant: #636363;
+  --color-outline: #767676;
+  --color-outline-variant: #b9b9b9;
+  --color-inverse-surface: #202426;
+  --color-inverse-on-surface: #f3f3f3;
+
+  --color-primary: #2563eb;
+  --color-on-primary: #ffffff;
+  --color-primary-container: #eff6ff;
+  --color-on-primary-container: #1d4ed8;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-active: #1e40af;
+
+  --color-secondary: #4e8af7;
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: #e8f1ff;
+  --color-on-secondary-container: #4e8af7;
+
+  --color-tertiary: #147eb3;
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: #d4ebf7;
+  --color-on-tertiary-container: #147eb3;
+
+  --color-success: #16a34a;
+  --color-on-success: #ffffff;
+  --color-success-container: #dcfce7;
+  --color-on-success-container: #15803d;
+
+  --color-error: #ff4136;
+  --color-on-error: #ffffff;
+  --color-error-container: #ffe8e6;
+  --color-on-error-container: #ff4136;
+
+  --color-warning: #f59e0b;
+  --color-on-warning: #ffffff;
+  --color-warning-container: #fef3c7;
+  --color-on-warning-container: #b45309;
+
+  --color-background: var(--color-surface-dim);
+  --color-foreground: var(--color-on-surface);
+
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', system-ui, 'Segoe UI', Roboto, sans-serif;
+}
+
+/*
+ * Modo escuro — mesmo padrão do outro produto Logos (ThemeToggle.tsx +
+ * script bloqueante em layout.tsx): classe "dark" na <html>, sem
+ * @media prefers-color-scheme, sem Context/Provider. Claro continua
+ * sendo o padrão; a classe só existe quando a pessoa escolhe.
+ */
+html.dark {
+  --color-surface: #1a1c1e;
+  --color-surface-dim: #131415;
+  --color-surface-bright: #26282b;
+  --color-surface-container-lowest: #131415;
+  --color-surface-container-low: #202225;
+  --color-surface-container: #26282b;
+  --color-surface-container-high: #2f3134;
+  --color-surface-container-highest: #3a3c40;
+  --color-on-surface: #e7e7e7;
+  --color-on-surface-variant: #a3a3a3;
+  --color-outline: #6b6b6b;
+  --color-outline-variant: #45474a;
+  --color-inverse-surface: #f3f3f3;
+  --color-inverse-on-surface: #1e2124;
+
+  --color-primary: #5b8cf5;
+  --color-on-primary: #06132c;
+  --color-primary-container: #16233f;
+  --color-on-primary-container: #a9c6ff;
+  --color-primary-hover: #7ba1f7;
+  --color-primary-active: #416ecf;
+
+  --color-secondary: #5b8cf5;
+  --color-on-secondary: #06132c;
+  --color-secondary-container: #16233f;
+  --color-on-secondary-container: #a9c6ff;
+
+  --color-tertiary: #55b8e8;
+  --color-on-tertiary: #00293b;
+  --color-tertiary-container: #0f3346;
+  --color-on-tertiary-container: #aee0f7;
+
+  --color-success: #4ade80;
+  --color-on-success: #06280f;
+  --color-success-container: #0f3a1e;
+  --color-on-success-container: #86efac;
+
+  --color-error: #ff6b61;
+  --color-on-error: #3a0a06;
+  --color-error-container: #4a120d;
+  --color-on-error-container: #ffb4ac;
+
+  --color-warning: #fbbf24;
+  --color-on-warning: #3a2905;
+  --color-warning-container: #4a3407;
+  --color-on-warning-container: #fde68a;
+
+  --color-background: var(--color-surface-dim);
+  --color-foreground: var(--color-on-surface);
+}
+
+@theme inline {
+  --color-surface: var(--color-surface);
+  --color-surface-dim: var(--color-surface-dim);
+  --color-surface-container-lowest: var(--color-surface-container-lowest);
+  --color-surface-container-low: var(--color-surface-container-low);
+  --color-surface-container: var(--color-surface-container);
+  --color-surface-container-high: var(--color-surface-container-high);
+  --color-surface-container-highest: var(--color-surface-container-highest);
+  --color-on-surface: var(--color-on-surface);
+  --color-on-surface-variant: var(--color-on-surface-variant);
+  --color-outline: var(--color-outline);
+  --color-outline-variant: var(--color-outline-variant);
+
+  --color-primary: var(--color-primary);
+  --color-on-primary: var(--color-on-primary);
+  --color-primary-container: var(--color-primary-container);
+  --color-on-primary-container: var(--color-on-primary-container);
+
+  --color-secondary: var(--color-secondary);
+  --color-secondary-container: var(--color-secondary-container);
+  --color-on-secondary-container: var(--color-on-secondary-container);
+
+  --color-tertiary: var(--color-tertiary);
+  --color-tertiary-container: var(--color-tertiary-container);
+
+  --color-success: var(--color-success);
+  --color-success-container: var(--color-success-container);
+  --color-on-success-container: var(--color-on-success-container);
+
+  --color-error: var(--color-error);
+  --color-error-container: var(--color-error-container);
+  --color-on-error-container: var(--color-on-error-container);
+
+  --color-warning: var(--color-warning);
+  --color-warning-container: var(--color-warning-container);
+  --color-on-warning-container: var(--color-on-warning-container);
+
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+
+  --font-sans: var(--font-sans);
+}
+
+html,
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: var(--font-sans);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Leaflet precisa da própria altura explícita no container — ver MapaBase.tsx */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+  z-index: 0;
+}
+
+/* ---------- Painel do shopping: cores de visualização ----------
+ * Séries categóricas na ordem fixa da paleta de referência (validada pra
+ * daltonismo): 1 azul, 2 laranja, 3 verde-água. Planta: fundo, corredor,
+ * lojas e setas. O tema escuro tem seus próprios passos, não é inversão. */
+:root {
+  --serie-1: #2a78d6;
+  --serie-2: #eb6834;
+  --serie-3: #1baf7a;
+  --viz-grade: #e4e3df;
+  --viz-eixo: #6b6a66;
+  --viz-fundo: #fcfcfb;
+  --viz-corredor: #e9edf3;
+  --viz-loja: #f2f1ee;
+  --viz-loja-destaque: #fde7dc;
+  --viz-linha: #c9c7c1;
+  --viz-texto: #2b2a27;
+  --viz-texto-sec: #6b6a66;
+  --viz-entrada: #52514e;
+  --viz-neutro: #dcdbd6;
+  --viz-seta: #eb6834;
+  --viz-selecao: #0b0b0b;
+}
+html.dark {
+  --serie-1: #3987e5;
+  --serie-2: #d95926;
+  --serie-3: #199e70;
+  --viz-grade: #2f2f2d;
+  --viz-eixo: #a3a29b;
+  --viz-fundo: #1a1a19;
+  --viz-corredor: #2a2d33;
+  --viz-loja: #242422;
+  --viz-loja-destaque: #4a2c1f;
+  --viz-linha: #44443f;
+  --viz-texto: #f0efec;
+  --viz-texto-sec: #a3a29b;
+  --viz-entrada: #6b6a66;
+  --viz-neutro: #4a4a46;
+  --viz-seta: #d95926;
+  --viz-selecao: #f0efec;
+}
+
+/* Pergunte à AIP: painel abre crescendo a partir do botão. */
+@keyframes aip-abrir {
+  from { opacity: 0; transform: translateY(12px) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+/* ...e fecha encolhendo de volta para o botão. */
+@keyframes aip-fechar {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  35% { opacity: 1; transform: translateY(-4px) scale(1.01); }
+  100% { opacity: 0; transform: translateY(24px) scale(0.6); filter: blur(2px); }
+}

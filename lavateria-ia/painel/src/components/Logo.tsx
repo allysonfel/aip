@@ -1,0 +1,34 @@
+import { cn } from '@/lib/cn';
+
+// O logo original (public/aip-logo.png) é branco com transparência.
+// Usado como MÁSCARA, ele assume a cor que o tema mandar (fica visível
+// no claro e no escuro) sem redesenhar nada.
+function Mascara({ src, proporcao, className }: { src: string; proporcao: number; className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn('inline-block bg-current', className)}
+      style={{
+        aspectRatio: proporcao,
+        WebkitMaskImage: `url(/lavateria${src})`,
+        maskImage: `url(/lavateria${src})`,
+        WebkitMaskSize: 'contain',
+        maskSize: 'contain',
+        WebkitMaskRepeat: 'no-repeat',
+        maskRepeat: 'no-repeat',
+        WebkitMaskPosition: 'center',
+        maskPosition: 'center',
+      }}
+    />
+  );
+}
+
+/** Logotipo completo "AIP" (o A tem o olhinho). */
+export function LogoAIP({ className }: { className?: string }) {
+  return <Mascara src="/aip-logo.png" proporcao={2238 / 586} className={className} />;
+}
+
+/** Só o "A" com olhinho, recortado do logotipo (public/aip-a.png). */
+export function LogoA({ className }: { className?: string }) {
+  return <Mascara src="/aip-a.png" proporcao={1090 / 586} className={className} />;
+}
