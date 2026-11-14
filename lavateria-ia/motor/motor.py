@@ -236,6 +236,7 @@ class Camera:
     fps: float
     tipo_linha: str | None
     linha: dict | None
+    calibracao: dict | None = None
     fonte: FonteVideo | None = None
     proximo: float = 0.0
     rastreador: sv.ByteTrack | None = None
@@ -250,6 +251,10 @@ class Camera:
     rastros: dict[int, "Rastro"] = field(default_factory=dict)
     rastros_v: dict[int, "Rastro"] = field(default_factory=dict)
     noturna: bool | None = None
+    transformador: sv.ViewTransformer | None = None
+    trajeto_v: dict[int, list] = field(default_factory=dict)
+    jpeg_cena: tuple[int, bytes] | None = None
+    poligono: np.ndarray | None = None
 
     def fps_processado(self) -> float:
         agora = time.time()
@@ -267,6 +272,17 @@ def montar_rastreio(cam: Camera, largura: int, altura: int) -> None:
         minimum_consecutive_frames=1,
     )
     cam.veiculos = RastreadorVeiculos(largura)
+    cam.transformador = None
+    cal = cam.calibracao or {}
+    pts = cal.get("pontos")
+    if pts and len(pts) == 4 and cal.get("largura_m") and cal.get("comprimento_m"):
+        # 4 pontos sobre a rua (na ordem: frente-esquerda, frente-direita,
+        # fundo-direita, fundo-esquerda) e as medidas reais do trecho.
+        fonte = np.array([[p[0] * largura, p[1] * altura] for p in pts], dtype=np.float32)
+        lw, lc = float(cal["largura_m"]), float(cal["comprimento_m"])
+        alvo = np.array([[0, lc], [lw, lc], [lw, 0], [0, 0]], dtype=np.float32)
+        cam.transformador = sv.ViewTransformer(source=fonte, target=alvo)
+        cam.poligono = fonte
     cam.contador = None
     cam.chave_linha = json.dumps(cam.linha, sort_keys=True) if cam.linha else ""
     if cam.tipo_linha and cam.linha:
@@ -320,6 +336,7 @@ class Rastro:
     pontuacao: float = 0.0
     recorte: np.ndarray | None = None
     analisado: bool = False
+    quadros: list = field(default_factory=list)  # (ts, jpeg) a cada ~1 s, para a busca
 
 
 def recorte_com_margem(img: np.ndarray, caixa, margem: float = 0.08) -> tuple[np.ndarray, bool]:
@@ -329,6 +346,23 @@ def recorte_com_margem(img: np.ndarray, caixa, margem: float = 0.08) -> tuple[np
     a, b, c, d = int(max(0, x1 - mx)), int(max(0, y1 - my)), int(min(w, x2 + mx)), int(min(h, y2 + my))
     borda = x1 <= 2 or y1 <= 2 or x2 >= w - 2 or y2 >= h - 2
     return img[b:d, a:c].copy(), borda
+
+
+def cena_jpeg(cam: "Camera", img: np.ndarray, seq: int) -> bytes:
+    """Quadro inteiro reduzido (para a sequência de imagens da busca), uma vez por quadro analisado."""
+    if cam.jpeg_cena is None or cam.jpeg_cena[0] != seq:
+        h, w = img.shape[:2]
+        esc = min(1.0, 640 / w)
+        peq = cv2.resize(img, (int(w * esc), int(h * esc))) if esc < 1 else img
+        cam.jpeg_cena = (seq, jpeg(peq, 70))
+    return cam.jpeg_cena[1]
+
+
+def guardar_quadro(r: "Rastro", ts: float, obter) -> None:
+    if not r.quadros or ts - r.quadros[-1][0] >= 1.0:
+        r.quadros.append((ts, obter()))
+        if len(r.quadros) > 8:
+            del r.quadros[1]  # mantém o primeiro (chegada) e os mais recentes
 
 
 def atualizar_rastro(rastros: dict, chave: int, img: np.ndarray, caixa, conf: float, ts: float) -> "Rastro":
@@ -344,6 +378,21 @@ def atualizar_rastro(rastros: dict, chave: int, img: np.ndarray, caixa, conf: fl
     if pont > r.pontuacao and rec.size:
         r.pontuacao, r.recorte = pont, rec
     return r
+
+
+
+def velocidade_kmh(trajeto: list) -> float | None:
+    """Velocidade pelo trajeto em metros (perspectiva corrigida pela
+    calibração): deslocamento entre o primeiro e o último ponto dentro do
+    trecho calibrado, dividido pelo tempo. Precisa de 2 pontos e 0,4 s."""
+    if len(trajeto) < 2:
+        return None
+    (t0, p0), (t1, p1) = trajeto[0], trajeto[-1]
+    dt = t1 - t0
+    if dt < 0.4:
+        return None
+    v = float(np.hypot(*(np.array(p1) - np.array(p0)))) / dt * 3.6
+    return round(v, 1) if 0 < v < 200 else None
 
 
 class Analisador(threading.Thread):
@@ -399,24 +448,31 @@ class Analisador(threading.Thread):
             return
         t0 = time.perf_counter()
         if tipo == "pessoa":
-            _, canal, tid, inicio, fim, rec, noturna = tarefa
+            _, canal, tid, inicio, fim, rec, noturna, quadros = tarefa
             attrs = self.modelos.pessoa(rec, noturna) if self.modelos else {}
+            assinatura = attrs.pop("_assinatura", None)
             with db.cursor() as c:
                 c.execute(
-                    """INSERT INTO pessoas (canal, track_id, inicio, fim, recorte, atributos, noturna)
-                       VALUES (%s, %s, to_timestamp(%s), to_timestamp(%s), %s, %s, %s)""",
-                    (canal, tid, inicio, fim, jpeg(rec, 88), json.dumps(attrs), noturna),
+                    """INSERT INTO pessoas (canal, track_id, inicio, fim, recorte, atributos, noturna, assinatura)
+                       VALUES (%s, %s, to_timestamp(%s), to_timestamp(%s), %s, %s, %s, %s) RETURNING id""",
+                    (canal, tid, inicio, fim, jpeg(rec, 88), json.dumps(attrs), noturna, assinatura),
                 )
+                pid = c.fetchone()[0]
+                for ts, img in quadros:
+                    c.execute("INSERT INTO quadros_momento (tipo, ref_id, ts, img) VALUES ('pessoa', %s, to_timestamp(%s), %s)", (pid, ts, img))
         elif tipo == "veiculo":
-            _, canal, vid, classe, inicio, fim, sentido, rec, noturna = tarefa
+            _, canal, vid, classe, inicio, fim, sentido, rec, noturna, vel, desloc, quadros = tarefa
             attrs = self.modelos.veiculo(rec, noturna) if self.modelos else {}
             cor = attrs.get("cor", {})
             with db.cursor() as c:
                 c.execute(
-                    """INSERT INTO veiculos (canal, track_id, classe, inicio, fim, sentido, recorte, cor, cor_conf, atributos, noturna)
-                       VALUES (%s, %s, %s, to_timestamp(%s), to_timestamp(%s), %s, %s, %s, %s, %s, %s)""",
-                    (canal, vid, classe, inicio, fim, sentido, jpeg(rec, 88), cor.get("valor"), cor.get("conf"), json.dumps(attrs), noturna),
+                    """INSERT INTO veiculos (canal, track_id, classe, inicio, fim, sentido, recorte, cor, cor_conf, atributos, noturna, velocidade_kmh, deslocamento)
+                       VALUES (%s, %s, %s, to_timestamp(%s), to_timestamp(%s), %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id""",
+                    (canal, vid, classe, inicio, fim, sentido, jpeg(rec, 88), cor.get("valor"), cor.get("conf"), json.dumps(attrs), noturna, vel, desloc),
                 )
+                vid_db = c.fetchone()[0]
+                for ts, img in quadros:
+                    c.execute("INSERT INTO quadros_momento (tipo, ref_id, ts, img) VALUES ('veiculo', %s, to_timestamp(%s), %s)", (vid_db, ts, img))
         self.ms.append((time.perf_counter() - t0) * 1000)
         self.ms = self.ms[-50:]
 
@@ -470,13 +526,13 @@ class Motor:
             cfg = {k: v for k, v in c.fetchall()}
             self.borrar = bool(cfg.get("borrar_rostos", True))
             self.retencao_dias = int(cfg.get("retencao_dias", 30))
-            c.execute("SELECT canal, caminho, nome, ativa, fps, tipo_linha, linha FROM cameras ORDER BY canal")
+            c.execute("SELECT canal, caminho, nome, ativa, fps, tipo_linha, linha, calibracao FROM cameras ORDER BY canal")
             linhas = c.fetchall()
         ativas = {r[0] for r in linhas if r[3]}
         for canal in list(self.cameras):
             if canal not in ativas:
                 self._parar_camera(canal)
-        for canal, caminho, nome, ativa, fps, tipo_linha, linha in linhas:
+        for canal, caminho, nome, ativa, fps, tipo_linha, linha, calibracao in linhas:
             if not ativa:
                 continue
             cam = self.cameras.get(canal)
@@ -484,14 +540,18 @@ class Motor:
                 self._parar_camera(canal)
                 cam = None
             if cam is None:
-                cam = Camera(canal, caminho, nome, float(fps), tipo_linha, linha)
+                cam = Camera(canal, caminho, nome, float(fps), tipo_linha, linha, calibracao)
                 cam.fonte = FonteVideo(f"{RTSP_BASE}/lavateria/{caminho}", eh_arquivo=False)
                 cam.fonte.iniciar()
                 self.cameras[canal] = cam
                 log(f"câmera {canal} ({nome}) ligada a {fps} q/s")
             else:
-                mudou = cam.fps != float(fps) or cam.tipo_linha != tipo_linha or (json.dumps(linha, sort_keys=True) if linha else "") != cam.chave_linha
-                cam.nome, cam.fps, cam.tipo_linha, cam.linha = nome, float(fps), tipo_linha, linha
+                mudou = (
+                    cam.fps != float(fps) or cam.tipo_linha != tipo_linha
+                    or (json.dumps(linha, sort_keys=True) if linha else "") != cam.chave_linha
+                    or json.dumps(calibracao, sort_keys=True) != json.dumps(cam.calibracao, sort_keys=True)
+                )
+                cam.nome, cam.fps, cam.tipo_linha, cam.linha, cam.calibracao = nome, float(fps), tipo_linha, linha, calibracao
                 if mudou and cam.tamanho:
                     montar_rastreio(cam, *cam.tamanho)
                     log(f"câmera {canal}: configuração atualizada")
@@ -558,21 +618,29 @@ class Motor:
             tid = int(tid)
             vivos.add(tid)
             r = atualizar_rastro(cam.rastros, tid, img, caixa, conf, q.ts)
+            guardar_quadro(r, q.ts, lambda: cena_jpeg(cam, img, q.seq))
             if not r.analisado and q.ts - r.inicio >= ANALISAR_APOS_S and r.recorte is not None:
                 r.analisado = True
-                self.analisador.enviar(("pessoa", cam.canal, tid, r.inicio, q.ts, r.recorte, cam.noturna))
+                self.analisador.enviar(("pessoa", cam.canal, tid, r.inicio, q.ts, r.recorte, cam.noturna, list(r.quadros)))
         for tid in [t for t, r in cam.rastros.items() if t not in vivos and q.ts - r.ultimo > PESSOA_SAIU_S]:
             r = cam.rastros.pop(tid)
             if r.analisado:
                 self.analisador.enviar(("pessoa_fim", cam.canal, tid, r.inicio, r.ultimo))
             elif r.recorte is not None and r.ultimo - r.inicio >= 1.0:
-                self.analisador.enviar(("pessoa", cam.canal, tid, r.inicio, r.ultimo, r.recorte, cam.noturna))
+                self.analisador.enviar(("pessoa", cam.canal, tid, r.inicio, r.ultimo, r.recorte, cam.noturna, list(r.quadros)))
         for v in veiculos:
-            atualizar_rastro(cam.rastros_v, v.id, img, v.caixa, 1.0, q.ts)
+            r = atualizar_rastro(cam.rastros_v, v.id, img, v.caixa, 1.0, q.ts)
+            guardar_quadro(r, q.ts, lambda: cena_jpeg(cam, img, q.seq))
+            pe = np.array([[(v.caixa[0] + v.caixa[2]) / 2, v.caixa[3]]], dtype=np.float32)  # ponto de contato com o chão
+            dentro = cam.poligono is None or cv2.pointPolygonTest(cam.poligono, (float(pe[0][0]), float(pe[0][1])), False) >= 0
+            if cam.transformador is not None and dentro:
+                cam.trajeto_v.setdefault(v.id, []).append((q.ts, cam.transformador.transform_points(pe)[0]))
         for v in cam.veiculos.saiu:
             r = cam.rastros_v.pop(v.id, None)
+            trajeto = cam.trajeto_v.pop(v.id, [])
             if r is not None and r.recorte is not None:
-                self.analisador.enviar(("veiculo", cam.canal, v.id, v.classe, v.inicio, v.visto, v.sentido, r.recorte, cam.noturna))
+                desloc = float(np.hypot(*(v.centro - v.origem))) / w if v.origem is not None else 0.0
+                self.analisador.enviar(("veiculo", cam.canal, v.id, v.classe, v.inicio, v.visto, v.sentido, r.recorte, cam.noturna, velocidade_kmh(trajeto), round(desloc, 3), list(r.quadros)))
         cam.veiculos.saiu = []
 
         mudou = False
@@ -679,6 +747,7 @@ class Motor:
             c.execute("DELETE FROM eventos WHERE ocorrido_em < now() - make_interval(days => %s)", (self.retencao_dias,))
             c.execute("DELETE FROM pessoas WHERE inicio < now() - make_interval(days => %s)", (self.retencao_dias,))
             c.execute("DELETE FROM veiculos WHERE inicio < now() - make_interval(days => %s)", (self.retencao_dias,))
+            c.execute("DELETE FROM quadros_momento WHERE ts < now() - make_interval(days => %s)", (self.retencao_dias,))
             c.execute("DELETE FROM motor_amostras WHERE em < now() - interval '30 days'")
 
     def rodar(self) -> None:

@@ -113,6 +113,21 @@ export async function garantirSchema() {
       criado_em TIMESTAMPTZ NOT NULL DEFAULT now()
     );
     CREATE INDEX IF NOT EXISTS veiculos_inicio ON veiculos (inicio);
+    -- Etapa 3: velocidade (calibração por câmera), papel da câmera (fachada),
+    -- assinatura visual da pessoa (comparar câmeras) e sequência de imagens do momento.
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS calibracao JSONB;
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS fachada BOOLEAN NOT NULL DEFAULT false;
+    ALTER TABLE pessoas ADD COLUMN IF NOT EXISTS assinatura REAL[];
+    ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS velocidade_kmh REAL;
+    ALTER TABLE veiculos ADD COLUMN IF NOT EXISTS deslocamento REAL;
+    CREATE TABLE IF NOT EXISTS quadros_momento (
+      id BIGSERIAL PRIMARY KEY,
+      tipo TEXT NOT NULL CHECK (tipo IN ('pessoa', 'veiculo')),
+      ref_id BIGINT NOT NULL,
+      ts TIMESTAMPTZ NOT NULL,
+      img BYTEA NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS quadros_momento_ref ON quadros_momento (tipo, ref_id, ts);
     ALTER TABLE motor_status ADD COLUMN IF NOT EXISTS detector TEXT;
   `);
 
@@ -149,6 +164,13 @@ export async function garantirSchema() {
     const fps: Record<string, number> = { cam2: 5, cam5: 4, cam3: 2, cam1: 2, cam4: 1 };
     for (const [canal, q] of Object.entries(fps)) await sql`UPDATE cameras SET ativa = true, fps = ${q} WHERE canal = ${canal}`;
     await sql`INSERT INTO config (chave, valor) VALUES ('migracao_2', 'true')`;
+  }
+
+  // Migração 3: Frente1 é a câmera da calçada (conversão da fachada).
+  const [v3] = await sql`SELECT 1 FROM config WHERE chave = 'migracao_3'`;
+  if (!v3) {
+    await sql`UPDATE cameras SET fachada = true WHERE canal = 'cam1'`;
+    await sql`INSERT INTO config (chave, valor) VALUES ('migracao_3', 'true'), ('parado_min', '3') ON CONFLICT DO NOTHING`;
   }
 
   await sql`DELETE FROM sessoes WHERE expira < now()`;

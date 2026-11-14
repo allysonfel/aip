@@ -33,7 +33,7 @@ CORES = ["preto", "branco", "cinza", "vermelho", "azul", "verde", "amarelo", "la
 
 PROMPTS = {
     "genero": (["a photo of a man", "a photo of a woman"], ["masculino", "feminino"]),
-    "baixo_tipo": (["a person wearing long pants", "a person wearing shorts", "a person wearing a skirt or a dress"], ["calça", "bermuda/short", "saia/vestido"]),
+    "baixo_tipo": (["a photo of a person wearing long trousers or jeans", "a photo of a person wearing shorts", "a photo of a woman wearing a skirt or a dress"], ["calça", "bermuda/short", "saia/vestido"]),
     "bone": (["a person wearing a cap or a hat", "a person with nothing on the head"], [True, False]),
     "mochila": (["a person carrying a backpack", "a person without a backpack"], [True, False]),
     "bolsa": (["a person carrying a handbag or a shoulder bag", "a person not carrying any bag"], [True, False]),
@@ -109,14 +109,15 @@ class Atributos:
                 t = self.clip.encode_text(tok(prompts))
                 self.textos[k] = (t / t.norm(dim=-1, keepdim=True), valores)
 
-    def _clip(self, rec_bgr: np.ndarray) -> dict[str, list[float]]:
+    def _clip(self, rec_bgr: np.ndarray) -> tuple[dict[str, list[float]], list[float]]:
         from PIL import Image
 
         img = self.prep(Image.fromarray(cv2.cvtColor(rec_bgr, cv2.COLOR_BGR2RGB))).unsqueeze(0)
         with self._torch.no_grad():
             e = self.clip.encode_image(img)
             e = e / e.norm(dim=-1, keepdim=True)
-            return {k: (100 * e @ t.T).softmax(-1)[0].tolist() for k, (t, _) in self.textos.items()}
+            probs = {k: (100 * e @ t.T).softmax(-1)[0].tolist() for k, (t, _) in self.textos.items()}
+            return probs, [round(float(x), 4) for x in e[0].tolist()]
 
     def _par(self, rec_bgr: np.ndarray):
         x = cv2.resize(rec_bgr, (80, 160)).transpose(2, 0, 1)[None].astype(np.float32)
@@ -132,7 +133,15 @@ class Atributos:
         if h < 48 or w < 20:
             return {"pequeno": True}
         attrs, p_cima, p_baixo = self._par(rec_bgr)
-        c = self._clip(rec_bgr)
+        c, assinatura = self._clip(rec_bgr)
+
+        # Saia/vestido depende do gênero estimado: com homem muito provável, o
+        # CLIP confundia pernas cruzadas ou recorte cortado com saia.
+        p_fem = c["genero"][1]
+        bt = list(c["baixo_tipo"])
+        bt[2] *= 0.15 + 0.85 * p_fem
+        tot = sum(bt) or 1.0
+        c["baixo_tipo"] = [x / tot for x in bt]
 
         def escolha(k):
             probs = c[k]
@@ -161,6 +170,9 @@ class Atributos:
             for chave, (px, py) in (("cima", (cx, cy)), ("baixo_cor", (bx, by))):
                 nome, conf = nome_da_cor(_regiao(hsv, px, py, 0.2, 0.1))
                 out[chave] = {"valor": nome or None, "conf": round(conf, 3)}
+        # Assinatura visual (vetor do CLIP): serve só para comparar recortes
+        # entre câmeras (experimental). Não é biometria de rosto.
+        out["_assinatura"] = assinatura
         return out
 
     def veiculo(self, rec_bgr: np.ndarray, noturna: bool) -> dict:

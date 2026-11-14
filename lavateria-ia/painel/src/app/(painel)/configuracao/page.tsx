@@ -19,6 +19,10 @@ export default async function Configuracao() {
             <input name="retencao" type="number" min={1} max={90} defaultValue={cfg.retencaoDias} className="mt-1 w-28 rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
           </label>
           <label className="block">
+            <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Veículo parado após (min)</span>
+            <input name="parado_min" type="number" min={1} max={120} defaultValue={cfg.paradoMin} className="mt-1 w-28 rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
+          </label>
+          <label className="block">
             <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Confiança mínima (%)</span>
             <input name="limiar" type="number" min={50} max={95} defaultValue={Math.round(cfg.limiar * 100)} className="mt-1 w-28 rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
           </label>

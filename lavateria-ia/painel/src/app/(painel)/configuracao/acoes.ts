@@ -19,6 +19,14 @@ export async function salvarCamera(canal: string, form: FormData) {
     const ok = (p: unknown) => Array.isArray(p) && p.length === 2 && p.every((x) => typeof x === 'number' && x >= 0 && x <= 1);
     if (l && ok(l.a) && ok(l.b)) linha = { a: l.a, b: l.b };
   } catch {}
+  let calibracao: { pontos: [number, number][]; largura_m: number; comprimento_m: number } | null = null;
+  try {
+    const c = JSON.parse(String(form.get('calibracao') ?? 'null'));
+    const lw = num(form.get('largura_m'), 0, 200, 0);
+    const lc = num(form.get('comprimento_m'), 0, 500, 0);
+    const ok = Array.isArray(c) && c.length === 4 && c.every((p: unknown) => Array.isArray(p) && p.length === 2 && p.every((x) => typeof x === 'number' && x >= 0 && x <= 1));
+    if (tipoLinha === 'veiculos' && ok && lw > 0 && lc > 0) calibracao = { pontos: c, largura_m: lw, comprimento_m: lc };
+  } catch {}
   await sql`
     UPDATE cameras SET
       nome = ${String(form.get('nome') ?? '').trim().slice(0, 40) || canal},
@@ -26,7 +34,9 @@ export async function salvarCamera(canal: string, form: FormData) {
       ativa = ${form.get('ativa') === 'on'},
       fps = ${num(form.get('fps'), 0.5, 5, 2)},
       tipo_linha = ${tipoLinha},
-      linha = ${linha ? sql.json(linha) : null}
+      linha = ${linha ? sql.json(linha) : null},
+      calibracao = ${calibracao ? sql.json(calibracao) : null},
+      fachada = ${form.get('fachada') === 'on'}
     WHERE canal = ${canal}`;
   revalidatePath('/', 'layout');
 }
@@ -37,5 +47,7 @@ export async function salvarGeral(form: FormData) {
   await sql`UPDATE config SET valor = ${sql.json(Math.round(num(form.get('retencao'), 1, 90, 30)))} WHERE chave = 'retencao_dias'`;
   const limiar = num(form.get('limiar'), 50, 95, 65) / 100;
   await sql`INSERT INTO config (chave, valor) VALUES ('limiar_confianca', ${sql.json(limiar)}) ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor`;
+  const parado = Math.round(num(form.get('parado_min'), 1, 120, 3));
+  await sql`INSERT INTO config (chave, valor) VALUES ('parado_min', ${sql.json(parado)}) ON CONFLICT (chave) DO UPDATE SET valor = EXCLUDED.valor`;
   revalidatePath('/', 'layout');
 }

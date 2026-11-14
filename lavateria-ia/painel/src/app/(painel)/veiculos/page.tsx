@@ -1,13 +1,16 @@
 import { Numero, Secao, Tabela, TituloPagina } from '@/components/Comum';
 import { ChipAtributo } from '@/components/Atributos';
 import { BASE } from '@/lib/base';
-import { config, NOMES_VEICULO, resumoHoje, resumoVeiculos, veiculosDoDia } from '@/lib/dados';
+import { BarrasPorHora } from '@/components/Graficos';
+import { cameras, config, NOMES_VEICULO, parados, resumoHoje, resumoVeiculos, veiculosDoDia, velocidades } from '@/lib/dados';
 
 const hora = (d: Date) => new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Sao_Paulo' });
 
 export default async function Veiculos() {
   const cfg = await config();
-  const [r, rv, lista] = await Promise.all([resumoHoje(), resumoVeiculos(cfg.limiar), veiculosDoDia(120)]);
+  const [r, rv, lista, vel, par, cams] = await Promise.all([resumoHoje(), resumoVeiculos(cfg.limiar), veiculosDoDia(120), velocidades(), parados(cfg.paradoMin), cameras()]);
+  const calibrada = cams.some((c) => c.tipo_linha === 'veiculos' && c.calibracao);
+  const kmh = (v: number | null) => (v == null ? '—' : `${v.toFixed(0)} km/h`);
   const tipos = [...new Set(r.porClasse.map((x) => x.classe))];
   const n = (classe: string, sentido: string) => r.porClasse.find((x) => x.classe === classe && x.sentido === sentido)?.n ?? 0;
   const totalA = r.porClasse.filter((x) => x.sentido === 'a').reduce((s, x) => s + x.n, 0);
@@ -38,6 +41,25 @@ export default async function Veiculos() {
           {rv.porCor.length ? <Tabela cabecalho={['Cor', 'Veículos']} alinharDireita={[1]} linhas={rv.porCor.map((c) => [c.cor, c.n])} /> : <p className="text-sm text-on-surface-variant">Sem veículos analisados ainda.</p>}
         </Secao>
       </div>
+ <div className="mt-4 grid gap-4 lg:grid-cols-2">
+        <Secao titulo="Velocidade média por hora" descricao={calibrada ? `Média de hoje: ${kmh(vel.media)} (${vel.n} veículos medidos). Estimativa pela calibração da câmera.` : 'Velocidade não calibrada: marque os 4 pontos e as medidas da rua em Configuração.'}>
+          {calibrada ? <BarrasPorHora dados={vel.horas} series={[{ chave: 'media', nome: 'km/h (média)', cor: '#a855f7' }]} /> : <p className="text-sm text-on-surface-variant">não calibrada</p>}
+        </Secao>
+        <Secao titulo="Maiores velocidades do dia">
+          {vel.maiores.length ? (
+            <Tabela cabecalho={['Hora', 'Tipo', 'Sentido', 'km/h']} alinharDireita={[3]} linhas={vel.maiores.map((m) => [hora(m.inicio), NOMES_VEICULO[m.classe] ?? m.classe, m.sentido ? m.sentido.toUpperCase() : '—', m.velocidade_kmh.toFixed(0)])} />
+          ) : (
+            <p className="text-sm text-on-surface-variant">{calibrada ? 'Nenhum veículo medido hoje ainda.' : 'não calibrada'}</p>
+          )}
+        </Secao>
+      </div>
+      <Secao titulo={`Parados em frente à loja por mais de ${cfg.paradoMin} min`} className="mt-4">
+        {par.length ? (
+          <Tabela cabecalho={['Chegou', 'Saiu', 'Tipo', 'Cor']} linhas={par.map((p) => [hora(p.inicio), hora(p.fim), NOMES_VEICULO[p.classe] ?? p.classe, p.cor && (p.cor_conf ?? 0) >= cfg.limiar ? p.cor : 'indefinido'])} />
+        ) : (
+          <p className="text-sm text-on-surface-variant">Nenhum veículo parado por tanto tempo hoje.</p>
+        )}
+      </Secao>
       <Secao titulo="Últimos veículos vistos" className="mt-4" descricao="Inclui os que passaram sem cruzar a linha (sentido em branco).">
         {lista.length ? (
           <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -49,8 +71,12 @@ export default async function Veiculos() {
                   {hora(v.inicio)} · {NOMES_VEICULO[v.classe] ?? v.classe}
                   {v.sentido ? ` · sentido ${v.sentido.toUpperCase()}` : ''}
                 </p>
-                <div className="mt-1">
+                <div className="mt-1 space-y-0.5">
                   <ChipAtributo rotulo="Cor (estimada)" a={v.atributos.cor} limiar={cfg.limiar} />
+                  <div className="flex justify-between text-xs">
+                    <span className="text-on-surface-variant">Velocidade</span>
+                    <span className="font-medium text-on-surface">{v.velocidade_kmh != null ? kmh(v.velocidade_kmh) : calibrada ? '—' : 'não calibrada'}</span>
+                  </div>
                 </div>
               </li>
             ))}

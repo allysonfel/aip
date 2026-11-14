@@ -7,12 +7,17 @@ import { salvarCamera } from './acoes';
 
 type Ponto = [number, number];
 const PADRAO: { a: Ponto; b: Ponto } = { a: [0.3, 0.5], b: [0.7, 0.5] };
+// Calibração: frente-esquerda, frente-direita, fundo-direita, fundo-esquerda (um trapézio sobre a rua).
+const CAL_PADRAO: Ponto[] = [[0.15, 0.85], [0.6, 0.85], [0.62, 0.3], [0.4, 0.3]];
+const NOME_PONTO = ['1 frente-esq.', '2 frente-dir.', '3 fundo-dir.', '4 fundo-esq.'];
 
 /** Quadro atual da câmera com a linha de contagem arrastável por cima. */
 export default function EditorCamera({ cam }: { cam: CameraInfo }) {
   const [linha, setLinha] = useState(cam.linha ?? PADRAO);
   const [tipo, setTipo] = useState<string>(cam.tipo_linha ?? '');
-  const [arrastando, setArrastando] = useState<'a' | 'b' | null>(null);
+  const [arrastando, setArrastando] = useState<'a' | 'b' | 0 | 1 | 2 | 3 | null>(null);
+  const [cal, setCal] = useState<Ponto[]>(cam.calibracao?.pontos ?? CAL_PADRAO);
+  const [calibrar, setCalibrar] = useState(Boolean(cam.calibracao));
   const [salvo, setSalvo] = useState(false);
   const caixa = useRef<HTMLDivElement>(null);
   const proporcao = cam.largura && cam.altura ? cam.largura / cam.altura : 704 / 480;
@@ -21,7 +26,9 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
     if (!arrastando || !caixa.current) return;
     const r = caixa.current.getBoundingClientRect();
     const p: Ponto = [Math.min(1, Math.max(0, (e.clientX - r.left) / r.width)), Math.min(1, Math.max(0, (e.clientY - r.top) / r.height))];
-    setLinha((l) => ({ ...l, [arrastando]: [Math.round(p[0] * 1000) / 1000, Math.round(p[1] * 1000) / 1000] }));
+    const r3: Ponto = [Math.round(p[0] * 1000) / 1000, Math.round(p[1] * 1000) / 1000];
+    if (typeof arrastando === 'number') setCal((c) => c.map((x, i) => (i === arrastando ? r3 : x)));
+    else setLinha((l) => ({ ...l, [arrastando]: r3 }));
     setSalvo(false);
   };
 
@@ -60,6 +67,28 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
           ) : (
             <p className="absolute inset-0 flex items-center justify-center text-sm text-white/70">Esperando o primeiro quadro do motor...</p>
           )}
+          {tipo === 'veiculos' && calibrar && (
+            <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+              <polygon points={cal.map((p) => p.join(',')).join(' ')} fill="rgba(168,85,247,0.15)" stroke="#a855f7" style={{ strokeWidth: 2 }} vectorEffect="non-scaling-stroke" />
+            </svg>
+          )}
+          {tipo === 'veiculos' &&
+            calibrar &&
+            cal.map((p, i) => (
+              <button
+                key={i}
+                type="button"
+                aria-label={`Ponto de calibração ${NOME_PONTO[i]} (arraste)`}
+                onPointerDown={(e) => {
+                  (e.target as HTMLElement).setPointerCapture(e.pointerId);
+                  setArrastando(i as 0 | 1 | 2 | 3);
+                }}
+                className="absolute flex h-5 w-5 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded-full border-2 border-white bg-[#a855f7] text-[10px] font-bold text-white shadow"
+                style={{ left: `${p[0] * 100}%`, top: `${p[1] * 100}%` }}
+              >
+                {i + 1}
+              </button>
+            ))}
           {tipo && (
             <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
               <line x1={ax} y1={ay} x2={bx} y2={by} stroke="#4ade80" strokeWidth={0.006} vectorEffect="non-scaling-stroke" style={{ strokeWidth: 3 }} />
@@ -121,6 +150,36 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
           <input type="checkbox" name="ativa" defaultChecked={cam.ativa} />
           Analisar esta câmera
         </label>
+        <label className="flex items-center gap-2">
+          <input type="checkbox" name="fachada" defaultChecked={cam.fachada} />
+          Esta câmera vê a calçada (conversão da fachada)
+        </label>
+        {tipo === 'veiculos' && (
+          <fieldset className="space-y-3 rounded-sm border border-outline-variant p-3">
+            <legend className="px-1 text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Velocidade</legend>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={calibrar} onChange={(e) => { setCalibrar(e.target.checked); setSalvo(false); }} />
+              Calibrar (4 pontos roxos sobre a rua + medidas reais)
+            </label>
+            {calibrar && (
+              <>
+                <input type="hidden" name="calibracao" value={JSON.stringify(cal)} />
+                <p className="text-xs text-on-surface-variant">Arraste os pontos 1 a 4 para os cantos de um trecho da rua que você consiga medir (por exemplo, entre duas faixas ou dois postes). 1-2 é o lado mais perto da câmera.</p>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className="text-xs text-on-surface-variant">Largura do trecho (m, entre 1 e 2)</span>
+                    <input name="largura_m" type="number" step="0.1" min="0.5" defaultValue={cam.calibracao?.largura_m ?? ''} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
+                  </label>
+                  <label className="block">
+                    <span className="text-xs text-on-surface-variant">Comprimento (m, entre 1-2 e 3-4)</span>
+                    <input name="comprimento_m" type="number" step="0.1" min="0.5" defaultValue={cam.calibracao?.comprimento_m ?? ''} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
+                  </label>
+                </div>
+              </>
+            )}
+            {!calibrar && <p className="text-xs text-on-surface-variant">Sem calibração, a velocidade aparece como &quot;não calibrada&quot;.</p>}
+          </fieldset>
+        )}
         <div className="flex flex-wrap items-center gap-3">
           <button className="rounded-sm bg-primary px-4 py-2 font-semibold text-on-primary">Salvar</button>
           {tipo && (

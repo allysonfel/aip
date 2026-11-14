@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Secao, TituloPagina } from '@/components/Comum';
 import { ChipAtributo, simNao } from '@/components/Atributos';
 import { BASE } from '@/lib/base';
-import { cameras, config, pessoasDoDia } from '@/lib/dados';
+import { cameras, config, ligacoesCameras, pessoasDoDia } from '@/lib/dados';
 
 const hora = (d: Date) => new Date(d).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit', timeZone: 'America/Sao_Paulo' });
 const duracao = (a: Date, b: Date) => {
@@ -13,6 +13,8 @@ const duracao = (a: Date, b: Date) => {
 export default async function Pessoas({ searchParams }: { searchParams: Promise<{ camera?: string }> }) {
   const { camera } = await searchParams;
   const [lista, cams, cfg] = await Promise.all([pessoasDoDia(undefined, camera), cameras(), config()]);
+  const fachada = new Set(cams.filter((c) => c.fachada).map((c) => c.canal));
+  const ligacoes = await ligacoesCameras(lista.filter((p) => !fachada.has(p.canal)).map((p) => p.id));
   return (
     <>
       <TituloPagina
@@ -40,12 +42,17 @@ export default async function Pessoas({ searchParams }: { searchParams: Promise<
             return (
               <li key={p.id} className="flex gap-3 rounded border border-outline-variant bg-surface p-3">
                 {/* eslint-disable-next-line @next/next/no-img-element -- recorte do banco */}
-                <img src={`${BASE}/api/recorte/pessoa/${p.id}`} alt={`Pessoa ${p.track_id} na câmera ${p.camera}`} loading="lazy" className="h-40 w-20 shrink-0 rounded-sm bg-black object-contain" />
+                <a href={`${BASE}/busca/pessoa/${p.id}`} className="shrink-0"><img src={`${BASE}/api/recorte/pessoa/${p.id}`} alt={`Pessoa ${p.track_id} na câmera ${p.camera}`} loading="lazy" className="h-40 w-20 shrink-0 rounded-sm bg-black object-contain" /></a>
                 <div className="min-w-0 flex-1 space-y-1">
                   <p className="text-xs font-semibold text-on-surface">
                     {hora(p.inicio)} · {p.camera}
                   </p>
                   <p className="text-[11px] text-on-surface-variant">na imagem por {duracao(p.inicio, p.fim)}</p>
+                  {ligacoes.get(p.id) && (
+                    <p className="rounded-sm bg-warning-container px-1.5 py-0.5 text-[11px] text-on-warning-container">
+                      Experimental: talvez a mesma pessoa vista em {ligacoes.get(p.id)!.camera} às {hora(ligacoes.get(p.id)!.inicio)} ({Math.round(ligacoes.get(p.id)!.semelhanca * 100)}% parecida)
+                    </p>
+                  )}
                   {a.pequeno ? (
                     <p className="pt-2 text-xs italic text-on-surface-variant">Recorte pequeno demais para estimar.</p>
                   ) : (

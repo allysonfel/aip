@@ -1,10 +1,11 @@
 import { Numero, Secao, Tabela, TituloPagina } from '@/components/Comum';
 import { Atualizar } from '@/components/Atualizar';
 import { BarrasPorHora } from '@/components/Graficos';
-import { cameras, NOMES_VEICULO, resumoHoje } from '@/lib/dados';
+import { cameras, conversaoFachada, NOMES_VEICULO, permanenciaMedia, resumoHoje } from '@/lib/dados';
 
 export default async function VisaoGeral() {
-  const [r, cams] = await Promise.all([resumoHoje(), cameras()]);
+  const [r, cams, conv, perm] = await Promise.all([resumoHoje(), cameras(), conversaoFachada(), permanenciaMedia()]);
+  const minutos = perm != null ? `${Math.floor(perm / 60)} min ${Math.round(perm % 60)} s` : '—';
   const camEntrada = cams.find((c) => c.tipo_linha === 'entrada' && c.ativa);
   const camVeiculos = cams.find((c) => c.tipo_linha === 'veiculos' && c.ativa);
   const tipos = [...new Set(r.porClasse.map((x) => x.classe))];
@@ -26,7 +27,7 @@ export default async function VisaoGeral() {
           <Numero rotulo="passaram hoje" valor={r.veiculos} detalhe={camVeiculos ? `linha na câmera ${camVeiculos.nome}` : 'linha de veículos não configurada'} />
         </Secao>
         <Secao titulo="Conversão da fachada">
-          <Numero rotulo="calçada × entradas" valor="—" detalhe="chega na etapa 3" />
+          <Numero rotulo="entraram ÷ passaram na calçada" valor={conv.taxa != null ? `${(conv.taxa * 100).toFixed(1).replace('.', ',')}%` : '—'} detalhe={`${conv.entraram} entradas de ${conv.passaram} pessoas na calçada`} />
         </Secao>
       </div>
 
@@ -36,6 +37,15 @@ export default async function VisaoGeral() {
         </Secao>
         <Secao titulo="Veículos por hora" descricao="Passagens pela linha da rua, nos dois sentidos">
           <BarrasPorHora dados={r.horas} series={[{ chave: 'veiculos', nome: 'Veículos', cor: '#f59e0b' }]} />
+        </Secao>
+      </div>
+
+ <div className="mt-4 grid gap-4 lg:grid-cols-[1fr_2fr]">
+        <Secao titulo="Tempo médio na loja" descricao="Estimado pela ocupação ao longo do dia (entradas e saídas pela porta).">
+          <Numero rotulo="por pessoa" valor={minutos} />
+        </Secao>
+        <Secao titulo="Calçada × entradas por hora" descricao="Pessoas vistas na câmera da calçada e pessoas que entraram pela porta">
+          <BarrasPorHora dados={conv.horas} series={[{ chave: 'passaram', nome: 'Passaram na calçada', cor: '#94a3b8' }, { chave: 'entraram', nome: 'Entraram', cor: 'var(--color-primary)' }]} />
         </Secao>
       </div>
 
