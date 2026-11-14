@@ -84,12 +84,24 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado }: { canal:
         setEstado('sem-video');
         return;
       }
-      const h = new Hls({ liveSyncDuration: 4, liveMaxLatencyDuration: 12, maxLiveSyncPlaybackRate: 1.1 });
+      // Atraso calculado pelo tamanho dos trechos de cada câmera (o Salão usa
+      // trechos de 4 s, as outras de 2 s): 2 trechos atrás do ao vivo.
+      const h = new Hls({ liveSyncDurationCount: 2, liveMaxLatencyDurationCount: 5, maxLiveSyncPlaybackRate: 1.1 });
       h.loadSource(`${BASE}/api/hls/${caminho}/index.m3u8`);
       h.attachMedia(v);
+      let falhas = 0;
       h.on(Hls.Events.ERROR, (_e, data) => {
-        if (data.fatal) setEstado('sem-video');
+        if (!data.fatal) return;
+        falhas += 1;
+        if (falhas > 6) return setEstado('sem-video');
+        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) h.recoverMediaError();
+        else setTimeout(() => h.startLoad(), 2000);
       });
+      // Se travar (aba em segundo plano, rede), volta para perto do ao vivo.
+      const vigia = setInterval(() => {
+        if (v.paused && v.readyState >= 2) v.play().catch(() => {});
+      }, 3000);
+      h.on(Hls.Events.DESTROYING, () => clearInterval(vigia));
       v.addEventListener('playing', () => setEstado('ao-vivo'), { once: true });
       hlsRef.current = h as unknown as { playingDate?: Date | null; destroy: () => void };
     });
