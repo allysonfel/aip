@@ -21,7 +21,8 @@ export async function GET(req: Request, { params }: { params: Promise<{ canal: s
   const cruz = await sql<{ ts: number; k: string }[]>`
     SELECT (extract(epoch FROM ocorrido_em) * 1000)::float8 AS ts, CASE WHEN tipo = 'veiculo' THEN sentido ELSE tipo END AS k
     FROM eventos WHERE canal = ${canal} AND ocorrido_em > now() - interval '60 seconds' ORDER BY ocorrido_em`;
-  const ultimo = quadros.length ? Number(quadros[quadros.length - 1].ts) : null;
+  const [u] = await sql<{ ts: string | null }[]>`SELECT max(ts)::text AS ts FROM deteccoes WHERE canal = ${canal}`;
+  const ultimo = u?.ts ? Number(u.ts) : null;
   return Response.json(
     {
       quadros: quadros.map((q) => ({ ts: Number(q.ts), objetos: q.objetos })), linha: cam?.linha ?? null, tipoLinha: cam?.tipo_linha ?? null,
