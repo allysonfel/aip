@@ -691,11 +691,13 @@ class Motor:
                 (tipo, canal, nivel, mensagem, jpeg(img, 75) if img is not None else None),
             )
 
-    def salvar_evento(self, canal: str, tipo: str, classe: str, sentido: str | None, tid: int) -> None:
+    def salvar_evento(self, canal: str, tipo: str, classe: str, sentido: str | None, tid: int, ts: float | None = None) -> None:
+        """ts = hora do QUADRO em que cruzou (a mesma régua do vídeo), para o
+        painel mudar o número no instante em que o cruzamento aparece no vídeo."""
         with self.db.cursor() as c:
             c.execute(
-                "INSERT INTO eventos (canal, tipo, classe, sentido, track_id) VALUES (%s, %s, %s, %s, %s)",
-                (canal, tipo, classe, sentido, tid),
+                "INSERT INTO eventos (canal, tipo, classe, sentido, track_id, ocorrido_em) VALUES (%s, %s, %s, %s, %s, coalesce(to_timestamp(%s), now()))",
+                (canal, tipo, classe, sentido, tid, ts),
             )
 
     def contagem_hoje(self, cam: Camera) -> None:
@@ -845,7 +847,7 @@ class Motor:
                 for o in po:
                     s = cam.contador.atualizar(o.uid, tuple(o.pos))
                     if s and not o.descartado:
-                        self.salvar_evento(cam.canal, "entrada" if s == "a" else "saida", "pessoa", s, o.uid)
+                        self.salvar_evento(cam.canal, "entrada" if s == "a" else "saida", "pessoa", s, o.uid, ts)
                         mudou = True
                 cam.contador.esquecer(set(cam.objs_p.vivos) | {x.uid for x in cam.objs_p.sumidos})
             elif cam.tipo_linha == "veiculos":
@@ -854,7 +856,7 @@ class Motor:
                     # uma vez só por veículo, e só se ele andou de verdade (parado ou manobrando não conta)
                     if s and not o.contado and o.desloc_max >= 0.06:
                         o.contado, o.sentido = True, s
-                        self.salvar_evento(cam.canal, "veiculo", o.classe, s, o.uid)
+                        self.salvar_evento(cam.canal, "veiculo", o.classe, s, o.uid, ts)
                         mudou = True
                 cam.contador.esquecer(set(cam.objs_v.vivos) | {x.uid for x in cam.objs_v.sumidos})
         if mudou:

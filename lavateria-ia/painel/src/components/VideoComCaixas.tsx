@@ -39,12 +39,13 @@ function caixasNoInstante(buf: Quadro[], t: number): Objeto[] {
   return saida;
 }
 
-export function VideoComCaixas({ canal, caminho, nome, videoLiberado }: { canal: string; caminho: string; nome: string; videoLiberado: boolean }) {
+export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }: { canal: string; caminho: string; nome: string; videoLiberado: boolean; aoEstado?: (noAr: boolean) => void }) {
   const video = useRef<HTMLVideoElement>(null);
   const tela = useRef<HTMLCanvasElement>(null);
   const caixa = useRef<HTMLDivElement>(null);
   const buf = useRef<Quadro[]>([]);
-  const meta = useRef<{ linha: Linha; tipoLinha: string | null; contagem: Record<string, number> }>({ linha: null, tipoLinha: null, contagem: {} });
+  const meta = useRef<{ linha: Linha; tipoLinha: string | null; contagem: Record<string, number>; cruzamentos: { ts: number; k: string }[] }>({ linha: null, tipoLinha: null, contagem: {}, cruzamentos: [] });
+  const ultimaAnalise = useRef<number>(Date.now());
   const hlsRef = useRef<{ playingDate?: Date | null; destroy: () => void } | null>(null);
   const [estado, setEstado] = useState<'carregando' | 'ao-vivo' | 'sem-video'>('carregando');
   const [foto, setFoto] = useState(() => Date.now());
@@ -58,7 +59,9 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado }: { canal:
         const r = await fetch(`${BASE}/api/deteccoes/${canal}?desde=${ultimo}`, { cache: 'no-store' });
         if (r.ok) {
           const d = await r.json();
-          meta.current = { linha: d.linha, tipoLinha: d.tipoLinha, contagem: d.contagem ?? {} };
+          meta.current = { linha: d.linha, tipoLinha: d.tipoLinha, contagem: d.contagem ?? {}, cruzamentos: d.cruzamentos ?? [] };
+          if (d.quadros.length) ultimaAnalise.current = Date.now();
+          aoEstado?.(d.ultimoQuadro != null && d.agora - d.ultimoQuadro < 15000);
           buf.current = [...buf.current, ...d.quadros].filter((q: Quadro) => d.agora - q.ts < 30000);
         }
       } catch {}
@@ -169,10 +172,18 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado }: { canal:
         g.fillStyle = '#0b0b0c';
         g.fillText(rot, x + 3, y - 4);
       }
-      const { linha, tipoLinha, contagem } = meta.current;
+      const { linha, tipoLinha, cruzamentos } = meta.current;
+      // Número que o vídeo está mostrando AGORA: tira os cruzamentos que ainda
+      // não aconteceram no vídeo (ele chega alguns segundos atrasado).
+      const contagem = { ...meta.current.contagem };
+      let piscar = false;
+      for (const c of cruzamentos) {
+        if (c.ts > t) contagem[c.k] = Math.max(0, (contagem[c.k] ?? 0) - 1);
+        else if (t - c.ts < 700) piscar = true;
+      }
       if (linha && tipoLinha) {
-        g.strokeStyle = '#4ade80';
-        g.lineWidth = 2.5;
+        g.strokeStyle = piscar ? '#ffffff' : '#4ade80';
+        g.lineWidth = piscar ? 6 : 2.5;
         g.beginPath();
         g.moveTo(ox + linha.a[0] * dw, oy + linha.a[1] * dh);
         g.lineTo(ox + linha.b[0] * dw, oy + linha.b[1] * dh);
