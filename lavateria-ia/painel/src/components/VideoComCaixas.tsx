@@ -91,6 +91,8 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
     const caminhos = [...new Set([caminho, canal])];
     let cancelado = false;
     let tentativa = 0;
+    let preferido = 0; // último caminho que funcionou
+    let atual = caminho;
     let h: { destroy: () => void } | null = null;
     let reabrir: ReturnType<typeof setTimeout> | null = null;
     let ultimoAvanco = Date.now();
@@ -111,8 +113,9 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
         if (!Hls.isSupported()) return setEstado('sem-video');
         h?.destroy();
         hlsRef.current = null;
-        const cam = caminhos[tentativa % caminhos.length];
+        const cam = caminhos[(preferido + tentativa) % caminhos.length];
         tentativa += 1;
+        atual = cam;
         // Baixa latência (LL-HLS do mediamtx): o player segue o PART-HOLD-BACK da playlist (~1 s atrás do ao vivo).
         const n = new Hls({ lowLatencyMode: true, maxLiveSyncPlaybackRate: 1.2, backBufferLength: 10 });
         n.loadSource(`${BASE}/api/hls/${cam}/index.m3u8`);
@@ -135,7 +138,19 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
     const vigia = setInterval(() => {
       if (cancelado) return;
       if (v.paused && v.readyState >= 2) v.play().catch(() => {});
+      // Vídeo chegou mas está parado num buraco do buffer (comum quando o
+      // trecho de áudio e o de vídeo começam em horas diferentes): pula para
+      // perto do ao vivo.
+      if (v.readyState < 3 && v.buffered.length) {
+        const fim = v.buffered.end(v.buffered.length - 1);
+        if (fim - v.currentTime > 2) {
+          v.currentTime = Math.max(v.buffered.start(v.buffered.length - 1), fim - 1);
+          v.play().catch(() => {});
+        }
+      }
       if (v.currentTime !== ultimoTempo && v.readyState >= 2) {
+        preferido = Math.max(0, caminhos.indexOf(atual));
+        tentativa = 0;
         ultimoTempo = v.currentTime;
         ultimoAvanco = Date.now();
         semVideoDesde = Date.now();
