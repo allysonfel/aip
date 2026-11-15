@@ -11,7 +11,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ canal: s
     SELECT ts, objetos FROM deteccoes
     WHERE canal = ${canal} AND ts > ${desde} AND ts > (extract(epoch from now()) * 1000 - 30000)::bigint
     ORDER BY ts LIMIT 400`;
-  const [cam] = await sql<{ linha: unknown; tipo_linha: string | null }[]>`SELECT linha, tipo_linha FROM cameras WHERE canal = ${canal}`;
+  const [cam] = await sql<{ linha: unknown; tipo_linha: string | null; ajuste_video_ms: number }[]>`SELECT linha, tipo_linha, ajuste_video_ms FROM cameras WHERE canal = ${canal}`;
   const hoje = sql`(date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') AT TIME ZONE 'America/Sao_Paulo')`;
   const cont = await sql<{ k: string; n: number }[]>`
     SELECT CASE WHEN tipo = 'veiculo' THEN sentido ELSE tipo END AS k, count(*)::int AS n
@@ -26,7 +26,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ canal: s
   return Response.json(
     {
       quadros: quadros.map((q) => ({ ts: Number(q.ts), objetos: q.objetos })), linha: cam?.linha ?? null, tipoLinha: cam?.tipo_linha ?? null,
-      contagem: Object.fromEntries(cont.map((c) => [c.k, c.n])), cruzamentos: cruz.map((c) => ({ ts: Number(c.ts), k: c.k })), agora: Date.now(), ultimoQuadro: ultimo,
+      contagem: Object.fromEntries(cont.map((c) => [c.k, c.n])), ajusteMs: cam?.ajuste_video_ms ?? 0, cruzamentos: cruz.map((c) => ({ ts: Number(c.ts), k: c.k })), agora: Date.now(), ultimoQuadro: ultimo,
     },
     { headers: { 'Cache-Control': 'no-store' } },
   );

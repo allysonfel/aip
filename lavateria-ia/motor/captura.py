@@ -19,6 +19,7 @@ from __future__ import annotations
 import os
 import threading
 import time
+from collections import deque
 from dataclasses import dataclass
 
 import cv2
@@ -59,6 +60,14 @@ class FonteVideo:
         self.altura = 0
         self._fps_medido = 0.0
         self._t_ultimo: float | None = None
+        # Hora real de cada quadro pelo PTS do stream: hora = PTS + desvio, com o
+        # desvio = a MENOR diferença (chegada - PTS) vista recentemente. Os
+        # quadros que o decodificador segura no buffer chegam com diferença
+        # maior e não puxam a hora para depois.
+        self._desvios: list[float] = []
+        self._pts_ant: float | None = None
+        # Miniaturas em tons de cinza dos últimos ~25 s (alinhamento com o vídeo HLS)
+        self.historico: deque = deque(maxlen=400)
 
     # ---------- ciclo de vida ----------
 
@@ -116,7 +125,19 @@ class FonteVideo:
             return f"{esquema}://***@{resto.split('@', 1)[1]}"
         return self.fonte
 
-    def _publicar(self, imagem: np.ndarray) -> None:
+    def _hora_do_quadro(self, pts_ms: float, agora: float) -> float:
+        if not pts_ms or pts_ms <= 0:
+            return agora
+        pts = pts_ms / 1000.0
+        if self._pts_ant is not None and (pts < self._pts_ant or pts - self._pts_ant > 10):
+            self._desvios = []  # stream reiniciou ou pulou: recomeça a régua
+        self._pts_ant = pts
+        self._desvios.append(agora - pts)
+        if len(self._desvios) > 450:  # ~30 s a 15 q/s
+            del self._desvios[:150]
+        return pts + min(self._desvios)
+
+    def _publicar(self, imagem: np.ndarray, pts_ms: float = 0.0) -> None:
         agora = time.time()
         if self._t_ultimo is not None:
             dt = agora - self._t_ultimo
@@ -126,7 +147,9 @@ class FonteVideo:
         self._t_ultimo = agora
         with self._cond:
             self._seq += 1
-            self._quadro = Quadro(imagem=imagem, ts=agora, seq=self._seq, ciclo=self._ciclo)
+            ts = agora if self.eh_arquivo else self._hora_do_quadro(pts_ms, agora)
+            self.historico.append((ts, cv2.resize(cv2.cvtColor(imagem, cv2.COLOR_BGR2GRAY), (88, 60))))
+            self._quadro = Quadro(imagem=imagem, ts=ts, seq=self._seq, ciclo=self._ciclo)
             self._cond.notify_all()
 
     def _loop(self) -> None:
@@ -143,6 +166,7 @@ class FonteVideo:
 
             self.online = True
             self.erro = None
+            self._desvios, self._pts_ant = [], None
             espera_reconexao = 1.0
             intervalo = 1.0 / self.fps_fonte
             proximo = time.monotonic()
@@ -167,7 +191,7 @@ class FonteVideo:
                     elif atraso < -1.0:
                         proximo = time.monotonic()  # ficou muito pra trás: realinha
 
-                self._publicar(imagem)
+                self._publicar(imagem, cap.get(cv2.CAP_PROP_POS_MSEC))
 
             cap.release()
         self.online = False

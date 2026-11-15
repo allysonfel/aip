@@ -7,10 +7,10 @@ type Objeto = { id: number; c: string; b: [number, number, number, number]; r?: 
 type Quadro = { ts: number; objetos: Objeto[] };
 type Linha = { a: [number, number]; b: [number, number] } | null;
 
-// O motor marca cada análise com a hora em que leu o quadro do mediamtx; o
-// vídeo (HLS) traz a hora em que o mediamtx recebeu cada trecho. A leitura
-// do motor chega um pouco depois da gravação: este é esse pequeno atraso.
-const ATRASO_MOTOR_MS = 350;
+// O motor marca cada análise com a hora do PRÓPRIO quadro (PTS do stream, na
+// régua do relógio do mediamtx); o vídeo (HLS) traz a hora de cada trecho na
+// mesma régua. As caixas são desenhadas pela hora do quadro que está na tela.
+const ATRASO_MOTOR_MS = 0;
 const COR: Record<string, string> = { pessoa: '#38bdf8', carro: '#f59e0b', moto: '#f97316', caminhao: '#eab308', onibus: '#eab308', bicicleta: '#a3e635', gato: '#f472b6', cachorro: '#f472b6' };
 const NOME: Record<string, string> = { pessoa: 'pessoa', carro: 'carro', moto: 'moto', caminhao: 'caminhão', onibus: 'ônibus', bicicleta: 'bicicleta', gato: 'gato', cachorro: 'cachorro' };
 
@@ -20,13 +20,13 @@ function caixasNoInstante(buf: Quadro[], t: number): Objeto[] {
   let i = buf.findIndex((q) => q.ts > t);
   if (i === -1) {
     const ult = buf[buf.length - 1];
-    return t - ult.ts < 1500 ? ult.objetos : [];
+    return t - ult.ts < 400 ? ult.objetos : [];
   }
-  if (i === 0) return buf[0].ts - t < 600 ? buf[0].objetos : [];
+  if (i === 0) return buf[0].ts - t < 300 ? buf[0].objetos : [];
   const a = buf[i - 1];
   const b = buf[i];
   const vao = b.ts - a.ts;
-  if (vao > 3000) return t - a.ts < 1500 ? a.objetos : [];
+  if (vao > 3000) return t - a.ts < 400 ? a.objetos : [];
   const k = (t - a.ts) / vao;
   const depois = new Map(b.objetos.map((o) => [o.id, o]));
   const saida: Objeto[] = [];
@@ -46,6 +46,7 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
   const buf = useRef<Quadro[]>([]);
   const meta = useRef<{ linha: Linha; tipoLinha: string | null; contagem: Record<string, number>; cruzamentos: { ts: number; k: string }[] }>({ linha: null, tipoLinha: null, contagem: {}, cruzamentos: [] });
   const ultimaAnalise = useRef<number>(Date.now());
+  const ajuste = useRef<number>(0); // diferença medida pelo motor: hora do motor - hora do vídeo (ms)
   const hlsRef = useRef<{ playingDate?: Date | null; destroy: () => void } | null>(null);
   const [estado, setEstado] = useState<'carregando' | 'ao-vivo' | 'sem-video'>('carregando');
   const [foto, setFoto] = useState(() => Date.now());
@@ -61,6 +62,7 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
           const d = await r.json();
           meta.current = { linha: d.linha, tipoLinha: d.tipoLinha, contagem: d.contagem ?? {}, cruzamentos: d.cruzamentos ?? [] };
           if (d.quadros.length) ultimaAnalise.current = Date.now();
+          ajuste.current = Number(d.ajusteMs) || 0;
           aoEstado?.(d.ultimoQuadro != null && d.agora - d.ultimoQuadro < 15000);
           buf.current = [...buf.current, ...d.quadros].filter((q: Quadro) => d.agora - q.ts < 30000);
         }
@@ -152,7 +154,7 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
       const oy = (H - dh) / 2;
 
       const data = hlsRef.current?.playingDate;
-      const t = estado === 'ao-vivo' && data ? data.getTime() + ATRASO_MOTOR_MS : Date.now() - 200;
+      const t = estado === 'ao-vivo' && data ? data.getTime() + ATRASO_MOTOR_MS + ajuste.current : Date.now() - 200;
       const objetos = estado === 'ao-vivo' ? caixasNoInstante(buf.current, t) : (buf.current.at(-1)?.objetos ?? []);
 
       g.lineWidth = 2;

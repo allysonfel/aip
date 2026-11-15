@@ -36,6 +36,7 @@ from captura import FonteVideo
 from regras import Regras
 from objetos import Objetos, no_poligono
 from atributos import ganhos_da_imagem
+import alinhamento
 
 DATABASE_URL = os.environ["DATABASE_URL"]
 RTSP_BASE = os.environ.get("MEDIAMTX_RTSP", "rtsp://mediamtx:8554").rstrip("/")
@@ -279,6 +280,8 @@ class Camera:
     zona_atributos_px: list = field(default_factory=list)
     ganhos: np.ndarray | None = None  # balanço de branco (B, G, R)
     ganhos_em: float = 0.0
+    pouca_luz: bool = False  # cena escura (noite com luz da rua): cor não é confiável
+    luz_em: float = 0.0
 
     def fps_processado(self) -> float:
         agora = time.time()
@@ -295,7 +298,7 @@ def montar_rastreio(cam: Camera, largura: int, altura: int) -> None:
         frame_rate=max(1, int(round(cam.fps))),
         minimum_consecutive_frames=1,
     )
-    cam.veiculos = RastreadorVeiculos(largura)
+    cam.veiculos = RastreadorVeiculos(largura, raio_rel=0.22 if cam.fps >= 6 else 0.25, validade_s=1.2 if cam.fps >= 6 else 1.6)
     # Pessoa que nunca se mexeu: 20 s nas câmeras de rua (lixo, sombra); nas
     # internas não se descarta (cliente sentado esperando a roupa).
     cam.objs_p = Objetos("pessoa", largura, cam.interna, parado_s=8.0)
@@ -319,7 +322,7 @@ def montar_rastreio(cam: Camera, largura: int, altura: int) -> None:
     if cam.tipo_linha and cam.linha:
         a = (cam.linha["a"][0] * largura, cam.linha["a"][1] * altura)
         b = (cam.linha["b"][0] * largura, cam.linha["b"][1] * altura)
-        cam.contador = Linha(a, b, largura, faixa_rel=0.03 if cam.tipo_linha == "veiculos" else 0.015)
+        cam.contador = Linha(a, b, largura, faixa_rel=0.012 if cam.tipo_linha == "veiculos" else 0.015)
 
 
 # ---------------------------------------------------------------- privacidade e desenho
@@ -422,6 +425,11 @@ class Analisador(threading.Thread):
 
     def run(self) -> None:
         from atributos import Atributos
+
+        try:
+            os.setpriority(os.PRIO_PROCESS, threading.get_native_id(), 10)
+        except Exception:
+            pass
 
         try:
             self.modelos = Atributos(threads=1)
@@ -527,7 +535,7 @@ class Analisador(threading.Thread):
                 c.execute(
                     """UPDATE pessoas SET fim = greatest(fim, %s), atributos = %s, noturna = %s,
                        recorte = coalesce(%s, recorte), assinatura = coalesce(%s, assinatura) WHERE id = %s""",
-                    (datetime_utc(fim), json.dumps(attrs), noturna, jpeg(melhor_rec, 88) if melhor_rec is not None else None,
+                    (datetime_utc(fim), json.dumps(attrs), bool(noturna), jpeg(melhor_rec, 88) if melhor_rec is not None else None,
                      [round(float(x), 4) for x in emb] if melhor_rec is not None else None, alvo["id"]),
                 )
                 ref = alvo["id"]
@@ -540,7 +548,7 @@ class Analisador(threading.Thread):
                 c.execute(
                     """INSERT INTO pessoas (canal, track_id, inicio, fim, recorte, atributos, noturna, assinatura)
                        VALUES (%s, %s, to_timestamp(%s), %s, %s, %s, %s, %s) RETURNING id""",
-                    (canal, chave[1], inicio, datetime_utc(fim), jpeg(recorte_novo, 88), json.dumps(attrs), noturna, [round(float(x), 4) for x in emb]),
+                    (canal, chave[1], inicio, datetime_utc(fim), jpeg(recorte_novo, 88), json.dumps(attrs), bool(noturna), [round(float(x), 4) for x in emb]),
                 )
                 ref = c.fetchone()[0]
                 lista.append({"id": ref, "emb": emb, "inicio": inicio, "fim": fim, "recs_attr": todos_attr, "pont": pont_novo, "visto": agora, "condutor": attrs.get("papel") == "condutor"})
@@ -572,7 +580,7 @@ class Analisador(threading.Thread):
             cor = attrs.get("cor", {})
             self._gravar(db, "veiculos", chave, {
                 "classe": classe, "fim": datetime_utc(fim), "sentido": sentido, "recorte": jpeg(recortes[0], 88), "cor": cor.get("valor"), "cor_conf": cor.get("conf"),
-                "atributos": json.dumps(attrs), "noturna": noturna, "velocidade_kmh": vel, "deslocamento": desloc,
+                "atributos": json.dumps(attrs), "noturna": bool(noturna), "velocidade_kmh": vel, "deslocamento": desloc,
             }, quadros)
         self.ms.append((time.perf_counter() - t0) * 1000)
         self.ms = self.ms[-50:]
@@ -593,6 +601,9 @@ class Motor:
         self._ultimo_status = 0.0
         self._ultima_config = 0.0
         self._ultima_limpeza = 0.0
+        self._dia_limpeza: str | None = None
+        self._alinhado: dict[str, float] = {}
+        self._alinhando = False
         self._ultimo_cru_inativas = 0.0
         self.detector = Detector()
         self.analisador = Analisador()
@@ -788,6 +799,9 @@ class Motor:
 
         # tom da câmera (balanço de branco), a cada 30 s
         cam.noturna = imagem_noturna_rapida(img)
+        if ts - cam.luz_em > 10:
+            cam.luz_em = ts
+            cam.pouca_luz = float(cv2.cvtColor(cv2.resize(img, (96, 64)), cv2.COLOR_BGR2HSV)[..., 2].mean()) < 95
         if ts - cam.ganhos_em > 30 and not cam.noturna:
             g = ganhos_da_imagem(img)
             if g is not None:
@@ -864,6 +878,9 @@ class Motor:
 
         validas = [o for o in po if o.confirmado(fps) and not o.descartado]
         vvalidos = [o for o in vo if o.confirmado(fps)]
+        # no vídeo, a caixa aparece já na 2ª detecção (confirmar 1 s atrasava a caixa)
+        na_tela = [o for o in po if o.vistos >= 2 and not o.descartado]
+        vna_tela = [o for o in vo if o.vistos >= 2]
 
         # ---- regras da loja (alertas)
         pets = [i for i, n in enumerate(nomes) if n in PETS and confs[i] >= 0.45]
@@ -875,8 +892,8 @@ class Motor:
             return [round(float(c[0]) / w, 4), round(float(c[1]) / h, 4), round(float(c[2]) / w, 4), round(float(c[3]) / h, 4)]
 
         objetos = (
-            [{"id": o.uid, "c": "pessoa", "b": norm(o.caixa), **({"r": "condutor"} if o.eh_condutor() else {})} for o in validas]
-            + [{"id": 100000 + o.uid, "c": o.classe, "b": norm(o.caixa)} for o in vvalidos]
+            [{"id": o.uid, "c": "pessoa", "b": norm(o.caixa), **({"r": "condutor"} if o.eh_condutor() else {})} for o in na_tela if o.ultimo == ts]
+            + [{"id": 100000 + o.uid, "c": o.classe, "b": norm(o.caixa)} for o in vna_tela if o.ultimo == ts]
             + [{"id": 200000 + k, "c": nomes[i], "b": norm(dets.xyxy[i])} for k, i in enumerate(pets)]
         )
         cam.processados.append(time.time())
@@ -897,12 +914,12 @@ class Motor:
     def _enviar_pessoa(self, cam: Camera, o, ganhos) -> None:
         recs = [r for _, _, r in o.recortes]
         attr = [r for _, _, r in o.recortes_attr]
-        self.analisador.enviar(("pessoa", (cam.canal, o.uid, o.inicio), o.ultimo, recs, attr, bool(cam.noturna), o.eh_condutor(), ganhos, list(o.quadros)))
+        self.analisador.enviar(("pessoa", (cam.canal, o.uid, o.inicio), o.ultimo, recs, attr, "noturna" if cam.noturna else ("pouca_luz" if cam.pouca_luz else ""), o.eh_condutor(), ganhos, list(o.quadros)))
 
     def _enviar_veiculo(self, cam: Camera, o, ganhos, w: int) -> None:
         recs = [r for _, _, r in o.recortes]
         vel = velocidade_kmh(o.trajeto) if cam.transformador is not None else None
-        self.analisador.enviar(("veiculo", (cam.canal, o.uid, o.inicio), o.classe, o.ultimo, o.sentido, recs, bool(cam.noturna), ganhos, vel, round(o.desloc_max, 3), list(o.quadros)))
+        self.analisador.enviar(("veiculo", (cam.canal, o.uid, o.inicio), o.classe, o.ultimo, o.sentido, recs, "noturna" if cam.noturna else ("pouca_luz" if cam.pouca_luz else ""), ganhos, vel, round(o.desloc_max, 3), list(o.quadros)))
 
     def atualizar_offline(self) -> None:
         with self.db.cursor() as c:
@@ -950,6 +967,51 @@ class Motor:
                 (round(cpu, 1), round(mem), ms and round(ms, 1), len(self.cameras), sum(v.get("fps_processado", 0) for v in cams.values())),
             )
 
+    def alinhar_se_preciso(self, agora: float) -> None:
+        """Uma câmera por vez, a cada 20 min (a primeira 2 min depois de ligar), numa thread à parte."""
+        if self._alinhando:
+            return
+        pend = [c for c in self.cameras.values() if c.fonte and agora - self._alinhado.get(c.canal, agora - 1080) >= 1200]
+        if not pend:
+            return
+        cam = pend[0]
+        self._alinhado[cam.canal] = agora
+        self._alinhando = True
+
+        def tarefa():
+            try:
+                d = alinhamento.medir(RTSP_BASE, cam.caminho, cam.fonte.historico)
+                if d is not None:
+                    with psycopg.connect(DATABASE_URL, autocommit=True) as db, db.cursor() as c:
+                        c.execute("UPDATE cameras SET ajuste_video_ms = %s WHERE canal = %s", (int(round(d * 1000)), cam.canal))
+                    log(f"alinhamento {cam.canal}: motor - vídeo = {d:+.2f} s")
+            except Exception as e:
+                log(f"alinhamento {cam.canal}: não deu ({repr(e)[:120]})")
+            finally:
+                self._alinhando = False
+
+        threading.Thread(target=tarefa, daemon=True, name="alinhamento").start()
+
+    def limpeza_diaria(self) -> None:
+        """Meia-noite (Brasília): apaga o que é pesado e não serve mais (sequências
+        de imagens e recortes dos dias anteriores). Fica tudo que é número e texto
+        (contagens, atributos, horários), os alertas e as marcações da Validação;
+        os recortes das pessoas e veículos validados também ficam."""
+        with self.db.cursor() as c:
+            hoje = "(date_trunc('day', now() AT TIME ZONE 'America/Sao_Paulo') AT TIME ZONE 'America/Sao_Paulo')"
+            c.execute(f"DELETE FROM quadros_momento WHERE ts < {hoje}")
+            q = c.rowcount
+            c.execute(f"""UPDATE pessoas SET recorte = NULL WHERE recorte IS NOT NULL AND inicio < {hoje}
+                         AND id NOT IN (SELECT ref_id FROM validacoes WHERE tipo = 'pessoa')""")
+            p = c.rowcount
+            c.execute(f"""UPDATE veiculos SET recorte = NULL WHERE recorte IS NOT NULL AND inicio < {hoje}
+                         AND id NOT IN (SELECT ref_id FROM validacoes WHERE tipo = 'veiculo')""")
+            v = c.rowcount
+            c.execute("DELETE FROM deteccoes WHERE criado_em < now() - interval '2 minutes'")
+            for t in ("quadros_momento", "pessoas", "veiculos", "deteccoes"):
+                c.execute(f"VACUUM (ANALYZE) {t}")  # libera o espaço para reaproveitar
+        log(f"limpeza diária: {q} imagens de sequência, {p} recortes de pessoas e {v} de veículos apagados")
+
     def limpar(self) -> None:
         with self.db.cursor() as c:
             c.execute("DELETE FROM eventos WHERE ocorrido_em < now() - make_interval(days => %s)", (self.retencao_dias,))
@@ -971,9 +1033,15 @@ class Motor:
                 if agora - self._ultimo_cru_inativas > 60:
                     self._ultimo_cru_inativas = agora
                     self.quadros_das_inativas()
+                self.alinhar_se_preciso(agora)
                 if agora - self._ultima_limpeza > 3600:
                     self._ultima_limpeza = agora
                     self.limpar()
+                dia_br = time.strftime("%Y-%m-%d", time.gmtime(agora - 3 * 3600))
+                if self._dia_limpeza != dia_br:
+                    if self._dia_limpeza is not None:  # virou o dia (não roda no boot)
+                        self.limpeza_diaria()
+                    self._dia_limpeza = dia_br
                 trabalhou = False
                 for cam in list(self.cameras.values()):
                     if time.time() >= cam.proximo:

@@ -134,6 +134,7 @@ export async function garantirSchema() {
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS conf_min REAL;
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS exclusao JSONB;
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS zona_atributos JSONB;
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS ajuste_video_ms INT NOT NULL DEFAULT 0;
     CREATE TABLE IF NOT EXISTS alertas (
       id BIGSERIAL PRIMARY KEY,
       tipo TEXT NOT NULL,

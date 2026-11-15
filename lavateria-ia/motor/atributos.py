@@ -267,7 +267,7 @@ class Atributos:
 
         # por recorte: CLIP colorido, CLIP em preto e branco, CLIP da cabeça e modelo da Intel
         p_cor, p_cinza, p_cab, par = [], [], [], []
-        for r in recs:
+        for r in recs[:3]:
             p_cor.append(self._probs(self._emb(r), self.t_cor))
             cinza = cv2.cvtColor(cv2.cvtColor(r, cv2.COLOR_BGR2GRAY), cv2.COLOR_GRAY2BGR)
             p_cinza.append(self._probs(self._emb(cinza), self.t_cinza))
@@ -298,7 +298,7 @@ class Atributos:
         out["bolsa"] = combinar("bolsa", p_cor, PROMPTS["bolsa"][1], float(par[:, 1].mean()))
         if not condutor:
             clip_baixo = combinar("baixo_tipo", p_cor, PROMPTS["baixo_tipo"][1], None)
-            pose_valor, pose_conf = self._pernas(recs[0])
+            pose_valor, pose_conf = self._pernas(recs[0])  # pose só no melhor recorte
             acordo = pose_valor is not None and pose_valor == clip_baixo["valor"]
             out["baixo_tipo"] = {
                 "valor": clip_baixo["valor"] if acordo else None,
@@ -306,9 +306,10 @@ class Atributos:
                 "concordancia": clip_baixo["concordancia"], "acordo": acordo, "pose": pose_valor, "recortes": len(recs),
             }
         if noturna:
-            out["cima"] = {"valor": None, "motivo": "sem cor (imagem noturna)"}
+            motivo = "sem cor (imagem noturna)" if noturna == "noturna" else "cor não confiável com pouca luz"
+            out["cima"] = {"valor": None, "motivo": motivo}
             if not condutor:
-                out["baixo_cor"] = {"valor": None, "motivo": "sem cor (imagem noturna)"}
+                out["baixo_cor"] = {"valor": None, "motivo": motivo}
         else:
             corr = [corrigir_tom(r, ganhos) for r in recs]
             out["cima"] = votar([cor_da_regiao(miolo(r, 0.32, 0.68, 0.22, 0.45)) for r in corr])
@@ -324,7 +325,7 @@ class Atributos:
         if not recortes:
             return {"pequeno": True}
         if noturna:
-            return {"cor": {"valor": None, "motivo": "sem cor (imagem noturna)"}}
+            return {"cor": {"valor": None, "motivo": "sem cor (imagem noturna)" if noturna == "noturna" else "cor não confiável com pouca luz"}}
         corr = [corrigir_tom(r, ganhos) for r in recortes]
         cor = votar([cor_da_regiao(miolo(r, 0.22, 0.78, 0.3, 0.7), veiculo=True) for r in corr])
         if cor.get("concordancia", 1) < CONCORDANCIA_MIN:
