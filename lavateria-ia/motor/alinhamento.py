@@ -39,14 +39,17 @@ def medir(rtsp_base: str, caminho: str, historico) -> float | None:
     if len(vistos) < 50:
         return None
     pl = get("main_stream.m3u8").decode()
-    segs = re.findall(r"#EXT-X-PROGRAM-DATE-TIME:(\S+)\s+#EXTINF:[\d.]+,\s+(\S+)", pl)
+    # HLS comum (.ts) ou de baixa latência (fMP4: precisa do segmento de iniciação)
+    mapa = re.search(r'#EXT-X-MAP:URI="([^"]+)"', pl)
+    init = get(mapa.group(1)) if mapa else b""
+    segs = re.findall(r"#EXT-X-PROGRAM-DATE-TIME:(\S+)\s+(?:#EXT-X-PART:[^\n]*\s+)*#EXTINF:[\d.]+,\s+(\S+)", pl)
     mini = np.array([v[1] for v in vistos], dtype=np.float32)
     tss = np.array([v[0] for v in vistos])
     dif = []
     for pdt, nome in segs[-3:]:
         t0 = datetime.datetime.fromisoformat(pdt.replace("Z", "+00:00")).timestamp()
-        with tempfile.NamedTemporaryFile(suffix=".ts") as tf:
-            tf.write(get(nome))
+        with tempfile.NamedTemporaryFile(suffix=".mp4" if init else ".ts") as tf:
+            tf.write(init + get(nome))
             tf.flush()
             cap = cv2.VideoCapture(tf.name)
             k, pts0 = 0, None

@@ -195,6 +195,7 @@ class _Veiculo:
     contado: bool = False
     sentido: str | None = None
     inicio: float = 0.0
+    vel: np.ndarray | None = None  # px/s (média), para prever onde o veículo estará
 
 
 class RastreadorVeiculos:
@@ -211,29 +212,47 @@ class RastreadorVeiculos:
         self.saiu: list[_Veiculo] = []
 
     def atualizar(self, caixas: np.ndarray, classes: list[str], ts: float) -> list[_Veiculo]:
+        """Associação pelo centro mais próximo da posição PREVISTA (última
+        posição + velocidade x tempo): num veículo rápido, a 9 análises por
+        segundo, isso evita trocar o ID com o vizinho."""
         self.saiu = [v for v in self._v.values() if ts - v.visto > self.validade]
         self._v = {k: v for k, v in self._v.items() if ts - v.visto <= self.validade}
-        livres = dict(self._v)
-        saida: list[_Veiculo] = []
         centros = [np.array([(c[0] + c[2]) / 2, (c[1] + c[3]) / 2]) for c in caixas]
-        ordem = sorted(range(len(caixas)), key=lambda i: -(caixas[i][2] - caixas[i][0]) * (caixas[i][3] - caixas[i][1]))
-        for i in ordem:
-            melhor, dmin = None, self.raio
-            for vid, v in livres.items():
-                d = float(np.hypot(*(v.centro - centros[i])))
+        pares = []
+        for i, c in enumerate(centros):
+            for vid, v in self._v.items():
+                dt = ts - v.visto
+                prev = v.centro + (v.vel * dt if v.vel is not None else 0)
+                d = float(np.hypot(*(prev - c)))
+                tam = max(caixas[i][2] - caixas[i][0], caixas[i][3] - caixas[i][1])
+                lim = max(self.raio * 0.5, min(self.raio, 1.5 * tam + 0.15 * self.raio))
                 if v.classe != classes[i]:
                     d *= 1.6
-                if d < dmin:
-                    melhor, dmin = vid, d
-            if melhor is None:
-                melhor = self._prox
+                if d <= lim:
+                    pares.append((d, i, vid))
+        pares.sort()
+        usados_i, usados_v, atrib = set(), set(), {}
+        for d, i, vid in pares:  # menor distância primeiro (guloso, sem repetir)
+            if i in usados_i or vid in usados_v:
+                continue
+            usados_i.add(i)
+            usados_v.add(vid)
+            atrib[i] = vid
+        saida: list[_Veiculo] = []
+        for i, c in enumerate(centros):
+            antes = self._v.get(atrib[i]) if i in atrib else None
+            if antes is None:
+                vid = self._prox
                 self._prox += 1
+                vel = None
             else:
-                livres.pop(melhor)
-            antes = self._v.get(melhor)
-            v = _Veiculo(melhor, classes[i], centros[i], ts, caixas[i], origem=antes.origem if antes else centros[i], contado=bool(antes and antes.contado),
-                         sentido=antes.sentido if antes else None, inicio=antes.inicio if antes else ts)
-            self._v[melhor] = v
+                vid = antes.id
+                dt = max(1e-3, ts - antes.visto)
+                inst = (c - antes.centro) / dt
+                vel = inst if antes.vel is None else 0.6 * inst + 0.4 * antes.vel
+            v = _Veiculo(vid, classes[i], c, ts, caixas[i], origem=antes.origem if antes else c, contado=bool(antes and antes.contado),
+                         sentido=antes.sentido if antes else None, inicio=antes.inicio if antes else ts, vel=vel)
+            self._v[vid] = v
             saida.append(v)
         return saida
 

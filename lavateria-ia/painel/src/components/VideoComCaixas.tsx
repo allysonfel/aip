@@ -91,7 +91,8 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
       }
       // Atraso calculado pelo tamanho dos trechos de cada câmera (o Salão usa
       // trechos de 4 s, as outras de 2 s): 2 trechos atrás do ao vivo.
-      const h = new Hls({ liveSyncDurationCount: 2, liveMaxLatencyDurationCount: 5, maxLiveSyncPlaybackRate: 1.1 });
+      // Baixa latência (LL-HLS) quando o mediamtx oferece; senão, 2 trechos atrás do ao vivo.
+      const h = new Hls({ lowLatencyMode: true, liveSyncDurationCount: 2, liveMaxLatencyDurationCount: 5, maxLiveSyncPlaybackRate: 1.2, backBufferLength: 10 });
       h.loadSource(`${BASE}/api/hls/${caminho}/index.m3u8`);
       h.attachMedia(v);
       let falhas = 0;
