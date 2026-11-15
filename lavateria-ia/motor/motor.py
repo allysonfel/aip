@@ -971,7 +971,9 @@ class Motor:
         """Uma câmera por vez, a cada 20 min (a primeira 2 min depois de ligar), numa thread à parte."""
         if self._alinhando:
             return
-        pend = [c for c in self.cameras.values() if c.fonte and agora - self._alinhado.get(c.canal, agora - 1080) >= 1200]
+        for c in self.cameras.values():
+            self._alinhado.setdefault(c.canal, agora - 1080 + 15 * len(self._alinhado))  # 1ª medida ~2 min depois de ligar
+        pend = [c for c in self.cameras.values() if c.fonte and agora - self._alinhado[c.canal] >= 1200]
         if not pend:
             return
         cam = pend[0]
