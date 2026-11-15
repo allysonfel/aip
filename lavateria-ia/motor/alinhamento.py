@@ -38,7 +38,9 @@ def medir(rtsp_base: str, caminho: str, historico) -> float | None:
     vistos = list(historico)
     if len(vistos) < 50:
         return None
-    pl = get("main_stream.m3u8").decode()
+    indice = get("index.m3u8").decode()
+    variante = next((l.strip() for l in indice.splitlines() if l.strip() and not l.startswith("#")), "main_stream.m3u8")
+    pl = get(variante).decode()
     # HLS comum (.ts) ou de baixa latência (fMP4: precisa do segmento de iniciação)
     mapa = re.search(r'#EXT-X-MAP:URI="([^"]+)"', pl)
     init = get(mapa.group(1)) if mapa else b""
