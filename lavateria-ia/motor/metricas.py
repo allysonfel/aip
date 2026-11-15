@@ -116,12 +116,23 @@ azul_v = sum(1 for v in veiculos if v[6] == "azul" and (v[7] or 0) >= 0.65)
 com_cor_v = sum(1 for v in veiculos if v[6] and (v[7] or 0) >= 0.65)
 
 pct = lambda a, b: round(100 * a / b, 1) if b else None
+
+
+def definido(at: dict, k: str) -> bool:
+    a = at.get(k) or {}
+    return a.get("valor") is not None and not a.get("motivo") and (a.get("conf") or 0) >= 0.7 and a.get("acordo", True) and (a.get("concordancia") or 1) >= 0.6
+
+
+com_attr = [p for p in pessoas if p[5] and not p[5].get("pequeno")]
+definidos = {k: pct(sum(definido(p[5], k) for p in com_attr), len(com_attr)) for k in ("genero", "cima", "baixo_tipo", "baixo_cor", "bone", "mochila", "bolsa")}
+condutores = sum(1 for p in pessoas if (p[5] or {}).get("papel") == "condutor")
 print(json.dumps({
     "intervalo": [ini, fim], "horas": round(horas, 2),
     "pessoas": len(pessoas), "pessoas_por_hora": round(len(pessoas) / horas, 1), "por_camera": por_canal,
     "pessoas_falsas_pct": pct(falsas, len(pessoas)), "motos_como_pessoa": motos,
     "pessoas_duplicadas_pct": pct(dup_p, len(pessoas)), "consistencia_cor_cima_pct": pct(iguais_p, pares_p),
     "pessoas_azul_pct": pct(azul_p, com_cor_p),
+    "pessoas_com_atributos": len(com_attr), "condutores": condutores, "atributo_definido_pct": definidos,
     "veiculos": len(veiculos), "veiculos_duplicados_pct": pct(dup_v, len(veiculos)), "consistencia_cor_veiculo_pct": pct(iguais_v, dup_v),
     "veiculos_azul_pct": pct(azul_v, com_cor_v),
 }, ensure_ascii=False, indent=1, default=float))
