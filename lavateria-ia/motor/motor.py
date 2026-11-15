@@ -34,7 +34,7 @@ import torch
 
 from captura import FonteVideo
 from regras import Regras
-from objetos import Objetos, no_poligono
+from objetos import Objetos, no_poligono, recorte
 from atributos import ganhos_da_imagem
 import alinhamento
 
@@ -50,6 +50,8 @@ cv2.setNumThreads(1)
 # Rótulos COCO originais usados pelo RF-DETR.
 CLASSES = {1: "pessoa", 2: "bicicleta", 3: "carro", 4: "moto", 6: "onibus", 8: "caminhao", 17: "gato", 18: "cachorro"}
 PETS = {"gato", "cachorro"}
+PET_CONF = 0.6  # confiança mínima do detector para considerar pet
+PET_SEGUIDOS_S = 3.0  # presença mínima antes da 2ª verificação (CLIP)
 VEICULOS = {"bicicleta", "carro", "moto", "onibus", "caminhao"}
 
 PARAR = threading.Event()
@@ -128,10 +130,38 @@ class Detector:
         # Supressão POR CLASSE: o carro não apaga a moto colada nele. Só carro,
         # caminhão e ônibus (a mesma caixa em duas classes) se juntam entre si.
         d = d.with_nms(threshold=0.6, class_agnostic=False)
-        grandes = np.isin(d.class_id, (3, 6, 8))
-        if grandes.sum() > 1:
-            d = sv.Detections.merge([d[~grandes], d[grandes].with_nms(threshold=0.7, class_agnostic=True)])
+        # Mesmo veículo em duas caixas: carro/caminhão/ônibus entre si; moto e
+        # bicicleta entre si (moto com garupa vinha em duas caixas e a bicicleta
+        # saía também como moto). Carro x moto continuam separados (lado a lado).
+        partes = [d[~np.isin(d.class_id, (2, 3, 4, 6, 8))]]
+        for grupo in ((3, 6, 8), (2, 4)):
+            g = d[np.isin(d.class_id, grupo)]
+            if len(g) > 1:
+                g = sem_contidas(g.with_nms(threshold=0.45, class_agnostic=True))
+            partes.append(g)
+        return sv.Detections.merge([x for x in partes if len(x)]) if any(len(x) for x in partes) else sv.Detections.empty()
+
+
+def sem_contidas(d: sv.Detections) -> sv.Detections:
+    """Tira a caixa que está quase toda dentro de outra do mesmo grupo (a caixa
+    só da moto dentro da caixa moto + garupa). Fica a de maior confiança."""
+    if len(d) < 2:
         return d
+    manter = np.ones(len(d), dtype=bool)
+    ordem = np.argsort(-d.confidence)
+    for i in ordem:
+        if not manter[i]:
+            continue
+        a = d.xyxy[i]
+        for j in ordem:
+            if j == i or not manter[j]:
+                continue
+            b = d.xyxy[j]
+            inter = max(0.0, min(a[2], b[2]) - max(a[0], b[0])) * max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+            area_b = max(1.0, (b[2] - b[0]) * (b[3] - b[1]))
+            if inter / area_b > 0.6:
+                manter[j] = False
+    return d[manter]
 
 
 # ---------------------------------------------------------------- linhas
@@ -179,6 +209,9 @@ class Linha:
 
     def esquecer(self, vivos: set[int]) -> None:
         self._lado = {k: v for k, v in self._lado.items() if k in vivos}
+
+    def posicao_na_linha(self, ponto) -> float:
+        return float(np.dot(np.array(ponto, dtype=float) - self.a, self.v)) / self.comp**2
 
 
 # ---------------------------------------------------------------- rastreio de veículos
@@ -278,6 +311,7 @@ class Camera:
     conf_min: float = 0.4
     exclusao: list | None = None  # polígonos (0 a 1) onde nada é detectado
     zona_atributos: list | None = None  # polígono (0 a 1): só aí se estimam atributos
+    area_interna: list | None = None  # polígono (0 a 1): chão de dentro da loja (regras e entrada só valem aí)
     fonte: FonteVideo | None = None
     proximo: float = 0.0
     rastreador: sv.ByteTrack | None = None
@@ -297,15 +331,27 @@ class Camera:
     poligono: np.ndarray | None = None
     exclusao_px: list = field(default_factory=list)
     zona_atributos_px: list = field(default_factory=list)
+    area_px: list = field(default_factory=list)
+    pets: list = field(default_factory=list)  # candidatos a pet sendo acompanhados
     ganhos: np.ndarray | None = None  # balanço de branco (B, G, R)
     ganhos_em: float = 0.0
     pouca_luz: bool = False  # cena escura (noite com luz da rua): cor não é confiável
+    recentes_linha: list = field(default_factory=list)  # (ts, sentido, grupo, posição na linha) das últimas contagens
     luz_em: float = 0.0
 
     def fps_processado(self) -> float:
         agora = time.time()
         self.processados = [t for t in self.processados if agora - t <= 10]
         return round(len(self.processados) / 10, 2)
+
+
+def poligono_px(pol, largura: int, altura: int) -> list:
+    return [np.array([[p[0] * largura, p[1] * altura] for p in pol], dtype=np.float32)] if pol and len(pol) >= 3 else []
+
+
+def na_area(cam: Camera, ponto) -> bool:
+    """Ponto (pé) dentro da área interna da loja. Sem área desenhada: a imagem toda."""
+    return not cam.area_px or no_poligono(cam.area_px, ponto)
 
 
 def montar_rastreio(cam: Camera, largura: int, altura: int) -> None:
@@ -325,6 +371,7 @@ def montar_rastreio(cam: Camera, largura: int, altura: int) -> None:
     cam.exclusao_px = [np.array([[p[0] * largura, p[1] * altura] for p in z], dtype=np.float32) for z in (cam.exclusao or []) if len(z) >= 3]
     z = cam.zona_atributos
     cam.zona_atributos_px = [np.array([[p[0] * largura, p[1] * altura] for p in z], dtype=np.float32)] if z and len(z) >= 3 else []
+    cam.area_px = poligono_px(cam.area_interna, largura, altura)
     cam.transformador = None
     cal = cam.calibracao or {}
     pts = cal.get("pontos")
@@ -582,6 +629,16 @@ class Analisador(threading.Thread):
     def _fazer(self, db, tarefa: tuple) -> None:
         tipo = tarefa[0]
         t0 = time.perf_counter()
+        if tipo == "pet":
+            _, canal, nome, bicho, recs, img, acomp, regras = tarefa
+            if self.modelos is None:
+                return
+            ok, prob = self.modelos.e_pet(recs)
+            log(f"pet em {canal}: {bicho}, CLIP {prob:.2f} -> {'confirmado' if ok else 'descartado'}")
+            if ok:
+                acomp["ok"] = True
+                regras.pet(canal, nome, bicho, img)
+            return
         if tipo == "apagar_pessoa":
             rid = self.ids.pop(tarefa[1], None)
             if rid is not None:
@@ -659,7 +716,7 @@ class Motor:
             cfg = {k: v for k, v in c.fetchall()}
             self.borrar = bool(cfg.get("borrar_rostos", True))
             self.retencao_dias = int(cfg.get("retencao_dias", 30))
-            c.execute("SELECT canal, caminho, nome, ativa, fps, tipo_linha, linha, calibracao, interna, fachada, zona_totem, conf_min, exclusao, zona_atributos FROM cameras ORDER BY canal")
+            c.execute("SELECT canal, caminho, nome, ativa, fps, tipo_linha, linha, calibracao, interna, fachada, zona_totem, conf_min, exclusao, zona_atributos, area_interna FROM cameras ORDER BY canal")
             linhas = c.fetchall()
             c.execute("SELECT valor FROM config WHERE chave = 'loja'")
             loja = c.fetchone()
@@ -667,6 +724,7 @@ class Motor:
             self.regras.configurar(loja[0])
         extras = {r[0]: (r[8], r[9], r[10]) for r in linhas}
         filtros = {r[0]: (float(r[11]) if r[11] is not None else 0.4, r[12], r[13]) for r in linhas}
+        areas = {r[0]: r[14] for r in linhas}
         linhas = [r[:8] for r in linhas]
         ativas = {r[0] for r in linhas if r[3]}
         for canal in list(self.cameras):
@@ -678,6 +736,10 @@ class Motor:
             cam = self.cameras.get(canal)
             if cam is not None:
                 cam.interna, cam.fachada, cam.zona_totem = extras[canal]
+                if json.dumps(cam.area_interna) != json.dumps(areas[canal]):
+                    cam.area_interna = areas[canal]
+                    if cam.tamanho:
+                        cam.area_px = poligono_px(cam.area_interna, *cam.tamanho)
                 if (cam.conf_min, json.dumps(cam.exclusao), json.dumps(cam.zona_atributos)) != (filtros[canal][0], json.dumps(filtros[canal][1]), json.dumps(filtros[canal][2])):
                     cam.conf_min, cam.exclusao, cam.zona_atributos = filtros[canal]
                     if cam.tamanho:
@@ -692,6 +754,7 @@ class Motor:
                 cam = Camera(canal, caminho, nome, float(fps), tipo_linha, linha, calibracao)
                 cam.interna, cam.fachada, cam.zona_totem = extras[canal]
                 cam.conf_min, cam.exclusao, cam.zona_atributos = filtros[canal]
+                cam.area_interna = areas[canal]
                 cam.fonte = FonteVideo(f"{RTSP_BASE}/lavateria/{caminho}", eh_arquivo=False)
                 cam.fonte.iniciar()
                 self.cameras[canal] = cam
@@ -803,7 +866,11 @@ class Motor:
         # ---- objetos estáveis (um registro por objeto)
         na_zona = (lambda pt: no_poligono(cam.zona_atributos_px, pt)) if cam.zona_atributos_px else None
         po = cam.objs_p.atualizar(pessoas.tracker_id, pessoas.xyxy, pconf, ["pessoa"] * len(pessoas), ts, img, lambda c: ((c[0] + c[2]) / 2, c[3]), na_zona)
-        vo = cam.objs_v.atualizar([v.id for v in veiculos], [v.caixa for v in veiculos], [1.0] * len(veiculos), [v.classe for v in veiculos], ts, img, lambda c: ((c[0] + c[2]) / 2, (c[1] + c[3]) / 2))
+        vo = cam.objs_v.atualizar([v.id for v in veiculos], [v.caixa for v in veiculos], [1.0] * len(veiculos), [v.classe for v in veiculos], ts, img, lambda c: ((c[0] + c[2]) / 2, c[3]))  # centro da base da caixa (contato com o chão)
+
+        for o in po:
+            if na_area(cam, o.pos):
+                o.visto_dentro = True
 
         # condutor/passageiro: pessoa sobreposta a moto ou bicicleta (em qualquer câmera)
         motos = [dets.xyxy[i] for i, n in enumerate(nomes) if n in ("moto", "bicicleta") and confs[i] >= 0.35]
@@ -877,19 +944,49 @@ class Motor:
         mudou = False
         if cam.contador is not None:
             if cam.tipo_linha == "entrada":
+                # Quem passa lá fora, visto pela porta de vidro, não conta: a
+                # entrada só vale quando a pessoa aparece dentro da área interna
+                # depois de cruzar, e a saída só se ela esteve lá dentro.
                 for o in po:
                     s = cam.contador.atualizar(o.uid, tuple(o.pos))
                     if s and not o.descartado:
-                        self.salvar_evento(cam.canal, "entrada" if s == "a" else "saida", "pessoa", s, o.uid, ts)
+                        if s == "a":
+                            o.entrada_pendente = ts
+                        else:
+                            o.entrada_pendente = None
+                            if o.visto_dentro:
+                                self.salvar_evento(cam.canal, "saida", "pessoa", s, o.uid, ts)
+                                mudou = True
+                    if o.entrada_pendente is not None and o.visto_dentro and not o.descartado:
+                        self.salvar_evento(cam.canal, "entrada", "pessoa", "a", o.uid, o.entrada_pendente)
+                        o.entrada_pendente = None
                         mudou = True
                 cam.contador.esquecer(set(cam.objs_p.vivos) | {x.uid for x in cam.objs_p.sumidos})
             elif cam.tipo_linha == "veiculos":
+                # Só veículos cruzam esta linha (pessoa, inclusive condutor e garupa, nunca conta aqui).
                 for o in vo:
+                    if o.pos_contagem is not None:
+                        o.afast_contagem = max(o.afast_contagem, float(np.hypot(*(o.pos - o.pos_contagem))) / w)
                     s = cam.contador.atualizar(o.uid, tuple(o.pos))
-                    # uma vez só por veículo, e só se ele andou de verdade (parado ou manobrando não conta)
-                    if s and not o.contado and o.desloc_max >= 0.06:
+                    # uma vez por sentido por veículo, e só se ele andou de verdade (parado
+                    # ou manobrando não conta). Por sentido, não "uma vez só": quando o
+                    # rastreio cola um veículo novo no registro de outro que acabou de
+                    # passar no sentido oposto, a passagem nova não se perde.
+                    # (no sentido oposto, só depois de se afastar >= 5% da imagem do ponto
+                    # da última contagem: caixa tremendo em cima da linha não conta de novo)
+                    if s and s not in o.sentidos_contados and o.desloc_max >= 0.06 and (o.pos_contagem is None or o.afast_contagem >= 0.05):
+                        o.sentidos_contados.add(s)
+                        o.pos_contagem, o.afast_contagem = o.pos.copy(), 0.0
                         o.contado, o.sentido = True, s
-                        self.salvar_evento(cam.canal, "veiculo", o.classe, s, o.uid, ts)
+                        classe = o.classe_votada()
+                        grupo = "duas_rodas" if classe in ("moto", "bicicleta") else "quatro_rodas"
+                        u = cam.contador.posicao_na_linha(tuple(o.pos))
+                        # mesmo sentido, mesmo grupo e mesmo trecho da linha nos últimos 2 s: é o mesmo veículo
+                        cam.recentes_linha = [r for r in cam.recentes_linha if ts - r[0] < 2.0]
+                        if any(r[1] == s and r[2] == grupo and abs(r[3] - u) < 0.2 for r in cam.recentes_linha):
+                            continue
+                        cam.recentes_linha.append((ts, s, grupo, u))
+                        self.salvar_evento(cam.canal, "veiculo", classe, s, o.uid, ts)
                         mudou = True
                 cam.contador.esquecer(set(cam.objs_v.vivos) | {x.uid for x in cam.objs_v.sumidos})
         if mudou:
@@ -902,9 +999,12 @@ class Motor:
         vna_tela = [o for o in vo if o.vistos >= 2]
 
         # ---- regras da loja (alertas)
-        pets = [i for i, n in enumerate(nomes) if n in PETS and confs[i] >= 0.45]
+        # Nas câmeras internas, só quem tem o pé dentro da área interna (quem
+        # aparece lá fora pela porta de vidro ou pela vitrine não dispara regra).
         zona = [(p[0] * w, p[1] * h) for p in cam.zona_totem] if cam.zona_totem and len(cam.zona_totem) >= 3 else None
-        self.regras.avaliar(cam.canal, cam.nome, ts, img, [(o.uid, tuple(map(float, o.caixa))) for o in validas], len(pets) if cam.interna else 0, cam.fachada, cam.interna, zona)
+        dentro_loja = [o for o in validas if not cam.interna or na_area(cam, o.pos)]
+        self.regras.avaliar(cam.canal, cam.nome, ts, img, [(o.uid, tuple(map(float, o.caixa))) for o in dentro_loja], cam.fachada, cam.interna, zona)
+        pets = self.acompanhar_pets(cam, dets, nomes, confs, ts, img) if cam.interna else []
 
         # ---- caixas para o navegador (só objetos confirmados)
         def norm(c):
@@ -913,7 +1013,7 @@ class Motor:
         objetos = (
             [{"id": o.uid, "c": "pessoa", "b": norm(o.caixa), **({"r": "condutor"} if o.eh_condutor() else {})} for o in na_tela if o.ultimo == ts]
             + [{"id": 100000 + o.uid, "c": o.classe, "b": norm(o.caixa)} for o in vna_tela if o.ultimo == ts]
-            + [{"id": 200000 + k, "c": nomes[i], "b": norm(dets.xyxy[i])} for k, i in enumerate(pets)]
+            + [{"id": 200000 + p["id"], "c": p["classe"], "b": norm(p["caixa"])} for p in pets]
         )
         cam.processados.append(time.time())
         agora = time.time()
@@ -930,6 +1030,47 @@ class Motor:
                     borrar_cabecas(base, np.array([o.caixa for o in validas]))
                 c.execute("UPDATE cameras SET quadro_cru = %s, quadro_cru_em = now(), largura = %s, altura = %s WHERE canal = %s", (jpeg(base, 80), w, h, cam.canal))
 
+    def acompanhar_pets(self, cam: Camera, dets, nomes, confs, ts: float, img) -> list[dict]:
+        """Cachorro/gato só vale se: confiança >= 0,6; pé dentro da área interna;
+        caixa inteira na imagem (sem encostar na borda); sem sobrepor pessoa (criança no colo ou sentada, mochila ao lado da
+        cadeira); presente por 3 s seguidos; e o CLIP concordar no recorte.
+        Devolve os pets já confirmados (para desenhar no vídeo)."""
+        h, w = img.shape[:2]
+        pessoas = [dets.xyxy[i] for i, n in enumerate(nomes) if n == "pessoa" and confs[i] >= 0.25]
+        cands = []
+        for i, n in enumerate(nomes):
+            if n not in PETS or confs[i] < PET_CONF:
+                continue
+            x1, y1, x2, y2 = map(float, dets.xyxy[i])
+            if not na_area(cam, ((x1 + x2) / 2, y2)):
+                continue
+            if x1 <= 3 or y1 <= 3 or x2 >= w - 3 or y2 >= h - 3:  # cortado na borda da imagem: não dá para confirmar
+                continue
+            area = max(1.0, (x2 - x1) * (y2 - y1))
+            if any(max(0.0, min(x2, b[2]) - max(x1, b[0])) * max(0.0, min(y2, b[3]) - max(y1, b[1])) / area > 0.1 for b in pessoas):
+                continue
+            cands.append((n, float(confs[i]), np.array([x1, y1, x2, y2])))
+        cam.pets = [p for p in cam.pets if ts - p["ultimo"] <= 1.5]
+        for classe, conf, caixa in cands:
+            centro = np.array([(caixa[0] + caixa[2]) / 2, (caixa[1] + caixa[3]) / 2])
+            perto = [p for p in cam.pets if p["ultimo"] < ts and np.hypot(*(p["centro"] - centro)) < 0.15 * w]
+            if perto:
+                p = min(perto, key=lambda p: np.hypot(*(p["centro"] - centro)))
+            else:
+                p = {"id": int(ts * 10) % 100000, "desde": ts, "vistos": 0, "recs": [], "enviado": False, "ok": False, "votos": {}}
+                cam.pets.append(p)
+            p.update(centro=centro, caixa=caixa, ultimo=ts, classe=classe)
+            p["vistos"] += 1
+            p["votos"][classe] = p["votos"].get(classe, 0) + 1
+            rec, _ = recorte(img, caixa, margem=0.25)
+            if rec.size:
+                p["recs"] = sorted(p["recs"] + [(conf, ts, rec)], key=lambda r: -r[0])[:3]
+            if not p["enviado"] and ts - p["desde"] >= PET_SEGUIDOS_S and p["vistos"] >= max(3, int(cam.fps * PET_SEGUIDOS_S * 0.5)):
+                p["enviado"] = True
+                bicho = max(p["votos"], key=p["votos"].get)
+                self.analisador.enviar(("pet", cam.canal, cam.nome, bicho, [r for _, _, r in p["recs"]], img.copy(), p, self.regras))
+        return [p for p in cam.pets if p["ok"] and p["ultimo"] == ts]
+
     def _enviar_pessoa(self, cam: Camera, o, ganhos) -> None:
         recs = [r for _, _, r in o.recortes]
         attr = [r for _, _, r in o.recortes_attr]
@@ -938,7 +1079,7 @@ class Motor:
     def _enviar_veiculo(self, cam: Camera, o, ganhos, w: int) -> None:
         recs = [r for _, _, r in o.recortes]
         vel = velocidade_kmh(o.trajeto) if cam.transformador is not None else None
-        self.analisador.enviar(("veiculo", (cam.canal, o.uid, o.inicio), o.classe, o.ultimo, o.sentido, recs, "noturna" if cam.noturna else ("pouca_luz" if cam.pouca_luz else ""), ganhos, vel, round(o.desloc_max, 3), list(o.quadros)))
+        self.analisador.enviar(("veiculo", (cam.canal, o.uid, o.inicio), o.classe_votada(), o.ultimo, o.sentido, recs, "noturna" if cam.noturna else ("pouca_luz" if cam.pouca_luz else ""), ganhos, vel, round(o.desloc_max, 3), list(o.quadros)))
 
     def atualizar_offline(self) -> None:
         with self.db.cursor() as c:

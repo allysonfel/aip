@@ -50,6 +50,7 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
   const hlsRef = useRef<{ playingDate?: Date | null; destroy: () => void } | null>(null);
   const [estado, setEstado] = useState<'carregando' | 'ao-vivo' | 'sem-video'>('carregando');
   const [foto, setFoto] = useState(() => Date.now());
+  const [semVideoMin, setSemVideoMin] = useState(0); // minutos sem o vídeo carregar (aviso depois de 2)
 
   // Busca as caixas novas a cada 700 ms.
   useEffect(() => {
@@ -76,48 +77,87 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
   }, [canal]);
 
   // Vídeo HLS (taxa nativa da câmera), com a hora de cada trecho.
+  // Reconexão automática: se der erro ou o vídeo parar de andar por 8 s, o
+  // player é recriado sozinho a cada poucos segundos, alternando entre o
+  // caminho principal e o caminho com áudio da câmera (se um conversor do
+  // mediamtx falhar, o outro costuma estar no ar). Mais de 2 min sem vídeo:
+  // aviso na tela (as tentativas continuam).
   useEffect(() => {
     const v = video.current;
     if (!v || !videoLiberado) {
       setEstado('sem-video');
       return;
     }
+    const caminhos = [...new Set([caminho, canal])];
     let cancelado = false;
-    import('hls.js').then(({ default: Hls }) => {
-      if (cancelado) return;
-      if (!Hls.isSupported()) {
-        setEstado('sem-video');
-        return;
-      }
-      // Atraso calculado pelo tamanho dos trechos de cada câmera (o Salão usa
-      // trechos de 4 s, as outras de 2 s): 2 trechos atrás do ao vivo.
-      // Baixa latência (LL-HLS do mediamtx): o player segue o PART-HOLD-BACK da
-      // playlist (~1 s atrás do ao vivo). Fixar "N trechos atrás" desligava isso.
-      const h = new Hls({ lowLatencyMode: true, maxLiveSyncPlaybackRate: 1.2, backBufferLength: 10 });
-      h.loadSource(`${BASE}/api/hls/${caminho}/index.m3u8`);
-      h.attachMedia(v);
-      let falhas = 0;
-      h.on(Hls.Events.ERROR, (_e, data) => {
-        if (!data.fatal) return;
-        falhas += 1;
-        if (falhas > 6) return setEstado('sem-video');
-        if (data.type === Hls.ErrorTypes.MEDIA_ERROR) h.recoverMediaError();
-        else setTimeout(() => h.startLoad(), 2000);
+    let tentativa = 0;
+    let h: { destroy: () => void } | null = null;
+    let reabrir: ReturnType<typeof setTimeout> | null = null;
+    let ultimoAvanco = Date.now();
+    let ultimoTempo = -1;
+    let semVideoDesde = Date.now();
+
+    const agendar = (ms: number) => {
+      if (cancelado || reabrir) return;
+      reabrir = setTimeout(() => {
+        reabrir = null;
+        abrir();
+      }, ms);
+    };
+
+    const abrir = () => {
+      import('hls.js').then(({ default: Hls }) => {
+        if (cancelado) return;
+        if (!Hls.isSupported()) return setEstado('sem-video');
+        h?.destroy();
+        hlsRef.current = null;
+        const cam = caminhos[tentativa % caminhos.length];
+        tentativa += 1;
+        // Baixa latência (LL-HLS do mediamtx): o player segue o PART-HOLD-BACK da playlist (~1 s atrás do ao vivo).
+        const n = new Hls({ lowLatencyMode: true, maxLiveSyncPlaybackRate: 1.2, backBufferLength: 10 });
+        n.loadSource(`${BASE}/api/hls/${cam}/index.m3u8`);
+        n.attachMedia(v);
+        let recuperou = false;
+        n.on(Hls.Events.ERROR, (_e, data) => {
+          if (!data.fatal) return;
+          if (data.type === Hls.ErrorTypes.MEDIA_ERROR && !recuperou) {
+            recuperou = true;
+            n.recoverMediaError();
+          } else agendar(4000);
+        });
+        ultimoAvanco = Date.now();
+        h = n;
+        hlsRef.current = n as unknown as { playingDate?: Date | null; destroy: () => void };
+        v.play().catch(() => {});
       });
-      // Se travar (aba em segundo plano, rede), volta para perto do ao vivo.
-      const vigia = setInterval(() => {
-        if (v.paused && v.readyState >= 2) v.play().catch(() => {});
-      }, 3000);
-      h.on(Hls.Events.DESTROYING, () => clearInterval(vigia));
-      v.addEventListener('playing', () => setEstado('ao-vivo'), { once: true });
-      hlsRef.current = h as unknown as { playingDate?: Date | null; destroy: () => void };
-    });
+    };
+
+    const vigia = setInterval(() => {
+      if (cancelado) return;
+      if (v.paused && v.readyState >= 2) v.play().catch(() => {});
+      if (v.currentTime !== ultimoTempo && v.readyState >= 2) {
+        ultimoTempo = v.currentTime;
+        ultimoAvanco = Date.now();
+        semVideoDesde = Date.now();
+        setEstado('ao-vivo');
+        setSemVideoMin(0);
+      } else if (Date.now() - ultimoAvanco > 8000) {
+        setEstado('carregando');
+        agendar(0);
+      }
+      const parado = Date.now() - semVideoDesde;
+      setSemVideoMin(parado > 120000 ? Math.floor(parado / 60000) : 0);
+    }, 2000);
+
+    abrir();
     return () => {
       cancelado = true;
-      hlsRef.current?.destroy();
+      clearInterval(vigia);
+      if (reabrir) clearTimeout(reabrir);
+      h?.destroy();
       hlsRef.current = null;
     };
-  }, [caminho, videoLiberado]);
+  }, [caminho, canal, videoLiberado]);
 
   // Sem vídeo: foto atual da câmera a cada 5 s, com as caixas mais recentes.
   useEffect(() => {
@@ -233,7 +273,12 @@ export function VideoComCaixas({ canal, caminho, nome, videoLiberado, aoEstado }
         <img src={`${BASE}/api/quadro/${canal}?tipo=cru&t=${foto}`} alt={`Câmera ${nome}`} className="absolute inset-0 h-full w-full object-contain" />
       )}
       <canvas ref={tela} className="pointer-events-none absolute inset-0 h-full w-full" />
-      {estado === 'carregando' && <p className="absolute inset-x-0 bottom-3 text-center text-xs text-white/70">Conectando ao vídeo...</p>}
+      {estado === 'carregando' && !semVideoMin && <p className="absolute inset-x-0 bottom-3 text-center text-xs text-white/70">Conectando ao vídeo...</p>}
+      {semVideoMin > 0 && estado !== 'ao-vivo' && (
+        <div role="alert" className="absolute inset-x-3 top-3 rounded-sm bg-error-container px-3 py-2 text-xs font-medium text-on-error-container">
+          Vídeo desta câmera sem carregar há {semVideoMin} min. Tentando reconectar sozinho; a análise do motor continua.
+        </div>
+      )}
     </div>
   );
 }

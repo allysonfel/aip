@@ -134,6 +134,7 @@ export async function garantirSchema() {
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS conf_min REAL;
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS exclusao JSONB;
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS zona_atributos JSONB;
+    ALTER TABLE cameras ADD COLUMN IF NOT EXISTS area_interna JSONB;
     ALTER TABLE cameras ADD COLUMN IF NOT EXISTS ajuste_video_ms INT NOT NULL DEFAULT 0;
     CREATE TABLE IF NOT EXISTS alertas (
       id BIGSERIAL PRIMARY KEY,
@@ -232,6 +233,18 @@ export async function garantirSchema() {
   if (!v6) {
     await sql`UPDATE config SET valor = '0.7' WHERE chave = 'limiar_confianca' AND (valor)::text::real < 0.7`;
     await sql`INSERT INTO config (chave, valor) VALUES ('migracao_6', 'true')`;
+  }
+
+  // Migração 7: área interna (só o chão de dentro da loja, sem a porta de vidro
+  // nem a vitrine) no Salão e na Recepção: as regras da loja só valem dentro dela.
+  const [v7] = await sql`SELECT 1 FROM config WHERE chave = 'migracao_7'`;
+  if (!v7) {
+    const areas: Record<string, [number, number][]> = {
+      cam5: [[0.37, 0.29], [0.58, 0.29], [0.8, 0.47], [1, 0.72], [1, 1], [0.27, 1], [0.24, 0.62], [0.3, 0.42]],
+      cam3: [[0, 0.27], [0.4, 0.3], [0.52, 0.55], [0.68, 0.86], [0.66, 1], [0, 1]],
+    };
+    for (const [canal, area] of Object.entries(areas)) await sql`UPDATE cameras SET area_interna = ${sql.json(area)} WHERE canal = ${canal} AND area_interna IS NULL`;
+    await sql`INSERT INTO config (chave, valor) VALUES ('migracao_7', 'true')`;
   }
 
   await sql`DELETE FROM sessoes WHERE expira < now()`;

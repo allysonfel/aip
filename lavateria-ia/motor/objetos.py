@@ -73,13 +73,22 @@ class Objeto:
     quadros: list = field(default_factory=list)  # (ts, jpeg)
     condutor: int = 0  # quadros sobreposto a moto/bicicleta
     contado: bool = False
+    sentidos_contados: set = field(default_factory=set)  # veículo: no máximo uma vez por sentido
+    pos_contagem: np.ndarray | None = None  # onde foi contado pela última vez
+    afast_contagem: float = 0.0  # quanto se afastou (fração da largura) desde a última contagem
     sentido: str | None = None
     trajeto: list = field(default_factory=list)
     registrado_em: float = 0.0  # quando foi mandado para a análise (registro preliminar)
+    votos: dict = field(default_factory=dict)  # classe -> vezes (a classe final é a mais votada)
     descartado: bool = False
+    visto_dentro: bool = False  # já teve o pé dentro da área interna da loja
+    entrada_pendente: float | None = None  # cruzou a porta entrando; conta quando aparecer dentro da área interna
 
     def confirmado(self, fps: float) -> bool:
         return self.ultimo - self.inicio >= 1.0 and self.vistos >= max(2, int(fps * 0.8))
+
+    def classe_votada(self) -> str:
+        return max(self.votos, key=self.votos.get) if self.votos else self.classe
 
     def eh_condutor(self) -> bool:
         return self.tipo == "pessoa" and self.condutor >= max(2, 0.3 * self.vistos)
@@ -170,8 +179,9 @@ class Objetos:
                     if h is not None:
                         o.hist = h if o.hist is None else (0.7 * o.hist + 0.3 * h).astype(np.float32)
             o.ultimo, o.pos, o.caixa = ts, pos, np.array(caixa)
-            if o.classe != classe and self.tipo == "veiculo" and o.vistos < 4:
-                o.classe = classe
+            if self.tipo == "veiculo":
+                o.votos[classe] = o.votos.get(classe, 0) + 1
+                o.classe = o.classe_votada()
             o.desloc_max = max(o.desloc_max, float(np.hypot(*(pos - o.origem))) / self.largura)
             o.guardar_recorte(img, caixa, conf, ts, True if na_zona is None else bool(na_zona(pos)))
             vistos.append(o)

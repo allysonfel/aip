@@ -25,6 +25,8 @@ REGRAS_PADRAO = {
 
 INTERNAS_PADRAO = {"cam3", "cam4", "cam5"}  # Recepção, Sala de Máquinas, Salão
 SALA_MAQUINAS = "cam4"
+LOJA_FECHADA_S = 3.0  # pessoa dentro da área interna por 3 s seguidos
+PET_INTERVALO_S = 1800  # no máximo um alerta de pet a cada 30 min por câmera
 
 
 def hora_br(ts: float | None = None) -> float:
@@ -44,7 +46,7 @@ class Regras:
         self.salvar = salvar_alerta  # (tipo, canal, nivel, mensagem, imagem_bgr | None)
         self.cfg = {"abre": 6.0, "fecha": 23.0, "limpeza_de": 14.0, "limpeza_ate": 17.0, "regras": dict(REGRAS_PADRAO), "fachada_s": 60, "totem_s": 180}
         self._ultimo: dict[tuple, float] = {}
-        self._presenca: dict[tuple, float] = {}  # (canal, tid, zona) -> desde
+        self._presenca: dict[tuple, list[float]] = {}  # (canal, tid, situação) -> [desde, último]
         self._caida: dict[str, float] = {}
         self._fech_aviso_dia: str | None = None
         self._fech_conf_dia: str | None = None
@@ -70,36 +72,48 @@ class Regras:
 
     # ---------- por análise de câmera
 
-    def avaliar(self, canal: str, nome: str, ts: float, img, pessoas: list[tuple[int, tuple]], pets: int, fachada: bool, interna: bool, zona_totem) -> None:
+    def _ha(self, k: tuple, ts: float) -> float:
+        """Há quantos segundos SEGUIDOS a pessoa está na situação k (uma falha
+        de detecção de até 1 s não zera a conta)."""
+        p = self._presenca.get(k)
+        if p is None or ts - p[1] > 1.0:
+            p = [ts, ts]
+        p[1] = ts
+        self._presenca[k] = p
+        return ts - p[0]
+
+    def avaliar(self, canal: str, nome: str, ts: float, img, pessoas: list[tuple[int, tuple]], fachada: bool, interna: bool, zona_totem) -> None:
+        """pessoas: nas câmeras internas, só quem tem o pé dentro da área interna."""
         aberta = self.aberta(ts)
         n = len(pessoas)
         if interna and n and not aberta and self.ativa("loja_fechada"):
-            self._alertar(("loja_fechada", canal), 300, "loja_fechada", canal, "urgente", f"Loja fechada: {n} pessoa(s) na câmera {nome}.", img)
+            # só alerta com a pessoa dentro da loja por pelo menos 3 s seguidos
+            seguidos = [tid for tid, _ in pessoas if self._ha((canal, tid, "fechada"), ts) >= LOJA_FECHADA_S]
+            if seguidos:
+                self._alertar(("loja_fechada", canal), 300, "loja_fechada", canal, "urgente", f"Loja fechada: {n} pessoa(s) na câmera {nome}.", img)
         if canal == SALA_MAQUINAS and n and self.ativa("sala_maquinas"):
             limpeza = dentro(hora_br(ts), float(self.cfg["limpeza_de"]), float(self.cfg["limpeza_ate"]))
             if not limpeza:
                 self._alertar(("sala_maquinas", canal), 300, "sala_maquinas", canal, "alto", f"Pessoa na Sala de Máquinas fora do horário da limpeza ({nome}).", img)
-        if interna and pets and self.ativa("pet"):
-            self._alertar(("pet", canal), 600, "pet", canal, "medio", f"Cachorro ou gato na loja (câmera {nome}). Registre para a higienização da máquina usada depois.", img)
 
         # presença prolongada: fachada com a loja fechada e zona do totem
-        vivos = set()
         for tid, (x1, y1, x2, y2) in pessoas:
             pe = ((x1 + x2) / 2, y2)
             if fachada and not aberta and self.ativa("fachada_fechada"):
-                k = (canal, tid, "fachada")
-                vivos.add(k)
-                desde = self._presenca.setdefault(k, ts)
-                if ts - desde >= float(self.cfg["fachada_s"]):
+                if self._ha((canal, tid, "fachada"), ts) >= float(self.cfg["fachada_s"]):
                     self._alertar(("fachada", canal, tid), 600, "fachada_fechada", canal, "alto", f"Pessoa parada na fachada há mais de {int(self.cfg['fachada_s'])} s com a loja fechada ({nome}).", img)
             if zona_totem is not None and self.ativa("totem") and _no_poligono(zona_totem, pe):
-                k = (canal, tid, "totem")
-                vivos.add(k)
-                desde = self._presenca.setdefault(k, ts)
-                if ts - desde >= float(self.cfg["totem_s"]):
+                if self._ha((canal, tid, "totem"), ts) >= float(self.cfg["totem_s"]):
                     self._alertar(("totem", canal, tid), 900, "totem", canal, "medio", f"Cliente parado no totem há mais de {int(self.cfg['totem_s']) // 60} min ({nome}). Pode estar com dificuldade.", img)
-        for k in [k for k in self._presenca if k[0] == canal and k not in vivos]:
+        for k in [k for k, p in self._presenca.items() if k[0] == canal and ts - p[1] > 1.0]:
             del self._presenca[k]
+
+    def pet(self, canal: str, nome: str, classe: str, img) -> None:
+        """Pet já confirmado (detector + CLIP, dentro da área interna, 3 s).
+        Um alerta por animal: no máximo um a cada 30 min por câmera."""
+        if self.ativa("pet"):
+            bicho = {"cachorro": "Cachorro", "gato": "Gato"}.get(classe, "Cachorro ou gato")
+            self._alertar(("pet", canal), PET_INTERVALO_S, "pet", canal, "medio", f"{bicho} na loja (câmera {nome}). Registre para a higienização da máquina usada depois.", img)
 
     # ---------- gerais (a cada poucos segundos)
 

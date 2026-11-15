@@ -23,6 +23,8 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
   const [exclusao, setExclusao] = useState<Ponto[][]>(cam.exclusao ?? []);
   const [zonaAttr, setZonaAttr] = useState<Ponto[]>(cam.zona_atributos ?? [[0.5, 0.5], [0.8, 0.5], [0.85, 0.98], [0.45, 0.98]]);
   const [temZonaAttr, setTemZonaAttr] = useState(Boolean(cam.zona_atributos));
+  const [area, setArea] = useState<Ponto[]>(cam.area_interna ?? [[0.1, 0.4], [0.9, 0.4], [0.95, 0.98], [0.05, 0.98]]);
+  const [temArea, setTemArea] = useState(Boolean(cam.area_interna));
   const [salvo, setSalvo] = useState(false);
   const caixa = useRef<HTMLDivElement>(null);
   const proporcao = cam.largura && cam.altura ? cam.largura / cam.altura : 704 / 480;
@@ -34,6 +36,7 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
     const r3: Ponto = [Math.round(p[0] * 1000) / 1000, Math.round(p[1] * 1000) / 1000];
     if (typeof arrastando === 'number') setCal((c) => c.map((x, i) => (i === arrastando ? r3 : x)));
     else if (arrastando.startsWith('z')) setZona((z) => z.map((x, i) => (i === Number(arrastando[1]) ? r3 : x)));
+    else if (arrastando.startsWith('i')) setArea((z) => z.map((x, i) => (i === Number(arrastando.slice(1)) ? r3 : x)));
     else if (arrastando.startsWith('q')) setZonaAttr((z) => z.map((x, i) => (i === Number(arrastando[1]) ? r3 : x)));
     else if (arrastando.startsWith('x')) {
       const [, zi, pi] = arrastando.split(':').map(Number);
@@ -78,6 +81,27 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
           ) : (
             <p className="absolute inset-0 flex items-center justify-center text-sm text-white/70">Esperando o primeiro quadro do motor...</p>
           )}
+          {temArea && (
+            <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
+              <polygon points={area.map((p) => p.join(',')).join(' ')} fill="rgba(96,165,250,0.16)" stroke="#60a5fa" style={{ strokeWidth: 2 }} vectorEffect="non-scaling-stroke" />
+            </svg>
+          )}
+          {temArea &&
+            area.map((p, i) => (
+              <button
+                key={`i${i}`}
+                type="button"
+                aria-label={`Ponto ${i + 1} da área interna (arraste)`}
+                onPointerDown={(e) => {
+                  (e.target as HTMLElement).setPointerCapture(e.pointerId);
+                  setArrastando(`i${i}`);
+                }}
+                className="absolute flex h-4 w-4 -translate-x-1/2 -translate-y-1/2 cursor-grab items-center justify-center rounded-sm border-2 border-white bg-[#60a5fa] text-[8px] font-bold text-black shadow"
+                style={{ left: `${p[0] * 100}%`, top: `${p[1] * 100}%` }}
+              >
+                {i + 1}
+              </button>
+            ))}
           {temZonaAttr && (
             <svg viewBox="0 0 1 1" preserveAspectRatio="none" className="absolute inset-0 h-full w-full">
               <polygon points={zonaAttr.map((p) => p.join(',')).join(' ')} fill="rgba(34,211,238,0.15)" stroke="#22d3ee" strokeDasharray="0.02 0.01" style={{ strokeWidth: 2 }} vectorEffect="non-scaling-stroke" />
@@ -206,7 +230,7 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Quadros por segundo</span>
-            <input name="fps" type="number" min={0.5} max={5} step={0.5} defaultValue={cam.fps} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
+            <input name="fps" type="number" min={0.5} max={15} step={0.5} defaultValue={cam.fps} className="mt-1 w-full rounded-sm border border-outline-variant bg-surface px-3 py-2 text-on-surface" />
           </label>
           <label className="block">
             <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Linha</span>
@@ -259,6 +283,30 @@ export default function EditorCamera({ cam }: { cam: CameraInfo }) {
           <input type="checkbox" name="interna" defaultChecked={cam.interna} />
           Câmera interna (regras de loja fechada e pet)
         </label>
+        <div className="rounded-sm border border-outline-variant p-3">
+          <label className="flex items-start gap-2">
+            <input type="checkbox" checked={temArea} onChange={(e) => { setTemArea(e.target.checked); setSalvo(false); }} className="mt-0.5" />
+            <span>
+              Área interna (polígono azul)
+              <span className="block text-xs text-on-surface-variant">Só o chão de dentro da loja: deixe de fora a porta de vidro, a vitrine e tudo o que aparece lá fora. As regras da loja (loja fechada, pet, pessoa parada) e a linha de entrada só valem para quem tem o pé dentro dela.</span>
+            </span>
+          </label>
+          {temArea && (
+            <div className="mt-2 flex flex-wrap gap-2">
+              <input type="hidden" name="area_interna" value={JSON.stringify(area)} />
+              {area.length < 16 && (
+                <button type="button" onClick={() => { setArea((a) => [...a, [(a[a.length - 1][0] + a[0][0]) / 2, (a[a.length - 1][1] + a[0][1]) / 2]]); setSalvo(false); }} className="rounded-sm border border-outline-variant px-3 py-1 text-xs text-on-surface">
+                  + Ponto (entre o último e o 1)
+                </button>
+              )}
+              {area.length > 3 && (
+                <button type="button" onClick={() => { setArea((a) => a.slice(0, -1)); setSalvo(false); }} className="rounded-sm border border-outline-variant px-3 py-1 text-xs text-on-surface">
+                  − Último ponto
+                </button>
+              )}
+            </div>
+          )}
+        </div>
         <label className="flex items-center gap-2">
           <input type="checkbox" checked={temZona} onChange={(e) => { setTemZona(e.target.checked); setSalvo(false); }} />
           Zona do totem (quadrado laranja: arraste os cantos)

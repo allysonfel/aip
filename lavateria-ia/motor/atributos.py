@@ -44,6 +44,13 @@ PROMPTS_CINZA = {"genero": (["a black and white photo of a man", "a black and wh
 # Boné num recorte ampliado só da cabeça.
 PROMPTS_CABECA = {"bone": (["a close-up photo of a head wearing a cap or a hat", "a close-up photo of a head with bare hair and no hat"], [True, False])}
 E_PESSOA = ["a photo of a person", "a photo of a motorcycle", "a photo of a car", "a photo of a trash bag or garbage on the ground", "a photo of an empty street or wall"]
+# Segunda verificação de pet: os 2 primeiros são o "sim".
+E_PET = [
+    "a photo of a dog", "a photo of a cat",
+    "a photo of a child", "a photo of a person sitting on a chair", "a photo of a person", "a photo of a person's legs and shoes",
+    "a photo of a backpack", "a photo of a handbag or purse", "a photo of a plastic shopping bag", "a photo of a laundry basket",
+    "a photo of a chair", "a photo of an empty floor",
+]
 URL_POSE = "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-t_simcc-body7_pt-body7_420e-256x192-026a1439_20230504.zip"
 CONCORDANCIA_MIN = 0.6
 
@@ -171,6 +178,8 @@ class Atributos:
         with torch.no_grad():
             t = self.clip.encode_text(tok(E_PESSOA))
             self.t_pessoa = t / t.norm(dim=-1, keepdim=True)
+            t = self.clip.encode_text(tok(E_PET))
+            self.t_pet = t / t.norm(dim=-1, keepdim=True)
         self.pose = None
         try:
             from rtmlib import RTMPose
@@ -188,6 +197,21 @@ class Atributos:
         with self._torch.no_grad():
             e = self.clip.encode_image(img)
             return e / e.norm(dim=-1, keepdim=True)
+
+    def e_pet(self, recortes: list[np.ndarray]) -> tuple[bool, float]:
+        """Segunda verificação do pet: CLIP compara cachorro/gato com criança,
+        pessoa sentada, mochila, bolsa, sacola... Cada recorte vota; só é pet se
+        a maioria disser cachorro/gato com pelo menos 60%."""
+        probs = []
+        for r in recortes:
+            if r is None or r.size == 0 or min(r.shape[:2]) < 12:
+                continue
+            p = (100 * self._emb(r) @ self.t_pet.T).softmax(-1)[0]
+            probs.append(float(p[0] + p[1]))
+        if not probs:
+            return False, 0.0
+        sim = sum(1 for p in probs if p >= 0.6)
+        return sim * 2 > len(probs), float(np.median(probs))
 
     def assinatura(self, rec_bgr: np.ndarray) -> np.ndarray:
         """Vetor visual do recorte (para juntar a mesma passagem). Não é biometria de rosto."""

@@ -16,14 +16,14 @@ export type CameraInfo = {
   canal: string; caminho: string; nome: string; funcao: string; ativa: boolean; fps: number;
   tipo_linha: 'entrada' | 'veiculos' | null; linha: { a: [number, number]; b: [number, number] } | null;
   online: boolean; erro: string | null; calibracao: Calibracao | null; fachada: boolean; interna: boolean; zona_totem: [number, number][] | null;
-  conf_min: number | null; exclusao: [number, number][][] | null; zona_atributos: [number, number][] | null;
+  conf_min: number | null; exclusao: [number, number][][] | null; zona_atributos: [number, number][] | null; area_interna: [number, number][] | null;
   contagem_hoje: Record<string, number> | null; quadro_em: Date | null; quadro_cru_em: Date | null;
   largura: number | null; altura: number | null; pessoas_agora: number; veiculos_agora: number;
 };
 
 export async function cameras(): Promise<CameraInfo[]> {
   return sql<CameraInfo[]>`
-    SELECT canal, caminho, nome, funcao, ativa, fps, tipo_linha, linha, online, erro, calibracao, fachada, interna, zona_totem, conf_min, exclusao, zona_atributos,
+    SELECT canal, caminho, nome, funcao, ativa, fps, tipo_linha, linha, online, erro, calibracao, fachada, interna, zona_totem, conf_min, exclusao, zona_atributos, area_interna,
            contagem_hoje, quadro_em, quadro_cru_em, largura, altura, pessoas_agora, veiculos_agora
     FROM cameras ORDER BY ordem, canal`;
 }

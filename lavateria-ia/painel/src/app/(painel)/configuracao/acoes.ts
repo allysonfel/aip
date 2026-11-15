@@ -45,12 +45,17 @@ export async function salvarCamera(canal: string, form: FormData) {
     const z = JSON.parse(String(form.get('zona_atributos') ?? 'null'));
     if (Array.isArray(z) && z.length >= 3 && z.every((p: unknown) => Array.isArray(p) && p.length === 2 && p.every((x) => typeof x === 'number' && x >= 0 && x <= 1))) zonaAttr = z;
   } catch {}
+  let areaInterna: [number, number][] | null = null;
+  try {
+    const z = JSON.parse(String(form.get('area_interna') ?? 'null'));
+    if (Array.isArray(z) && z.length >= 3 && z.length <= 16 && z.every((p: unknown) => Array.isArray(p) && p.length === 2 && p.every((x) => typeof x === 'number' && x >= 0 && x <= 1))) areaInterna = z;
+  } catch {}
   await sql`
     UPDATE cameras SET
       nome = ${String(form.get('nome') ?? '').trim().slice(0, 40) || canal},
       funcao = ${String(form.get('funcao') ?? '').trim().slice(0, 120)},
       ativa = ${form.get('ativa') === 'on'},
-      fps = ${num(form.get('fps'), 0.5, 5, 2)},
+      fps = ${num(form.get('fps'), 0.5, 15, 2)},
       tipo_linha = ${tipoLinha},
       linha = ${linha ? sql.json(linha) : null},
       calibracao = ${calibracao ? sql.json(calibracao) : null},
@@ -59,7 +64,8 @@ export async function salvarCamera(canal: string, form: FormData) {
       zona_totem = ${zonaTotem ? sql.json(zonaTotem) : null},
       exclusao = ${exclusao ? sql.json(exclusao) : null},
       conf_min = ${confMin},
-      zona_atributos = ${zonaAttr ? sql.json(zonaAttr) : null}
+      zona_atributos = ${zonaAttr ? sql.json(zonaAttr) : null},
+      area_interna = ${areaInterna ? sql.json(areaInterna) : null}
     WHERE canal = ${canal}`;
   revalidatePath('/', 'layout');
 }
