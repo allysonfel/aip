@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+  <meta name="theme-color" content="#000000">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <title>Vistoria de câmeras · Feira da Fundac · AIP</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="img/aip-icone-192.png">
+  <link rel="apple-touch-icon" href="img/aip-icone-apple.png">
+  <link rel="stylesheet" href="vendor/leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <header class="topo">
+    <span class="marca" aria-label="AIP"><span class="logo"></span></span>
+    <div class="titulo">
+      <strong>Vistoria de câmeras</strong>
+      <span>Feira da Fundac · Caruaru</span>
+    </div>
+    <button class="chip-gps" id="chipGps" type="button" aria-live="polite">GPS</button>
+    <button class="btn-icone" id="btnMenu" type="button" aria-label="Menu">
+      <svg viewBox="0 0 24 24" width="26" height="26"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+    </button>
+  </header>
+
+  <div id="aviso" class="aviso" hidden></div>
+  <div id="modoMapa" class="modo-mapa" hidden></div>
+
+  <main id="mapa" aria-label="Mapa da feira"></main>
+
+  <div class="flutuantes">
+    <button class="btn-redondo" id="btnSeguir" type="button" aria-pressed="false" aria-label="Seguir minha posição" title="Seguir minha posição">
+      <svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>
+    </button>
+    <button class="btn-redondo" id="btnFeira" type="button" aria-label="Ver a feira inteira" title="Ver a feira inteira">
+      <svg viewBox="0 0 24 24" width="24" height="24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" stroke="currentColor" stroke-width="2.2" fill="none" stroke-linecap="round"/></svg>
+    </button>
+    <button class="btn-redondo" id="btnCamadas" type="button" aria-label="Camadas" title="Camadas">
+      <svg viewBox="0 0 24 24" width="24" height="24"><path d="M12 3 2 8l10 5 10-5-10-5Z M2 13l10 5 10-5 M2 17.5l10 5 10-5" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>
+    </button>
+    <button class="btn-redondo" id="btnBussola" type="button" aria-label="Ativar bússola" title="Ativar bússola">
+      <svg viewBox="0 0 24 24" width="24" height="24"><circle cx="12" cy="12" r="9.5" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 5l3 7h-6l3-7Z" fill="currentColor"/><path d="M12 19l-3-7h6l-3 7Z" fill="currentColor" opacity=".35"/></svg>
+    </button>
+  </div>
+
+  <nav class="acoes" aria-label="Ações principais">
+    <button class="btn-acao principal" id="btnCameraAqui" type="button">Câmera aqui</button>
+    <button class="btn-acao" id="btnMarcarMapa" type="button">Marcar no mapa</button>
+    <button class="btn-acao" id="btnOutroPonto" type="button">Outro ponto</button>
+    <button class="btn-acao sec" id="btnPortao" type="button">Estou no portão</button>
+    <button class="btn-acao sec" id="btnLista" type="button">Lista</button>
+    <button class="btn-acao sec" id="btnEsperado" type="button">Esperado × encontrado</button>
+  </nav>
+
+  <section id="folha" class="folha" hidden aria-modal="true" role="dialog">
+    <div class="folha-alca" aria-hidden="true"></div>
+    <div id="folhaConteudo" class="folha-conteudo"></div>
+  </section>
+
+  <div id="ajuste" class="painel-ajuste" hidden></div>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <input type="file" id="inputFoto" accept="image/*" capture="environment" hidden>
+  <input type="file" id="inputImportar" accept=".json,application/json" hidden>
+  <input type="file" id="inputPlanta" accept="image/*" hidden>
+
+  <script src="vendor/leaflet/leaflet.js"></script>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
