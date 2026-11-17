@@ -1,0 +1,37 @@
+/*
+ * Café do Virgulino: mesas do mapa do salão alternando entre livre (contorno)
+ * e ocupada (ciano). Movimento contínuo e suave, só opacidade. Cada mesa tem
+ * duração e atraso próprios (variáveis --t e --a), para nunca piscarem juntas.
+ */
+@keyframes cv-mesa {
+  0%,
+  38% {
+    opacity: 0;
+  }
+  50%,
+  88% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.cv-mesa {
+  opacity: 0;
+  animation: cv-mesa var(--t, 14s) ease-in-out var(--a, 0s) infinite;
+}
+
+/* Mesa que começa ocupada: mesma animação, com a fase deslocada. */
+.cv-mesa.cv-ocupada {
+  animation-delay: calc(var(--a, 0s) - var(--t, 14s) * 0.6);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-mesa {
+    animation: none;
+  }
+  .cv-mesa.cv-ocupada {
+    opacity: 1;
+  }
+}
