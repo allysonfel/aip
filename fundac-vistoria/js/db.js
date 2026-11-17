@@ -48,10 +48,17 @@ export const pontos = {
   limpar: () => tx('pontos', 'readwrite', (s) => { s.clear(); }),
 };
 
+// Fotos guardadas como bytes (ArrayBuffer): o Safari nem sempre aceita Blob
+// no IndexedDB (ex.: aba privada). Para o resto do app, continuam sendo Blob.
+const paraBlob = (f) => (f && f.bytes ? { ...f, blob: new Blob([f.bytes], { type: f.tipo || 'image/jpeg' }), bytes: undefined } : f);
 export const fotos = {
-  pegar: (id) => tx('fotos', 'readonly', (s) => req(s.get(id))),
-  todas: () => tx('fotos', 'readonly', (s) => req(s.getAll())),
-  salvar: (f) => tx('fotos', 'readwrite', (s) => { s.put(f); }),
+  pegar: async (id) => paraBlob(await tx('fotos', 'readonly', (s) => req(s.get(id)))),
+  todas: async () => (await tx('fotos', 'readonly', (s) => req(s.getAll()))).map(paraBlob),
+  salvar: async (f) => {
+    const { blob, ...resto } = f;
+    const bytes = blob ? await blob.arrayBuffer() : f.bytes;
+    return tx('fotos', 'readwrite', (s) => { s.put({ ...resto, bytes, tipo: (blob && blob.type) || f.tipo || 'image/jpeg' }); });
+  },
   apagar: (id) => tx('fotos', 'readwrite', (s) => { s.delete(id); }),
   limpar: () => tx('fotos', 'readwrite', (s) => { s.clear(); }),
 };
