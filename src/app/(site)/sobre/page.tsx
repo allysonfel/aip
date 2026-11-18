@@ -6,7 +6,7 @@ import { LinhaDoTempo, Manifesto, MapaMundi, Principios, VisualDestaque } from "
 
 const TITULO = "Tecnologia brasileira para defender e entender patrimônios.";
 const DESCRICAO =
-  "A AIP — Agência de Inteligência Patrimonial — desenvolve soluções de inteligência artificial e visão computacional para empresas, condomínios e o setor público. Transformamos as imagens das câmeras em segurança, monitoramento avançado e eficiência para cada operação.";
+  "A AIP (Agência de Inteligência Patrimonial) desenvolve soluções de inteligência artificial e visão computacional para empresas, institutos e o setor público. Transformamos as imagens das câmeras em segurança, monitoramento avançado e eficiência para cada operação.";
 
 export const metadata = metadados(
   "/sobre",
@@ -17,13 +17,13 @@ export const metadata = metadados(
 const DESTAQUES: { visual: "globo" | "paises" | "bandeira"; titulo: string; texto: string }[] = [
   { visual: "globo", titulo: "Pesquisa própria", texto: "Estudos da nossa equipe de especialistas em visão computacional." },
   { visual: "paises", titulo: "Referências internacionais", texto: "Tecnologias usadas por empresas, serviços de inteligência e governos no mundo todo." },
-  { visual: "bandeira", titulo: "Soberania digital", texto: "Tecnologia desenvolvida no Brasil, para quem opera no Brasil." },
+  { visual: "bandeira", titulo: "Soberania digital", texto: "Tecnologia desenvolvida no Brasil." },
 ];
 
 const PRINCIPIOS = [
   { titulo: "Precisão", texto: "Informação só tem valor se for confiável. Validamos cada aplicação antes de entregar." },
   { titulo: "Responsabilidade", texto: "Tratamos dados com finalidade definida, controle de acesso e respeito à legislação." },
-  { titulo: "Tecnologia nacional", texto: "Desenvolvemos aqui, para quem opera aqui." },
+  { titulo: "Tecnologia nacional", texto: "Tecnologia própria, desenvolvida com independência e soberania." },
   { titulo: "Parceria", texto: "Acompanhamos cada projeto do diagnóstico ao resultado." },
 ];
 
@@ -40,24 +40,13 @@ export default function Sobre() {
       {/* 1. Hero */}
       <Hero sobretitulo="Sobre a AIP" titulo={TITULO} texto={DESCRICAO} midia={{ foto: "sobre-central-monitoramento.jpg", alt: "Operador de costas numa sala escura, diante de uma parede de telas com imagens de câmeras e mapas analisados pela inteligência artificial", foco: "72% 50%" }} />
 
-      {/* 2. Por que existimos */}
-      <section className="secao">
-        <div className="margem">
-          <Reveal>
-            <h2 className="titulo-tela max-w-[56rem]">Câmeras gravam o tempo todo. Quase ninguém assiste.</h2>
-          </Reveal>
-          <div className="mt-12 md:mt-16">
-            <Manifesto texto="Milhões de horas de imagem são armazenadas todos os dias e só são vistas depois que algo acontece. A AIP nasceu para mudar isso: fazer as câmeras entenderem o que registram e transformar cada imagem em segurança, monitoramento avançado e eficiência." />
-          </div>
-        </div>
-      </section>
-
-      {/* 3. Inovação com raiz brasileira */}
+      {/* 2. Inovação com raiz brasileira */}
       <section className="secao border-t border-linha">
         <div className="margem grid items-center gap-12 lg:grid-cols-[1fr_1.1fr] lg:gap-16">
           <Reveal className="order-2 lg:order-1">
             <p className="rotulo mb-4">Inovação</p>
-            <h2 className="titulo-secao">O que há de mais avançado no mundo, pensado para a realidade brasileira.</h2>
+            {/* as palavras acendem conforme a página desce */}
+            <Manifesto como="h2" className="titulo-secao" texto="O que há de mais avançado no mundo, pensado para a realidade brasileira." />
             <div className="corpo mt-6 space-y-4">
               <p>As soluções da AIP nascem de estudos e pesquisas da nossa equipe de especialistas, somados à experiência internacional de quem acompanha de perto as tecnologias de visão computacional usadas por grandes empresas, serviços de inteligência e governos ao redor do mundo.</p>
               <p>Um dos nossos diretores traz essa vivência para o Brasil, e a nossa equipe a transforma em soluções adaptadas às nossas cidades, ao nosso clima, às nossas leis e às necessidades de cada operação.</p>

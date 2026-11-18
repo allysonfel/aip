@@ -36,8 +36,8 @@ export function useVisto<T extends Element>(limiar = 0.3) {
  * Manifesto: as palavras começam em cinza escuro e acendem para branco, uma a
  * uma, acompanhando a rolagem. Com "reduzir movimento", o texto já vem branco.
  */
-export function Manifesto({ texto }: { texto: string }) {
-  const ref = useRef<HTMLParagraphElement>(null);
+export function Manifesto({ texto, como: Tag = "p", className = "max-w-[62rem] text-[1.75rem] font-light leading-[1.3] sm:text-4xl md:text-5xl md:leading-[1.2]" }: { texto: string; como?: "p" | "h2"; className?: string }) {
+  const ref = useRef<HTMLParagraphElement & HTMLHeadingElement>(null);
   const palavras = texto.split(" ");
   const [acesas, setAcesas] = useState(0);
 
@@ -74,7 +74,7 @@ export function Manifesto({ texto }: { texto: string }) {
   }, [palavras.length]);
 
   return (
-    <p ref={ref} className="max-w-[62rem] text-[1.75rem] font-light leading-[1.3] sm:text-4xl md:text-5xl md:leading-[1.2]">
+    <Tag ref={ref} className={className}>
       <span className="sr-only">{texto}</span>
       <span aria-hidden>
         {palavras.map((p, i) => (
@@ -83,7 +83,7 @@ export function Manifesto({ texto }: { texto: string }) {
           </span>
         ))}
       </span>
-    </p>
+    </Tag>
   );
 }
 
