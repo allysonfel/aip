@@ -26,7 +26,8 @@ function abrir() {
         const novo = (itens) => {
           const s = db.createObjectStore('trajeto', { keyPath: 'id' });
           s.createIndex('vistoria', 'vistoriaId');
-          for (const x of itens) s.put({ ...x, id: novoId(), vistoriaId: x.vistoriaId ?? null, enviado: false });
+          // id fixo pelo horário da leitura: o mesmo trajeto vindo de um arquivo importado não duplica
+          for (const x of itens) s.put({ ...x, id: x.t ? `tr-${x.t}-${Math.round((x.lat || 0) * 1e5)}` : novoId(), vistoriaId: x.vistoriaId ?? null, enviado: false });
         };
         if (ev.oldVersion >= 1) {
           // trajeto antigo (chave automática): copia para o novo formato sem perder nada

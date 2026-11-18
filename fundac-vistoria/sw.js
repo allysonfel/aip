@@ -1,6 +1,6 @@
 // Funciona sem internet: o app (código, fontes, planta) fica guardado na
 // primeira visita; as imagens de satélite ficam num cache próprio.
-const VERSAO = 'fv-app-v3';
+const VERSAO = 'fv-app-v4';
 const TILES = 'fv-tiles-v1';
 const APP = [
   './', 'index.html', 'manifest.webmanifest', 'css/app.css',

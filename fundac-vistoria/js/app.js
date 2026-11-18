@@ -1371,7 +1371,8 @@ $('#inputImportar').addEventListener('change', async (e) => {
     if (d.pontos.some((p) => !p.vistoriaId)) {
       const datas = d.pontos.map((p) => p.criadoEm).filter(Boolean).sort();
       const dia = datas[0] ? datas[0].slice(0, 10) : hojeISO();
-      destino = { id: novoId(), nome: `Importada – ${dataBR(dia)}`, data: dia, responsavel: E.usuario ? E.usuario.nome : '', status: 'andamento', iniciada: !!(d.vistoria && d.vistoria.iniciada), portao: (d.vistoria && d.vistoria.portao) || '02', inicio: (d.vistoria && d.vistoria.inicio) || null, conferencia: d.conf || { pares: [] }, criadoEm: agoraISO(), atualizadoEm: agoraISO() };
+      const primeiro = [...d.pontos].filter((p) => !p.vistoriaId).sort((x, y) => (x.criadoEm || '').localeCompare(y.criadoEm || ''))[0];
+      destino = { id: primeiro ? `v1-${primeiro.id}`.slice(0, 64) : novoId(), nome: `Importada – ${dataBR(dia)}`, data: dia, responsavel: E.usuario ? E.usuario.nome : '', status: 'andamento', iniciada: !!(d.vistoria && d.vistoria.iniciada), portao: (d.vistoria && d.vistoria.portao) || '02', inicio: (d.vistoria && d.vistoria.inicio) || null, conferencia: d.conf || { pares: [] }, criadoEm: agoraISO(), atualizadoEm: agoraISO() };
       E.vistorias.set(destino.id, destino);
       await dbVist.salvar(destino);
     }
@@ -1386,7 +1387,7 @@ $('#inputImportar').addEventListener('change', async (e) => {
       novos++;
     }
     for (const t of d.trajeto) {
-      const x = { ...t, id: t.id || novoId(), vistoriaId: t.vistoriaId || (destino && destino.id) || null, enviado: false };
+      const x = { ...t, id: t.id || (t.t ? `tr-${t.t}-${Math.round((t.lat || 0) * 1e5)}` : novoId()), vistoriaId: t.vistoriaId || (destino && destino.id) || null, enviado: false };
       if (!E.trajeto.some((y) => y.id === x.id)) { E.trajeto.push(x); await dbTrajeto.add(x); }
     }
     if (destino) await abrirVistoria(destino.id); else redesenharTudo();
@@ -1537,8 +1538,11 @@ async function migrarV1() {
     const datas = [...semV.map((p) => p.criadoEm), vOld && vOld.inicio].filter(Boolean).sort();
     const dia = datas[0] ? diaLocal(datas[0]) : hojeISO();
     const n = vistoriasOrdenadas().length + 1;
+    // id fixo, tirado da primeira câmera marcada: se a mesma vistoria também
+    // chegar ao sistema por um arquivo importado, as duas viram uma só
+    const primeiro = [...semV].sort((x, y) => (x.criadoEm || '').localeCompare(y.criadoEm || ''))[0];
     const v = {
-      id: novoId(), nome: `Vistoria ${n} – ${dataBR(dia)}`, data: dia, responsavel: (await kv.get('ultimoResponsavel')) || '', status: 'andamento',
+      id: primeiro ? `v1-${primeiro.id}`.slice(0, 64) : novoId(), nome: `Vistoria ${n} – ${dataBR(dia)}`, data: dia, responsavel: (await kv.get('ultimoResponsavel')) || '', status: 'andamento',
       iniciada: !!(vOld && vOld.iniciada), portao: (vOld && vOld.portao) || '02', inicio: (vOld && vOld.inicio) || null,
       conferencia: confOld && Array.isArray(confOld.pares) ? confOld : { pares: [] }, criadoEm: datas[0] || agoraISO(), atualizadoEm: agoraISO(), recuperadaDoCelular: true,
     };
