@@ -1,0 +1,463 @@
+/*
+ * Documento em páginas A4 retrato. Na impressão (PDF), cada .pagina ocupa
+ * exatamente uma folha de 210 × 297 mm. Na tela, as páginas encolhem para
+ * caber na largura: todas as medidas internas usam "cqw" (1% da largura da
+ * página), então a página é a mesma em qualquer tamanho.
+ */
+
+@page {
+  size: A4 portrait;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body.doc {
+  margin: 0;
+  background: #0b0c0d;
+  color: #fff;
+  font-family: var(--font-barlow), system-ui, sans-serif;
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+  -webkit-font-smoothing: antialiased;
+}
+
+.doc-folhas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 12px 48px;
+}
+
+.pagina {
+  position: relative;
+  width: min(210mm, calc(100vw - 24px));
+  aspect-ratio: 210 / 297;
+  overflow: hidden;
+  background: #000;
+  container-type: inline-size;
+  box-shadow: 0 10px 40px rgb(0 0 0 / 0.6);
+  display: flex;
+  flex-direction: column;
+}
+
+@media print {
+  html,
+  body.doc {
+    background: #000;
+  }
+  .doc-folhas {
+    display: block;
+    padding: 0;
+  }
+  .pagina {
+    width: 210mm;
+    height: 297mm;
+    aspect-ratio: auto;
+    box-shadow: none;
+    break-after: page;
+    page-break-after: always;
+    break-inside: avoid;
+  }
+  .pagina:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+}
+
+/* ---------- tipografia */
+.t-titulo {
+  font-family: var(--font-barlow-condensed), var(--font-barlow), sans-serif;
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.005em;
+  margin: 0;
+}
+.t-rotulo {
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  font-size: 1.75cqw;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.6);
+  margin: 0;
+}
+.t-rotulo::before {
+  content: "";
+  width: 5cqw;
+  height: 1px;
+  background: #5fd3ff;
+}
+.ciano {
+  color: #5fd3ff;
+}
+.miolo {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  padding: 7cqw 8cqw 0;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- rodapé de cada página */
+.rodape {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 2.4cqw;
+  height: 9cqw;
+  padding: 0 8cqw;
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+  font-size: 1.75cqw;
+  color: rgb(255 255 255 / 0.55);
+  flex: none;
+}
+.rodape img {
+  height: 2.3cqw;
+  width: auto;
+}
+.rodape .sep {
+  width: 1px;
+  height: 2.4cqw;
+  background: rgb(255 255 255 / 0.2);
+}
+.rodape .num {
+  margin-left: auto;
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  font-size: 1.9cqw;
+}
+
+/* ---------- capa */
+.capa-foto {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 66%;
+}
+.capa-foto img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 45%;
+  display: block;
+}
+.capa-foto::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgb(0 0 0 / 0.55) 0%, rgb(0 0 0 / 0) 26%, rgb(0 0 0 / 0) 58%, #000 100%);
+}
+.capa-logo {
+  position: relative;
+  z-index: 1;
+  height: 5.6cqw;
+  width: auto;
+  align-self: flex-start;
+}
+.capa-texto {
+  position: relative;
+  z-index: 1;
+  margin-top: auto;
+  padding-bottom: 7cqw;
+}
+.capa-titulo {
+  font-size: 10.5cqw;
+  max-width: 82cqw;
+}
+.capa-sub {
+  margin: 3cqw 0 0;
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 600;
+  font-size: 5cqw;
+  color: #5fd3ff;
+}
+.capa-lente {
+  position: absolute;
+  z-index: 2;
+  left: 8cqw;
+  top: 44%;
+  width: 34cqw;
+  aspect-ratio: 3 / 2;
+  border-radius: 2cqw;
+  overflow: hidden;
+  border: 1px solid rgb(95 211 255 / 0.45);
+  box-shadow: 0 2cqw 6cqw rgb(0 0 0 / 0.7);
+}
+.capa-lente img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 72% 50%;
+  display: block;
+}
+.capa-lente span {
+  position: absolute;
+  left: 2cqw;
+  bottom: 1.6cqw;
+  font-size: 1.6cqw;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #5fd3ff;
+}
+
+/* ---------- páginas de produto */
+.prod-topo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2.4cqw;
+}
+.prod-titulo {
+  font-size: 9.5cqw;
+}
+.preco {
+  margin: 1.2cqw 0 0;
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+  line-height: 1.05;
+}
+.preco .faixa {
+  display: block;
+  font-size: 7.4cqw;
+  color: #fff;
+}
+.preco .faixa b {
+  color: #5fd3ff;
+  font-weight: 700;
+}
+.preco .unidade {
+  display: block;
+  margin-top: 1cqw;
+  font-family: var(--font-barlow), sans-serif;
+  font-weight: 500;
+  font-size: 2.5cqw;
+  color: rgb(255 255 255 / 0.72);
+}
+.banda {
+  position: relative;
+  margin: 4.5cqw -8cqw 0;
+  height: 22cqw;
+  overflow: hidden;
+  flex: none;
+}
+.banda img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.banda::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #000 0%, rgb(0 0 0 / 0) 22%, rgb(0 0 0 / 0) 70%, #000 100%);
+}
+.incluso-rot {
+  margin-top: 3.4cqw;
+}
+.cond .lista li {
+  font-size: 2.75cqw;
+  padding: 1.35cqw 0;
+}
+.cond .lista li svg {
+  width: 3cqw;
+  height: 3cqw;
+}
+.cond .passos .txt {
+  font-size: 3.9cqw;
+}
+.fecho img {
+  align-self: flex-end;
+}
+.lista {
+  list-style: none;
+  margin: 2.2cqw 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 4.5cqw;
+}
+.lista.uma {
+  grid-template-columns: 1fr;
+}
+.lista li {
+  display: flex;
+  gap: 1.8cqw;
+  padding: 1.05cqw 0;
+  border-top: 1px solid rgb(255 255 255 / 0.1);
+  font-size: 2.25cqw;
+  line-height: 1.32;
+  color: rgb(255 255 255 / 0.9);
+  break-inside: avoid;
+}
+.lista li svg {
+  flex: none;
+  width: 2.4cqw;
+  height: 2.4cqw;
+  margin-top: 0.15cqw;
+  color: #5fd3ff;
+}
+.destaque {
+  position: relative;
+  margin-top: auto;
+  margin-bottom: 4.5cqw;
+  border: 1px solid rgb(95 211 255 / 0.4);
+  background: rgb(95 211 255 / 0.05);
+  border-radius: 2.4cqw;
+  padding: 3.4cqw 4cqw;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 3cqw;
+}
+.destaque h3 {
+  margin: 0;
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+  font-size: 4.4cqw;
+  line-height: 1;
+}
+.destaque p {
+  margin: 1.4cqw 0 0;
+  font-size: 2.2cqw;
+  line-height: 1.4;
+  color: rgb(255 255 255 / 0.8);
+}
+.selo {
+  display: inline-block;
+  transform: rotate(-5deg);
+  border: 0.45cqw solid #5fd3ff;
+  border-radius: 1cqw;
+  padding: 1.2cqw 2.2cqw;
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+  font-size: 2.7cqw;
+  line-height: 1.05;
+  letter-spacing: 0.16em;
+  text-align: center;
+  color: #5fd3ff;
+  box-shadow: 0 0 4cqw rgb(95 211 255 / 0.25);
+  white-space: nowrap;
+}
+
+/* ---------- totem: duas fotos */
+.duas-fotos {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2cqw;
+  margin-top: 4.5cqw;
+  flex: none;
+}
+.duas-fotos figure {
+  margin: 0;
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border-radius: 2cqw;
+  overflow: hidden;
+  border: 1px solid rgb(255 255 255 / 0.1);
+}
+.duas-fotos img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.duas-fotos figcaption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 5cqw 2.4cqw 1.8cqw;
+  background: linear-gradient(transparent, rgb(0 0 0 / 0.8));
+  font-size: 1.7cqw;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgb(255 255 255 / 0.85);
+}
+
+/* ---------- condições e próximos passos */
+.cond-titulo {
+  font-size: 9cqw;
+}
+.passos {
+  position: relative;
+  list-style: none;
+  margin: 3.4cqw 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 3cqw;
+}
+.passos::before {
+  content: "";
+  position: absolute;
+  left: 4cqw;
+  right: calc(33.33% - 4cqw);
+  top: 4cqw;
+  height: 1px;
+  background: #5fd3ff;
+}
+.passos li {
+  position: relative;
+}
+.passos .bola {
+  position: relative;
+  width: 8cqw;
+  height: 8cqw;
+  border-radius: 50%;
+  border: 1px solid #5fd3ff;
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+  font-size: 3.2cqw;
+  color: #5fd3ff;
+  box-shadow: 0 0 3cqw rgb(95 211 255 / 0.3);
+}
+.passos .txt {
+  margin-top: 2.2cqw;
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 600;
+  font-size: 3.4cqw;
+  line-height: 1.12;
+}
+.fecho {
+  margin-top: auto;
+  margin-bottom: 5cqw;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 4cqw;
+  border-top: 1px solid rgb(255 255 255 / 0.12);
+  padding-top: 3.6cqw;
+}
+.fecho img {
+  height: 5.6cqw;
+  width: auto;
+}
+.fecho .site {
+  font-family: var(--font-barlow-condensed), sans-serif;
+  font-weight: 700;
+  font-size: 5.6cqw;
+  color: #5fd3ff;
+  text-decoration: none;
+}
+.bandeira {
+  display: inline-block;
+  width: 3.4cqw;
+  height: auto;
+  margin-left: 1.4cqw;
+  vertical-align: -0.35cqw;
+  border-radius: 0.3cqw;
+}
