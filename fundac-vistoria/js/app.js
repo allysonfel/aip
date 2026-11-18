@@ -1022,6 +1022,10 @@ function ligarDial(p) {
 
 // fotos
 let fotoPara = null;
+conteudo.addEventListener('click', (e) => {
+  const img = e.target.closest('.foto[data-foto] img');
+  if (img && !e.target.closest('[data-acao]')) verFoto(img.closest('.foto').dataset.foto, E.selecionado);
+});
 acoesFolha['tirar-foto'] = () => {
   const p = pontoAtual();
   if (p.fotos.length >= limiteFotos(p)) return;
@@ -1161,6 +1165,7 @@ function telaResumo() {
   const tab = (rot, pares) => (pares.length ? `<table class="tabela"><tr><th>${rot}</th><th>Câmeras</th></tr>${pares.map(([k, n]) => `<tr><td>${esc(k)}</td><td>${n}</td></tr>`).join('')}</table>` : '<p class="vazio">Sem dados.</p>');
   abrirFolha(`${cabeca(E.verTodas ? 'Resumo de todas as vistorias' : `Resumo · ${esc(E.vistoria.nome || 'vistoria')}`, E.verTodas ? 'Câmeras juntadas contam uma vez só' : E.vistoria.iniciada ? `Iniciada em ${horaBR(E.vistoria.inicio)} no Portão ${E.vistoria.portao}` : 'Vistoria ainda não iniciada')}
     <div class="nums"><div class="num"><b>${cams.length}</b><span>câmeras</span></div><div class="num"><b>${cams.filter((p) => p.prioridadeIA === 'sim').length}</b><span>prioridade IA (sim)</span></div><div class="num"><b>${outros.length}</b><span>outros pontos</span></div></div>
+    <div class="btns"><button class="btn" type="button" data-acao="m" data-t="fotos">Ver as ${[...cams, ...outros].reduce((n, p) => n + (p.fotos || []).length, 0)} fotos</button></div>
     <div class="legenda"><span><i style="background:#22c55e"></i>Funcionando</span><span><i style="background:#ff4d4d"></i>Parada / sem sinal</span><span><i style="background:#9ca3af"></i>Não sei</span><span><i style="background:${D.COR_NOVA}"></i>Nova sugerida</span></div>
     <h3>Por grupo</h3>${tab('Grupo', conta(cams, (p) => p.grupo))}
     <h3>Por situação</h3>${tab('Situação', conta(cams, (p) => p.situacao))}
@@ -1168,6 +1173,55 @@ function telaResumo() {
     <h3>Prioridade para IA</h3>${tab('Prioridade', conta(cams, (p) => p.prioridadeIA))}
     <h3>Outros pontos</h3>${outros.length ? `<table class="tabela"><tr><th>Tipo</th><th>Pontos</th></tr>${conta(outros, (p) => D.OUTROS.find((x) => x.id === p.categoria)?.nome).map(([k, n]) => `<tr><td>${esc(k)}</td><td>${n}</td></tr>`).join('')}</table>` : '<p class="vazio">Nenhum.</p>'}
     <p class="sub">Trajeto gravado: ${E.trajeto.length} pontos · Conferência: ${E.conf.pares.length} portão(ões)${E.erroMedio != null ? `, erro médio ${E.erroMedio.toFixed(1).replace('.', ',')} m` : ''}</p>`, { cheia: true });
+}
+
+// ------------------------------------------------------------------ galeria de fotos
+const urlsGaleria = [];
+/** Endereço de uma foto: a cópia do aparelho, se houver; senão, direto do sistema. */
+async function urlFoto(id) {
+  const f = await dbFotos.pegar(id);
+  if (f && f.blob) { const u = URL.createObjectURL(f.blob); urlsGaleria.push(u); return u; }
+  return `api/fotos/${encodeURIComponent(id)}`;
+}
+async function telaFotos() {
+  urlsGaleria.splice(0).forEach((u) => URL.revokeObjectURL(u));
+  const itens = visiveis().filter((p) => (p.fotos || []).length).sort((a, b) => (a.codigo || '').localeCompare(b.codigo || '', 'pt-BR', { numeric: true }));
+  const total = itens.reduce((n, p) => n + p.fotos.length, 0);
+  const nomeOutro = (p) => (D.OUTROS.find((x) => x.id === p.categoria) || {}).nome || 'Outro ponto';
+  abrirFolha(`${cabeca(`Fotos (${total})`, E.verTodas ? 'Todas as vistorias' : esc((V() && V().nome) || ''))}
+    ${total ? `<div class="galeria">${itens.map((p) => p.fotos.map((fid, k) => `<button type="button" class="g-item" data-acao="abrir-foto-galeria" data-id="${p.id}" data-foto="${fid}">
+      <img alt="Foto ${k + 1} de ${esc(p.codigo || nomeOutro(p))}" loading="lazy" data-src-foto="${fid}">
+      <span class="g-rot"><i style="background:${p.tipo === 'camera' ? corPino(p) : (D.OUTROS.find((x) => x.id === p.categoria) || {}).cor || '#888'}"></i>${esc(p.tipo === 'camera' ? p.codigo : nomeOutro(p))}${p.fotos.length > 1 ? ` · ${k + 1}/${p.fotos.length}` : ''}</span></button>`).join('')).join('')}</div>`
+      : '<p class="vazio">Nenhuma foto nesta vistoria ainda.</p>'}
+    <p class="nota">Toque numa foto para ver ampliada. Em "Abrir a ficha" você vê e edita a câmera.</p>`, { cheia: true });
+  // carrega aos poucos (no celular, 70 fotos de uma vez pesam)
+  const imgs = [...conteudo.querySelectorAll('img[data-src-foto]')];
+  const io = new IntersectionObserver(async (ents) => {
+    for (const e of ents) {
+      if (!e.isIntersecting) continue;
+      io.unobserve(e.target);
+      e.target.src = await urlFoto(e.target.dataset.srcFoto);
+    }
+  }, { root: conteudo, rootMargin: '400px' });
+  imgs.forEach((i) => io.observe(i));
+}
+acoesFolha['abrir-foto-galeria'] = (b) => verFoto(b.dataset.foto, b.dataset.id, true);
+
+/** Foto em tela cheia, com o código e o caminho para a ficha. */
+async function verFoto(fid, pontoId, daGaleria = false) {
+  const p = E.pontos.get(pontoId);
+  const ov = document.createElement('div');
+  ov.className = 'foto-cheia';
+  ov.innerHTML = `<img alt="Foto de ${esc(p ? p.codigo || '' : '')}"><div class="fc-barra"><span>${esc(p ? p.codigo || '' : '')}${p && p.local ? ` · ${esc(p.local)}` : ''}</span>
+    ${daGaleria ? '<button type="button" data-fc="ficha">Abrir a ficha</button>' : ''}<button type="button" data-fc="fechar">Fechar</button></div>`;
+  document.body.appendChild(ov);
+  ov.querySelector('img').src = await urlFoto(fid);
+  ov.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-fc]');
+    if (!b && e.target.tagName === 'IMG') return;
+    ov.remove();
+    if (b && b.dataset.fc === 'ficha' && p) { map.setView(posPonto(p), Math.max(map.getZoom(), 19)); ligarSeguir(false); abrirFicha(p.id); }
+  });
 }
 
 // ------------------------------------------------------------------ camadas
@@ -1411,6 +1465,7 @@ function telaMenu() {
       <button class="btn" type="button" data-acao="m" data-t="lista">Lista de tudo o que foi marcado</button>
       <button class="btn" type="button" data-acao="m" data-t="esperado">Esperado × encontrado</button>
       <button class="btn" type="button" data-acao="m" data-t="resumo">Resumo</button>
+      <button class="btn" type="button" data-acao="m" data-t="fotos">Fotos (galeria)</button>
       <button class="btn" type="button" data-acao="m" data-t="exportar">Exportar, compartilhar e importar</button>
       <button class="btn" type="button" data-acao="m" data-t="camadas">Camadas e transparência da planta</button>
       <button class="btn" type="button" data-acao="ajustar-planta">Ajustar planta no satélite</button>
@@ -1420,7 +1475,7 @@ function telaMenu() {
       ${E.usuario ? `<button class="btn" type="button" data-acao="sair">Sair (${esc(E.usuario.nome)})</button>` : '<button class="btn" type="button" data-acao="tela-login">Entrar no sistema</button>'}
     </div>`, { cheia: true });
 }
-acoesFolha.m = (b) => ({ partida: telaPartida, inicio: telaInicio, portao: () => telaPortao(), lista: telaLista, esperado: telaEsperado, resumo: telaResumo, exportar: telaExportar, camadas: telaCamadas, ajustes: telaAjustes, ajuda: telaAjuda })[b.dataset.t]();
+acoesFolha.m = (b) => ({ fotos: telaFotos, partida: telaPartida, inicio: telaInicio, portao: () => telaPortao(), lista: telaLista, esperado: telaEsperado, resumo: telaResumo, exportar: telaExportar, camadas: telaCamadas, ajustes: telaAjustes, ajuda: telaAjuda })[b.dataset.t]();
 acoesFolha['ajustar-planta'] = () => entrarAjuste();
 acoesFolha['sync-agora'] = async () => { fecharFolha(); toast('Sincronizando…'); await sincronizar(); const st = statusSync(); toast(st.status === 'ok' ? (st.pendentes ? `${st.pendentes} itens aguardando envio` : 'Tudo salvo no sistema') : st.status === 'offline' ? 'Sem internet: fica salvo no aparelho e vai depois.' : st.status === 'login' ? 'Entre no sistema para enviar.' : 'Não foi possível sincronizar agora. Tenta de novo sozinho.'); };
 acoesFolha.concluir = async () => {

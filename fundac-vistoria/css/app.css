@@ -243,3 +243,17 @@ input.txt:focus, select.txt:focus, textarea.txt:focus, .opc:focus-visible, .btn:
   .flutuantes { right: auto; left: 10px; }
   .painel-ajuste { left: auto; right: 12px; width: 520px; }
 }
+
+/* ---------- galeria e foto em tela cheia */
+.galeria { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 10px; }
+@media (min-width: 900px) { .galeria { grid-template-columns: repeat(3, 1fr); } }
+.g-item { position: relative; aspect-ratio: 4 / 3; padding: 0; border: 1px solid var(--linha); border-radius: 10px; overflow: hidden; background: #0a0a0a; }
+.g-item img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.g-rot { position: absolute; left: 0; right: 0; bottom: 0; display: flex; align-items: center; gap: 6px; padding: 18px 8px 6px; background: linear-gradient(transparent, rgb(0 0 0 / 0.85)); font: 700 15px/1.1 var(--titulo); color: #fff; text-align: left; }
+.g-rot i { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid #fff; flex: none; }
+.foto-cheia { position: fixed; inset: 0; z-index: 3000; background: #000; display: flex; flex-direction: column; }
+.foto-cheia img { flex: 1; min-height: 0; width: 100%; object-fit: contain; }
+.fc-barra { display: flex; align-items: center; gap: 8px; padding: 10px 12px calc(10px + var(--seguro-baixo)); border-top: 1px solid var(--linha); }
+.fc-barra span { flex: 1; font: 700 18px var(--titulo); }
+.fc-barra button { min-height: 48px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--linha); background: var(--painel-2); font-weight: 600; }
+.foto[data-foto] img { cursor: zoom-in; }
