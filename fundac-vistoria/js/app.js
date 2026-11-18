@@ -1,6 +1,7 @@
 import * as D from './dados.js';
 import * as G from './geo.js';
-import { kv, pontos as dbPontos, fotos as dbFotos, trajeto as dbTrajeto, pedirArmazenamentoPersistente } from './db.js';
+import { kv, pontos as dbPontos, fotos as dbFotos, trajeto as dbTrajeto, vistorias as dbVist, novoId, pedirArmazenamentoPersistente } from './db.js';
+import { iniciarSync, agendarSync, sincronizar, baixarFoto, entrar, quemSou, statusSync } from './sync.js';
 import { exportarCSV, exportarJSON, exportarPNG, importarArquivo, compartilharOuBaixar } from './exportar.js';
 import { baixarMapaOffline, contarTiles, urlTile, ATRIB_ESRI, ATRIB_MAPBOX } from './offline.js';
 
@@ -8,15 +9,21 @@ const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const agoraISO = () => new Date().toISOString();
 const horaBR = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '');
-const novoId = () => (crypto.randomUUID ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`);
+const dataBR = (d) => (d ? d.split('-').reverse().join('/') : '');
+const hojeISO = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+// Cores do selo de cada vistoria no modo "Ver tudo junto".
+const CORES_VISTORIA = ['#5fd3ff', '#f59e0b', '#a78bfa', '#34d399', '#f472b6', '#fb7185', '#facc15', '#60a5fa'];
 
 // ------------------------------------------------------------------ estado
 const E = {
   encaixe: D.ENCAIXE_INICIAL.map((c) => [...c]),
-  conf: { pares: [] }, // conferência: [{ portao, gps: [lat, lng], acc, em }]
   T: { a: 1, b: 0, tx: 0, ty: 0 },
   erroMedio: null,
-  vistoria: { iniciada: false, portao: '02', inicio: null },
+  vistorias: new Map(), // id -> { id, nome, data, responsavel, status, iniciada, portao, inicio, conferencia: { pares } }
+  vid: null, // vistoria atual (onde as marcações novas entram)
+  verTodas: false, // "Ver tudo junto"
+  ocultas: new Set(), // vistorias escondidas no "Ver tudo junto"
+  usuario: null,
   pontos: new Map(),
   camadas: { cameras: true, cones: true, outros: true, trajeto: true, planta: true, digital: true },
   opacidade: 0.8,
@@ -31,6 +38,25 @@ const E = {
   plantaUrl: D.PLANTA.arquivo,
 };
 const ouvintesGps = new Set();
+const SEM_VISTORIA = { iniciada: false, portao: '02', inicio: null, conferencia: { pares: [] } };
+const V = () => E.vistorias.get(E.vid) || null;
+// Compatibilidade: E.vistoria e E.conf são os da vistoria atual.
+Object.defineProperty(E, 'vistoria', { get: () => V() || SEM_VISTORIA });
+Object.defineProperty(E, 'conf', { get: () => { const v = V() || SEM_VISTORIA; if (!v.conferencia) v.conferencia = { pares: [] }; return v.conferencia; } });
+const corVistoria = (vid) => { const ord = [...E.vistorias.values()].sort((a, b) => (a.criadoEm || '').localeCompare(b.criadoEm || '')).map((v) => v.id); return CORES_VISTORIA[Math.max(0, ord.indexOf(vid)) % CORES_VISTORIA.length]; };
+/** O ponto aparece no mapa e nas listas agora? */
+function visivel(p) {
+  if (p.apagado) return false;
+  if (E.verTodas) return !E.ocultas.has(p.vistoriaId) && !p.substituidoPor;
+  return p.vistoriaId === E.vid;
+}
+const visiveis = () => [...E.pontos.values()].filter(visivel);
+async function salvarVistoria(v) {
+  v.atualizadoEm = agoraISO();
+  E.vistorias.set(v.id, v);
+  await dbVist.salvar(v);
+  agendarSync();
+}
 
 // ------------------------------------------------------------------ planta <-> mapa
 let Hplano = null, HplanoInv = null;
@@ -58,11 +84,19 @@ function recalcularConferencia() {
   }
 }
 const corrigir = (ll) => G.desprojetar(G.aplicarSem(E.T, G.projetar(ll)));
+/** Ajuste do GPS de uma vistoria qualquer (cada dia tem a sua conferência nos portões). */
+function Tde(vid) {
+  if (vid === E.vid) return E.T;
+  const v = E.vistorias.get(vid);
+  const pares = (v && v.conferencia && v.conferencia.pares) || [];
+  return G.semelhanca(pares.map((p) => G.projetar(p.gps)), pares.map((p) => G.projetar(posPortao(p.portao))));
+}
+const corrigirDe = (vid, ll) => G.desprojetar(G.aplicarSem(Tde(vid), G.projetar(ll)));
 
-/** Posição oficial do ponto: à mão / no mapa segue a planta; pelo GPS segue a conferência. */
+/** Posição oficial do ponto: à mão / no mapa segue a planta; pelo GPS segue a conferência da sua vistoria. */
 function posPonto(p) {
   if (p.manual || p.origem === 'mapa') return planoParaLL(p.plano);
-  return corrigir([p.gps.lat, p.gps.lng]);
+  return corrigirDe(p.vistoriaId, [p.gps.lat, p.gps.lng]);
 }
 const planoDoPonto = (p) => (p.manual || p.origem === 'mapa' ? p.plano : llParaPlano(posPonto(p)));
 
@@ -70,6 +104,9 @@ const planoDoPonto = (p) => (p.manual || p.origem === 'mapa' ? p.plano : llParaP
 const map = L.map('mapa', { zoomControl: false, maxZoom: 22, minZoom: 14, zoomSnap: 0.5, wheelPxPerZoomLevel: 90, tap: false }).setView(D.CENTRO_FEIRA, 17);
 map.attributionControl.setPrefix('<a href="https://leafletjs.com" target="_blank" rel="noopener">Leaflet</a>');
 map.createPane('planta').style.zIndex = 350;
+// a faixa "Toque no lugar exato" flutua sobre o mapa (se empurrasse o mapa, o toque cairia no lugar errado)
+map.getContainer().appendChild(document.getElementById('modoMapa'));
+L.DomEvent.disableClickPropagation(document.getElementById('modoMapa'));
 map.createPane('cones').style.zIndex = 420;
 let camadaSat = null;
 function montarSatelite() {
@@ -153,10 +190,17 @@ const bordaGrupo = (g) => (D.GRUPOS.find((x) => x.id === g) || D.GRUPOS[0]).bord
 
 function iconePonto(p) {
   if (p.tipo === 'camera') {
-    return L.divIcon({ className: '', iconSize: null, html: `<div class="pino ${E.selecionado === p.id ? 'selecionado' : ''}" style="background:${corPino(p)};border-color:${bordaGrupo(p.grupo)}"><span class="cod">${esc(p.codigo)}</span></div>` });
+    return L.divIcon({ className: '', iconSize: null, html: `<div class="pino ${E.selecionado === p.id ? 'selecionado' : ''}" style="background:${corPino(p)};border-color:${bordaGrupo(p.grupo)}"><span class="cod">${esc(p.codigo)}</span>${seloDia(p)}</div>` });
   }
   const o = D.OUTROS.find((x) => x.id === p.categoria) || D.OUTROS[0];
-  return L.divIcon({ className: '', iconSize: null, html: `<div class="marco" style="background:${o.cor};${E.selecionado === p.id ? 'box-shadow:0 0 0 3px #5fd3ff,0 0 16px #5fd3ff' : ''}">${o.icone}</div>` });
+  return L.divIcon({ className: '', iconSize: null, html: `<div class="marco" style="background:${o.cor};${E.selecionado === p.id ? 'box-shadow:0 0 0 3px #5fd3ff,0 0 16px #5fd3ff' : ''}">${o.icone}${seloDia(p)}</div>` });
+}
+
+/** No "Ver tudo junto", cada ponto leva um selo com o dia da sua vistoria. */
+function seloDia(p) {
+  if (!E.verTodas) return '';
+  const v = E.vistorias.get(p.vistoriaId);
+  return `<span class="selo-dia" style="background:${corVistoria(p.vistoriaId)}">${v ? esc(dataBR(v.data).slice(0, 5)) : '?'}</span>`;
 }
 
 function conePontos(p, pos) {
@@ -191,8 +235,10 @@ function desenharPonto(p) {
   marcadores.set(p.id, { m, cone });
 }
 function redesenharTudo() {
-  for (const p of E.pontos.values()) desenharPonto(p);
+  for (const id of [...marcadores.keys()]) if (!E.pontos.has(id) || !visivel(E.pontos.get(id))) removerMarcador(id);
+  for (const p of E.pontos.values()) if (visivel(p)) desenharPonto(p);
   desenharTrajeto();
+  desenharBarraVistoria();
 }
 function removerMarcador(id) {
   const x = marcadores.get(id);
@@ -201,10 +247,12 @@ function removerMarcador(id) {
 
 async function salvarPonto(p) {
   p.atualizadoEm = agoraISO();
+  if (!p.vistoriaId) p.vistoriaId = E.vid;
   E._naoExportado = true;
   E.pontos.set(p.id, p);
-  desenharPonto(p);
+  if (visivel(p)) desenharPonto(p); else removerMarcador(p.id);
   await dbPontos.salvar(p);
+  agendarSync();
 }
 
 function aplicarCamadas() {
@@ -246,19 +294,27 @@ function aoPosicionar(pos) {
   if (E.seguir) map.panTo(ll, { animate: true });
   if (E.bussolaAtiva === false && s.heading != null && !Number.isNaN(s.heading) && s.speed > 0.8) girarSeta(s.heading);
   atualizarChipGps();
-  if (E.vistoria.iniciada && s.acc <= 30) {
+  if (V() && V().iniciada && V().status !== 'concluida' && s.acc <= 30) {
     const ult = ultimoTrajeto;
     if (!ult || G.distancia([ult.lat, ult.lng], [s.lat, s.lng]) >= 3 || s.t - ult.t > 20000) {
-      const pt = { lat: s.lat, lng: s.lng, acc: s.acc, t: s.t };
+      const pt = { id: novoId(), vistoriaId: E.vid, lat: s.lat, lng: s.lng, acc: s.acc, t: s.t, enviado: false };
       ultimoTrajeto = pt;
       E.trajeto.push(pt);
       dbTrajeto.add(pt);
-      linhaTrajeto.addLatLng(corrigir([pt.lat, pt.lng]));
+      if (!E.verTodas) linhaTrajeto.addLatLng(corrigir([pt.lat, pt.lng]));
+      agendarSync(10000);
     }
   }
 }
 function desenharTrajeto() {
-  linhaTrajeto.setLatLngs(E.trajeto.map((p) => corrigir([p.lat, p.lng])));
+  // um trecho por vistoria visível (no "Ver tudo junto", cada dia separado)
+  const porV = new Map();
+  for (const t of E.trajeto) {
+    if (E.verTodas ? E.ocultas.has(t.vistoriaId) : t.vistoriaId !== E.vid) continue;
+    if (!porV.has(t.vistoriaId)) porV.set(t.vistoriaId, []);
+    porV.get(t.vistoriaId).push(t);
+  }
+  linhaTrajeto.setLatLngs([...porV.entries()].map(([vid, l]) => l.sort((a, b) => a.t - b.t).map((p) => corrigirDe(vid, [p.lat, p.lng]))));
 }
 function atualizarChipGps() {
   const chip = $('#chipGps');
@@ -394,22 +450,120 @@ function toast(msg, ms = 3200) {
 }
 
 // ------------------------------------------------------------------ início da vistoria
+// ------------------------------------------------------------------ vistorias
+const contarDe = (vid) => {
+  const l = [...E.pontos.values()].filter((p) => p.vistoriaId === vid && !p.apagado);
+  return { cams: l.filter((p) => p.tipo === 'camera').length, outros: l.filter((p) => p.tipo !== 'camera').length };
+};
+const vistoriasOrdenadas = () => [...E.vistorias.values()].filter((v) => !v.apagado).sort((a, b) => (b.data || '').localeCompare(a.data || '') || (b.criadoEm || '').localeCompare(a.criadoEm || ''));
+
+/** Tela inicial: nova vistoria, lista das anteriores e "Ver tudo junto". */
 function telaInicio() {
+  const lista = vistoriasOrdenadas();
+  const st = statusSync();
+  abrirFolha(`${cabeca('Vistorias', 'Feira da Sulanca · Setor Fundac')}
+    <div class="btns"><button class="btn principal" type="button" data-acao="nova-vistoria">Nova vistoria</button>
+    ${lista.length > 1 ? '<button class="btn" type="button" data-acao="ver-todas">Ver tudo junto no mapa</button>' : ''}</div>
+    <h3>Vistorias (${lista.length})</h3>
+    ${lista.length ? lista.map((v) => {
+      const c = contarDe(v.id);
+      const atual = v.id === E.vid && !E.verTodas;
+      return `<div class="vist ${atual ? 'atual' : ''}">
+        <span class="vist-cor" style="background:${corVistoria(v.id)}"></span>
+        <div class="vist-txt"><b>${esc(v.nome)}</b>
+          <span>${dataBR(v.data)}${v.responsavel ? ` · ${esc(v.responsavel)}` : ''} · ${v.status === 'concluida' ? 'concluída' : 'em andamento'}</span>
+          <span>${c.cams} ${c.cams === 1 ? 'câmera' : 'câmeras'} · ${c.outros} ${c.outros === 1 ? 'outro ponto' : 'outros pontos'}</span></div>
+        <button class="opc" type="button" data-acao="continuar" data-id="${v.id}">${atual ? 'Aberta' : 'Continuar'}</button>
+      </div>`;
+    }).join('') : `<p class="vazio">${st.status === 'login' ? 'Entre no sistema para ver as vistorias já salvas.' : 'Nenhuma vistoria ainda. Toque em "Nova vistoria".'}</p>`}
+    <div class="btns"><button class="btn" type="button" data-acao="ajustar-planta">Ajustar planta no satélite</button>
+      <button class="btn" type="button" data-acao="tela-offline">Baixar mapa para usar sem internet</button></div>
+    <p class="nota">Tudo é salvo na hora neste aparelho e enviado ao sistema quando houver internet. Abrindo o mesmo link em outro aparelho, com o seu login, você vê e continua as mesmas vistorias.</p>`, { cheia: true });
+}
+acoesFolha['nova-vistoria'] = async () => {
+  const n = vistoriasOrdenadas().length + 1;
+  const resp = (await kv.get('ultimoResponsavel')) || (E.usuario && E.usuario.nome) || '';
+  abrirFolha(`${cabeca('Nova vistoria')}
+    <div class="campo"><label for="vNome">Nome</label><input class="txt" id="vNome" value="${esc(`Vistoria ${n} – ${dataBR(hojeISO())}`)}"></div>
+    <div class="campo"><label for="vData">Data</label><input class="txt" id="vData" type="date" value="${hojeISO()}"></div>
+    <div class="campo"><label for="vResp">Quem fez</label><input class="txt" id="vResp" value="${esc(resp)}" placeholder="Nome de quem está fazendo a vistoria"></div>
+    <div class="btns"><button class="btn principal" type="button" data-acao="criar-vistoria">Criar e começar</button><button class="btn" type="button" data-acao="voltar-vistorias">Voltar</button></div>`);
+};
+acoesFolha['voltar-vistorias'] = () => telaInicio();
+acoesFolha['criar-vistoria'] = async () => {
+  const nome = conteudo.querySelector('#vNome').value.trim() || `Vistoria ${vistoriasOrdenadas().length + 1}`;
+  const data = conteudo.querySelector('#vData').value || hojeISO();
+  const responsavel = conteudo.querySelector('#vResp').value.trim();
+  if (responsavel) await kv.set('ultimoResponsavel', responsavel);
+  const v = { id: novoId(), nome, data, responsavel, status: 'andamento', iniciada: false, portao: '02', inicio: null, conferencia: { pares: [] }, criadoEm: agoraISO(), criadoPor: E.usuario ? E.usuario.login : null };
+  await salvarVistoria(v);
+  await abrirVistoria(v.id);
+  telaPartida();
+};
+acoesFolha.continuar = async (b) => {
+  await abrirVistoria(b.dataset.id);
+  if (!V().iniciada && V().status !== 'concluida') telaPartida();
+  else { fecharFolha(); toast(`${V().nome}`); }
+};
+acoesFolha['ver-todas'] = () => { entrarTodas(); fecharFolha(); };
+
+async function abrirVistoria(vid) {
+  E.vid = vid;
+  E.verTodas = false;
+  await kv.set('vistoriaAtual', vid);
+  await kv.set('verTodas', false);
+  ultimoTrajeto = E.trajeto.filter((t) => t.vistoriaId === vid).sort((a, b) => a.t - b.t).at(-1) || null;
+  recalcularConferencia();
+  redesenharTudo();
+  if (V() && V().iniciada && V().status !== 'concluida') { iniciarGps(); manterTelaLigada(); }
+}
+async function entrarTodas() {
+  E.verTodas = true;
+  await kv.set('verTodas', true);
+  redesenharTudo();
+  map.fitBounds(L.latLngBounds(E.encaixe), { padding: [10, 10] });
+}
+
+/** Barra fina sob o topo: em qual vistoria as marcações entram, ou os filtros do "Ver tudo junto". */
+function desenharBarraVistoria() {
+  const b = $('#barraVistoria');
+  if (!b) return;
+  if (E.verTodas) {
+    b.innerHTML = `<span class="rot-barra">Tudo junto</span>${vistoriasOrdenadas().map((v) => `<button type="button" class="chip-v ${E.ocultas.has(v.id) ? 'off' : ''}" data-v="${v.id}"><i style="background:${corVistoria(v.id)}"></i>${esc(dataBR(v.data).slice(0, 5))} · ${contarDe(v.id).cams}</button>`).join('')}<button type="button" class="chip-v sair" data-v="sair">Sair</button>`;
+  } else if (V()) {
+    b.innerHTML = `<i style="background:${corVistoria(E.vid)}"></i><span class="nome-v">${esc(V().nome)}${V().status === 'concluida' ? ' · concluída' : ''}</span><button type="button" class="chip-v" data-v="trocar">Vistorias</button>`;
+  } else {
+    b.innerHTML = '<span class="nome-v">Nenhuma vistoria aberta</span><button type="button" class="chip-v" data-v="trocar">Vistorias</button>';
+  }
+  b.hidden = false;
+}
+document.addEventListener('click', async (e) => {
+  const c = e.target.closest('#barraVistoria [data-v]');
+  if (!c) return;
+  const v = c.dataset.v;
+  if (v === 'trocar') return telaInicio();
+  if (v === 'sair') { E.verTodas = false; await kv.set('verTodas', false); redesenharTudo(); return; }
+  if (E.ocultas.has(v)) E.ocultas.delete(v); else E.ocultas.add(v);
+  await kv.set('ocultas', [...E.ocultas]);
+  redesenharTudo();
+});
+
+/** Partida da vistoria aberta: escolher o portão e conferir o GPS. */
+function telaPartida() {
   const v = E.vistoria;
   const opc = D.PORTOES.map((g) => `<button class="opc" type="button" data-acao="escolher-portao-inicio" data-n="${g.n}" aria-pressed="${v.portao === g.n}">${g.n}</button>`).join('');
-  abrirFolha(`${cabeca(v.iniciada ? 'Vistoria em andamento' : 'Vistoria das câmeras', v.iniciada ? `Iniciada em ${horaBR(v.inicio)} no Portão ${v.portao}` : 'Feira da Sulanca · Setor Fundac')}
+  abrirFolha(`${cabeca(esc(v.nome || 'Vistoria'), v.iniciada ? `Iniciada em ${horaBR(v.inicio)} no Portão ${v.portao}` : `${dataBR(v.data)}${v.responsavel ? ` · ${esc(v.responsavel)}` : ''}`)}
     <p>Entre pela Rua Rui Limeira Rosal, no Portão 02. Parado no portão, aperte o botão abaixo: o app mede o GPS por 10 segundos e confere sua posição com a planta.</p>
     <div class="campo"><span class="rot">Ponto de partida</span><div class="opcs grade6">${opc}</div></div>
     <div class="btns">
       <button class="btn principal" type="button" data-acao="iniciar">Iniciar vistoria no Portão ${v.portao}</button>
-      <button class="btn" type="button" data-acao="ajustar-planta">Ajustar planta no satélite</button>
-      <button class="btn" type="button" data-acao="tela-offline">Baixar mapa para usar sem internet</button>
-      ${v.iniciada ? '<button class="btn" type="button" data-acao="fechar">Continuar a vistoria</button>' : ''}
-    </div>
-    <p class="nota">Tudo fica guardado só neste celular, salvo a cada alteração. No fim, exporte o arquivo pelo menu.</p>`);
+      <button class="btn" type="button" data-acao="comecar-sem">Começar sem conferir o GPS</button>
+      <button class="btn" type="button" data-acao="voltar-vistorias">Voltar às vistorias</button>
+    </div>`);
 }
-acoesFolha['escolher-portao-inicio'] = (b) => { E.vistoria.portao = b.dataset.n; kv.set('vistoria', E.vistoria); telaInicio(); };
+acoesFolha['escolher-portao-inicio'] = async (b) => { if (!V()) return; V().portao = b.dataset.n; await salvarVistoria(V()); telaPartida(); };
 acoesFolha.iniciar = async () => {
+  if (!V()) return telaInicio();
   if (!(await garantirGps())) return;
   const n = E.vistoria.portao;
   const res = await telaMedicao(`Medindo no Portão ${n}`, 'Fique parado no portão, com o celular na mão.', 10);
@@ -442,8 +596,9 @@ acoesFolha['corrigir-inicio'] = async () => {
 };
 acoesFolha['comecar-sem'] = () => comecarVistoria();
 async function comecarVistoria() {
-  if (!E.vistoria.iniciada) { E.vistoria.iniciada = true; E.vistoria.inicio = agoraISO(); }
-  await kv.set('vistoria', E.vistoria);
+  if (!V()) return telaInicio();
+  if (!V().iniciada) { V().iniciada = true; V().inicio = agoraISO(); }
+  await salvarVistoria(V());
   manterTelaLigada();
   ligarSeguir(true);
   fecharFolha();
@@ -521,7 +676,7 @@ acoesFolha['zerar-conf'] = async () => {
 };
 async function salvarConferencia() {
   recalcularConferencia();
-  await kv.set('conferencia', E.conf);
+  if (V()) await salvarVistoria(V());
   redesenharTudo();
   if (E.gps.ultima) aoPosicionar({ coords: { latitude: E.gps.ultima.lat, longitude: E.gps.ultima.lng, accuracy: E.gps.ultima.acc, heading: null, speed: null }, timestamp: E.gps.ultima.t });
 }
@@ -546,7 +701,7 @@ function prefixo(p) {
 }
 function sugerirCodigo(p) {
   const pre = prefixo(p);
-  const usados = new Set([...E.pontos.values()].filter((x) => x.id !== p.id && x.tipo === 'camera').map((x) => x.codigo));
+  const usados = new Set([...E.pontos.values()].filter((x) => x.id !== p.id && x.tipo === 'camera' && !x.apagado && x.vistoriaId === (p.vistoriaId || E.vid)).map((x) => x.codigo));
   if (/^P\d\d$/.test(pre)) {
     for (const l of 'ABCDEFGHIJKLMNOPQRSTUVWXYZ') if (!usados.has(`${pre}-${l}`)) return `${pre}-${l}`;
   }
@@ -554,10 +709,18 @@ function sugerirCodigo(p) {
   return `${pre}-${Date.now() % 1000}`;
 }
 
+/** Marcações novas entram na vistoria aberta; sem vistoria aberta, pede para abrir ou criar. */
+function exigirVistoria() {
+  if (V()) return true;
+  telaInicio();
+  toast('Abra ou crie uma vistoria antes de marcar.');
+  return false;
+}
 async function criarCamera(origem, ll, gps) {
+  if (!exigirVistoria()) return;
   const sug = sugerirLocal(ll);
   const p = {
-    id: novoId(), tipo: 'camera', origem, criadoEm: agoraISO(), atualizadoEm: agoraISO(),
+    id: novoId(), vistoriaId: E.vid, tipo: 'camera', origem, criadoEm: agoraISO(), atualizadoEm: agoraISO(),
     gps: gps || null, plano: origem === 'mapa' ? llParaPlano(ll) : null, manual: false,
     grupo: 'PV', local: sug.local, rua: sug.rua || null, situacao: 'não sei', tipoCam: 'não sei',
     direcao: null, abertura: 'media', alcance: 25, altura: null, rosto: 'não sei', cobre: [], prioridadeIA: null,
@@ -568,12 +731,14 @@ async function criarCamera(origem, ll, gps) {
   abrirFicha(p.id);
 }
 async function criarOutro(origem, ll, gps) {
-  const p = { id: novoId(), tipo: 'ponto', origem, criadoEm: agoraISO(), atualizadoEm: agoraISO(), gps: gps || null, plano: origem === 'mapa' ? llParaPlano(ll) : null, manual: false, categoria: null, fotos: [], obs: '' };
+  if (!exigirVistoria()) return;
+  const p = { id: novoId(), vistoriaId: E.vid, tipo: 'ponto', origem, criadoEm: agoraISO(), atualizadoEm: agoraISO(), gps: gps || null, plano: origem === 'mapa' ? llParaPlano(ll) : null, manual: false, categoria: null, fotos: [], obs: '' };
   await salvarPonto(p);
   abrirFicha(p.id);
 }
 
 async function marcarPeloGps(tipo) {
+  if (!exigirVistoria()) return;
   if (!(await garantirGps())) return;
   const res = await telaMedicao('Marcando pela sua posição', 'Fique parado embaixo da câmera por 5 segundos.', 5);
   if (!res) { toast('Sem leitura de GPS. Marque no mapa.'); return; }
@@ -590,6 +755,7 @@ async function marcarPeloGps(tipo) {
 }
 
 function entrarModoMarcar(tipo) {
+  if (!exigirVistoria()) return;
   E.modo = tipo === 'camera' ? 'marcar-camera' : 'marcar-outro';
   const b = $('#modoMapa');
   b.innerHTML = `<span>Toque no lugar exato ${tipo === 'camera' ? 'da câmera' : 'do ponto'}</span><button type="button" id="cancelarModo">Cancelar</button>`;
@@ -632,19 +798,27 @@ const opcs = (campo, lista, valor, extra = (x) => '') => `<div class="opcs">${li
   return `<button class="opc ${extra(x)}" type="button" data-acao="campo" data-campo="${campo}" data-valor="${esc(id)}" aria-pressed="${sel}">${esc(nome[0].toUpperCase() + nome.slice(1))}</button>`;
 }).join('')}</div>`;
 
+/** Até 3 fotos por câmera; câmera juntada com a de outro dia fica com as fotos das duas. */
+const limiteFotos = (p) => Math.min(9, 3 * (1 + ((p.mesclouDe && p.mesclouDe.length) || 0)));
 function blocoFotos(p) {
-  const slots = [0, 1, 2].map((i) => {
+  const lim = limiteFotos(p);
+  const n = Math.max(3, Math.min(lim, p.fotos.length + (p.fotos.length < lim ? 1 : 0)));
+  const slots = Array.from({ length: Math.ceil(n / 3) * 3 }, (_, i) => {
     const fid = p.fotos[i];
-    if (fid) return `<div class="foto" data-foto="${fid}"><img alt="Foto ${i + 1}"><button class="tirar" type="button" data-acao="apagar-foto" data-foto="${fid}" aria-label="Apagar foto">×</button></div>`;
+    if (fid) return `<div class="foto" data-foto="${fid}"><img alt="Foto ${i + 1}"><span class="carregando">Carregando…</span><button class="tirar" type="button" data-acao="apagar-foto" data-foto="${fid}" aria-label="Apagar foto">×</button></div>`;
+    if (i >= lim) return '';
     return `<button class="foto" type="button" data-acao="tirar-foto">${i === p.fotos.length ? 'Tirar foto' : ''}</button>`;
   }).join('');
-  return `<div class="campo"><span class="rot">Fotos (até 3)</span><div class="fotos">${slots}</div><p class="dica">Da câmera e do que ela vê. A foto é reduzida antes de guardar.</p></div>`;
+  return `<div class="campo"><span class="rot">Fotos (até ${lim})</span><div class="fotos">${slots}</div><p class="dica">Da câmera e do que ela vê. A foto é reduzida antes de guardar.</p></div>`;
 }
 async function preencherFotos() {
   for (const el of conteudo.querySelectorAll('.foto[data-foto]')) {
-    const f = await dbFotos.pegar(el.dataset.foto);
-    const img = el.querySelector('img');
-    if (f && img) { const u = URL.createObjectURL(f.blob); img.src = u; img.onload = () => URL.revokeObjectURL(u); }
+    let blob = (await dbFotos.pegar(el.dataset.foto))?.blob;
+    // foto tirada em outro aparelho: busca no sistema
+    if (!blob && navigator.onLine) blob = await baixarFoto(el.dataset.foto, E.selecionado).catch(() => null);
+    const img = el.querySelector('img'), aviso = el.querySelector('.carregando');
+    if (blob && img) { const u = URL.createObjectURL(blob); img.src = u; img.onload = () => URL.revokeObjectURL(u); aviso?.remove(); }
+    else if (aviso) aviso.textContent = navigator.onLine ? 'Foto ainda não chegou ao sistema' : 'Sem internet';
   }
 }
 
@@ -667,6 +841,7 @@ function renderFichaCamera(p, manterRolagem = false) {
   const sit = D.SITUACOES;
   const quadra = (p.local || '').startsWith('Quadra ');
   abrirFolha(`${cabeca(`Câmera ${esc(p.codigo)}`, `${p.origem === 'gps' ? `Marcada pelo GPS (±${Math.round(p.gps?.acc || 0)} m)` : 'Marcada no mapa'}${p.manual ? ' · ajustada à mão' : ''} · ${horaBR(p.criadoEm)}`)}
+    ${blocoJuntar(p)}
     <div class="campo"><span class="rot">Grupo</span>${opcs('grupo', D.GRUPOS, p.grupo, (g) => (g.id === 'Nova sugerida' ? 'cor-ciano' : ''))}</div>
     <div class="campo"><label for="fLocal">Local</label>
       <select class="txt" id="fLocal" data-input="local">${D.LOCAIS.map((l) => `<option ${l === p.local ? 'selected' : ''}>${l}</option>`).join('')}</select>
@@ -699,6 +874,40 @@ function renderFichaCamera(p, manterRolagem = false) {
   ligarDial(p);
   preencherFotos();
 }
+
+/** Mesma câmera marcada em outro dia: sugere juntar (o registro mais novo fica valendo, com as fotos das duas). */
+function blocoJuntar(p) {
+  const nomeV = (vid) => { const v = E.vistorias.get(vid); return v ? (v.nome.includes(dataBR(v.data)) ? esc(v.nome) : `${esc(v.nome)} (${dataBR(v.data)})`) : 'outra vistoria'; };
+  if (p.substituidoPor) {
+    const n = E.pontos.get(p.substituidoPor);
+    return `<p class="aviso-juntar">Juntada com <b>${esc(n ? n.codigo : 'outra câmera')}</b>${n ? ` de ${nomeV(n.vistoriaId)}` : ''}. No "Ver tudo junto" aparece só a mais nova.</p>`;
+  }
+  const pos = posPonto(p);
+  const cands = [...E.pontos.values()]
+    .filter((x) => x.tipo === 'camera' && !x.apagado && x.id !== p.id && x.vistoriaId !== p.vistoriaId && !x.substituidoPor && !(p.mesclouDe || []).includes(x.id))
+    .map((x) => ({ x, d: G.distancia(pos, posPonto(x)) }))
+    .filter((c) => c.d <= 12)
+    .sort((a, b) => a.d - b.d)
+    .slice(0, 3);
+  const juntadas = (p.mesclouDe || []).map((id) => E.pontos.get(id)).filter(Boolean);
+  return `${juntadas.length ? `<p class="aviso-juntar">Junta ${juntadas.map((x) => `<b>${esc(x.codigo)}</b> de ${nomeV(x.vistoriaId)}`).join(', ')}.</p>` : ''}
+    ${cands.length ? `<div class="campo juntar"><span class="rot">É a mesma câmera de outro dia?</span>${cands.map((c) => `<button class="btn" type="button" data-acao="juntar" data-id="${c.x.id}">Juntar com ${esc(c.x.codigo)} · ${nomeV(c.x.vistoriaId)} · a ${Math.round(c.d)} m</button>`).join('')}<p class="dica">Ao juntar, esta ficha fica valendo; o que estiver vazio nela é completado com a de antes, e as fotos das duas ficam aqui.</p></div>` : ''}`;
+}
+acoesFolha.juntar = async (b) => {
+  const p = pontoAtual(), velho = E.pontos.get(b.dataset.id);
+  if (!p || !velho || !confirm(`Juntar com ${velho.codigo}? Esta ficha fica valendo e a antiga deixa de contar em duplicidade.`)) return;
+  const vazio = (k, padrao) => p[k] == null || p[k] === padrao || (Array.isArray(p[k]) && !p[k].length);
+  if (!p.codigoManual && velho.codigo) { p.codigo = velho.codigo; p.codigoManual = true; }
+  for (const [k, padrao] of [['tipoCam', 'não sei'], ['direcao', null], ['altura', null], ['rosto', 'não sei'], ['cobre', null], ['prioridadeIA', null], ['rua', null]]) if (vazio(k, padrao) && velho[k] != null) p[k] = velho[k];
+  if (!p.obs && velho.obs) p.obs = velho.obs;
+  p.mesclouDe = [...(p.mesclouDe || []), velho.id];
+  p.fotos = [...p.fotos, ...(velho.fotos || []).filter((f) => !p.fotos.includes(f))].slice(0, limiteFotos(p));
+  velho.substituidoPor = p.id;
+  await salvarPonto(velho);
+  await salvarPonto(p);
+  rerender();
+  toast('Câmeras juntadas.');
+};
 
 function renderFichaOutro(p, manterRolagem = false) {
   const rol = manterRolagem ? conteudo.scrollTop : 0;
@@ -774,9 +983,14 @@ acoesFolha.excluir = async () => {
   const p = pontoAtual();
   if (!confirm(`Excluir ${p.tipo === 'camera' ? `a câmera ${p.codigo}` : 'este ponto'}? As fotos também serão apagadas.`)) return;
   for (const f of p.fotos) await dbFotos.apagar(f);
-  await dbPontos.apagar(p.id);
-  E.pontos.delete(p.id);
+  // "túmulo": avisa os outros aparelhos e o sistema que este ponto foi excluído
+  const tumulo = { id: p.id, vistoriaId: p.vistoriaId, tipo: p.tipo, apagado: true, atualizadoEm: agoraISO() };
+  await dbPontos.salvar(tumulo);
+  E.pontos.set(p.id, tumulo);
   removerMarcador(p.id);
+  // se era a câmera que absorveu a de outro dia, a antiga volta a valer sozinha
+  for (const x of E.pontos.values()) if (x.substituidoPor === p.id) { delete x.substituidoPor; await salvarPonto(x); }
+  agendarSync(300);
   E.selecionado = null;
   fecharFolha();
   toast('Excluído.');
@@ -810,7 +1024,7 @@ function ligarDial(p) {
 let fotoPara = null;
 acoesFolha['tirar-foto'] = () => {
   const p = pontoAtual();
-  if (p.fotos.length >= 3) return;
+  if (p.fotos.length >= limiteFotos(p)) return;
   fotoPara = p.id;
   $('#inputFoto').value = '';
   $('#inputFoto').click();
@@ -823,7 +1037,7 @@ $('#inputFoto').addEventListener('change', async (e) => {
     const blob = await reduzirFoto(arq);
     const f = { id: novoId(), pontoId: p.id, blob, criadoEm: agoraISO(), gps: E.gps.ultima ? { lat: E.gps.ultima.lat, lng: E.gps.ultima.lng, acc: E.gps.ultima.acc } : null };
     await dbFotos.salvar(f);
-    p.fotos = [...p.fotos, f.id].slice(0, 3);
+    p.fotos = [...p.fotos, f.id].slice(0, limiteFotos(p));
     await salvarPonto(p);
     if (E.selecionado === p.id && !folha.hidden) rerender();
     toast('Foto guardada.');
@@ -869,7 +1083,7 @@ function desenharLista() {
   const alvo = conteudo.querySelector('[data-lista]');
   if (!alvo) return;
   const b = filtros.busca.trim().toLowerCase();
-  const itens = [...E.pontos.values()].filter((p) => {
+  const itens = visiveis().filter((p) => {
     if (p.tipo === 'camera') {
       if (filtros.grupo && p.grupo !== filtros.grupo) return false;
       if (filtros.situacao && p.situacao !== filtros.situacao) return false;
@@ -905,7 +1119,7 @@ acoesFolha['ir-ponto'] = (b) => {
 
 // ------------------------------------------------------------------ esperado x encontrado
 function contarPorLocal() {
-  const cams = [...E.pontos.values()].filter((p) => p.tipo === 'camera');
+  const cams = visiveis().filter((p) => p.tipo === 'camera');
   const linha = (filtro) => {
     const l = cams.filter(filtro);
     const s = (id) => l.filter((p) => p.situacao === id).length;
@@ -941,11 +1155,11 @@ function telaEsperado() {
 
 // ------------------------------------------------------------------ resumo
 function telaResumo() {
-  const cams = [...E.pontos.values()].filter((p) => p.tipo === 'camera');
-  const outros = [...E.pontos.values()].filter((p) => p.tipo !== 'camera');
+  const cams = visiveis().filter((p) => p.tipo === 'camera');
+  const outros = visiveis().filter((p) => p.tipo !== 'camera');
   const conta = (lista, f) => { const m = new Map(); lista.forEach((p) => { const k = f(p) || 'sem informação'; m.set(k, (m.get(k) || 0) + 1); }); return [...m.entries()].sort((a, b) => b[1] - a[1]); };
   const tab = (rot, pares) => (pares.length ? `<table class="tabela"><tr><th>${rot}</th><th>Câmeras</th></tr>${pares.map(([k, n]) => `<tr><td>${esc(k)}</td><td>${n}</td></tr>`).join('')}</table>` : '<p class="vazio">Sem dados.</p>');
-  abrirFolha(`${cabeca('Resumo da vistoria', E.vistoria.iniciada ? `Iniciada em ${horaBR(E.vistoria.inicio)} no Portão ${E.vistoria.portao}` : 'Vistoria ainda não iniciada')}
+  abrirFolha(`${cabeca(E.verTodas ? 'Resumo de todas as vistorias' : `Resumo · ${esc(E.vistoria.nome || 'vistoria')}`, E.verTodas ? 'Câmeras juntadas contam uma vez só' : E.vistoria.iniciada ? `Iniciada em ${horaBR(E.vistoria.inicio)} no Portão ${E.vistoria.portao}` : 'Vistoria ainda não iniciada')}
     <div class="nums"><div class="num"><b>${cams.length}</b><span>câmeras</span></div><div class="num"><b>${cams.filter((p) => p.prioridadeIA === 'sim').length}</b><span>prioridade IA (sim)</span></div><div class="num"><b>${outros.length}</b><span>outros pontos</span></div></div>
     <div class="legenda"><span><i style="background:#22c55e"></i>Funcionando</span><span><i style="background:#ff4d4d"></i>Parada / sem sinal</span><span><i style="background:#9ca3af"></i>Não sei</span><span><i style="background:${D.COR_NOVA}"></i>Nova sugerida</span></div>
     <h3>Por grupo</h3>${tab('Grupo', conta(cams, (p) => p.grupo))}
@@ -1050,6 +1264,8 @@ $('#ajuste').addEventListener('click', async (e) => {
     E.encaixe = encaixeAntes; sairAjuste();
   } else if (a === 'salvar') {
     await kv.set('encaixe', E.encaixe);
+    await kv.set('encaixeEm', agoraISO());
+    agendarSync(300);
     sairAjuste();
     toast('Encaixe salvo. A planta agora está em coordenadas reais.');
   }
@@ -1129,9 +1345,11 @@ acoesFolha.exp = async (b) => {
 };
 async function estadoParaExportar() {
   return {
-    pontos: [...E.pontos.values()].map((p) => ({ ...p, _pos: posPonto(p), _plano: planoDoPonto(p) })),
+    pontos: visiveis().map((p) => ({ ...p, _pos: posPonto(p), _plano: planoDoPonto(p) })),
+    todosPontos: [...E.pontos.values()].filter((p) => !p.apagado),
+    vistorias: E.vistorias, verTodas: E.verTodas, vistoriaAtual: V(),
     encaixe: E.encaixe, conf: E.conf, erroMedio: E.erroMedio, vistoria: E.vistoria, trajeto: E.trajeto,
-    trajetoCorrigido: E.trajeto.map((t) => corrigir([t.lat, t.lng])),
+    trajetoCorrigido: E.trajeto.filter((t) => (E.verTodas ? !E.ocultas.has(t.vistoriaId) : t.vistoriaId === E.vid)).sort((a, b) => a.t - b.t).map((t) => corrigirDe(t.vistoriaId, [t.lat, t.lng])),
     planoParaLL, provedor: E.ajustes.provedor === 'mapbox' && E.ajustes.mapboxToken ? 'mapbox' : 'esri', mapboxToken: E.ajustes.mapboxToken,
     portoes: D.PORTOES.map((g) => ({ ...g, ll: posPortao(g.n) })),
     corPino, bordaGrupo, camadas: E.camadas, opacidade: E.opacidade,
@@ -1142,17 +1360,38 @@ $('#inputImportar').addEventListener('change', async (e) => {
   const arq = e.target.files?.[0];
   if (!arq) return;
   try {
-    const dados = await importarArquivo(arq);
-    if (!confirm(`Importar ${dados.pontos.length} itens e ${dados.fotos.length} fotos? O que está neste celular será substituído.`)) return;
-    await dbPontos.limpar(); await dbFotos.limpar(); await dbTrajeto.limpar();
-    for (const f of dados.fotos) await dbFotos.salvar(f);
-    for (const p of dados.pontos) await dbPontos.salvar(p);
-    for (const t of dados.trajeto) await dbTrajeto.add(t);
-    if (dados.encaixe) await kv.set('encaixe', dados.encaixe);
-    if (dados.conf) await kv.set('conferencia', dados.conf);
-    if (dados.vistoria) await kv.set('vistoria', dados.vistoria);
-    toast('Importado. Recarregando…');
-    setTimeout(() => location.reload(), 700);
+    const d = await importarArquivo(arq);
+    if (!confirm(`Juntar ${d.pontos.length} itens e ${d.fotos.length} fotos do arquivo a este aparelho? Nada daqui é apagado; o que já existir fica com a versão mais nova.`)) return;
+    // vistorias do arquivo (arquivo antigo, sem vistorias: cria uma)
+    let destino = null;
+    for (const v of d.vistorias) {
+      const l = E.vistorias.get(v.id);
+      if (!l || (l.atualizadoEm || '') < (v.atualizadoEm || '')) { const nv = { ...v, enviadoEm: null }; E.vistorias.set(nv.id, nv); await dbVist.salvar(nv); }
+    }
+    if (d.pontos.some((p) => !p.vistoriaId)) {
+      const datas = d.pontos.map((p) => p.criadoEm).filter(Boolean).sort();
+      const dia = datas[0] ? datas[0].slice(0, 10) : hojeISO();
+      destino = { id: novoId(), nome: `Importada – ${dataBR(dia)}`, data: dia, responsavel: E.usuario ? E.usuario.nome : '', status: 'andamento', iniciada: !!(d.vistoria && d.vistoria.iniciada), portao: (d.vistoria && d.vistoria.portao) || '02', inicio: (d.vistoria && d.vistoria.inicio) || null, conferencia: d.conf || { pares: [] }, criadoEm: agoraISO(), atualizadoEm: agoraISO() };
+      E.vistorias.set(destino.id, destino);
+      await dbVist.salvar(destino);
+    }
+    let novos = 0;
+    for (const f of d.fotos) if (!(await dbFotos.pegar(f.id))) await dbFotos.salvar({ ...f, enviada: false });
+    for (const p0 of d.pontos) {
+      const p = { ...p0, vistoriaId: p0.vistoriaId || destino.id, enviadoEm: null };
+      const l = E.pontos.get(p.id);
+      if (l && (l.atualizadoEm || '') >= (p.atualizadoEm || '')) continue;
+      E.pontos.set(p.id, p);
+      await dbPontos.salvar(p);
+      novos++;
+    }
+    for (const t of d.trajeto) {
+      const x = { ...t, id: t.id || novoId(), vistoriaId: t.vistoriaId || (destino && destino.id) || null, enviado: false };
+      if (!E.trajeto.some((y) => y.id === x.id)) { E.trajeto.push(x); await dbTrajeto.add(x); }
+    }
+    if (destino) await abrirVistoria(destino.id); else redesenharTudo();
+    agendarSync(300);
+    toast(`Importado: ${novos} itens novos ou mais recentes. Enviando ao sistema…`);
   } catch (err) {
     console.error(err);
     toast('Arquivo inválido ou de outro app.');
@@ -1163,32 +1402,40 @@ $('#inputImportar').addEventListener('change', async (e) => {
 function telaMenu() {
   abrirFolha(`${cabeca('Menu')}
     <div class="menu-lista">
-      <button class="btn" type="button" data-acao="m" data-t="inicio">${E.vistoria.iniciada ? 'Vistoria (início e portão de partida)' : 'Iniciar vistoria'}</button>
+      <button class="btn principal" type="button" data-acao="m" data-t="inicio">Vistorias (nova, continuar, ver tudo junto)</button>
+      <button class="btn" type="button" data-acao="sync-agora">Sincronizar agora</button>
+      ${V() ? `<button class="btn" type="button" data-acao="m" data-t="partida">Partida e portão de início · ${esc(V().nome)}</button>
+      <button class="btn" type="button" data-acao="concluir">${V().status === 'concluida' ? 'Reabrir esta vistoria' : 'Concluir esta vistoria'}</button>` : ''}
       <button class="btn" type="button" data-acao="m" data-t="portao">Conferência nos portões (${E.conf.pares.length})</button>
       <button class="btn" type="button" data-acao="m" data-t="lista">Lista de tudo o que foi marcado</button>
       <button class="btn" type="button" data-acao="m" data-t="esperado">Esperado × encontrado</button>
       <button class="btn" type="button" data-acao="m" data-t="resumo">Resumo</button>
-      <button class="btn principal" type="button" data-acao="m" data-t="exportar">Exportar e compartilhar</button>
+      <button class="btn" type="button" data-acao="m" data-t="exportar">Exportar, compartilhar e importar</button>
       <button class="btn" type="button" data-acao="m" data-t="camadas">Camadas e transparência da planta</button>
       <button class="btn" type="button" data-acao="ajustar-planta">Ajustar planta no satélite</button>
       <button class="btn" type="button" data-acao="tela-offline">Baixar mapa para usar sem internet</button>
       <button class="btn" type="button" data-acao="m" data-t="ajustes">Satélite (Esri ou Mapbox)</button>
       <button class="btn" type="button" data-acao="m" data-t="ajuda">Como usar</button>
-      <button class="btn" type="button" data-acao="trajeto-limpar">Apagar o trajeto gravado</button>
-      <button class="btn perigo" type="button" data-acao="apagar-tudo">Apagar tudo deste celular</button>
+      ${E.usuario ? `<button class="btn" type="button" data-acao="sair">Sair (${esc(E.usuario.nome)})</button>` : '<button class="btn" type="button" data-acao="tela-login">Entrar no sistema</button>'}
     </div>`, { cheia: true });
 }
-acoesFolha.m = (b) => ({ inicio: telaInicio, portao: () => telaPortao(), lista: telaLista, esperado: telaEsperado, resumo: telaResumo, exportar: telaExportar, camadas: telaCamadas, ajustes: telaAjustes, ajuda: telaAjuda })[b.dataset.t]();
+acoesFolha.m = (b) => ({ partida: telaPartida, inicio: telaInicio, portao: () => telaPortao(), lista: telaLista, esperado: telaEsperado, resumo: telaResumo, exportar: telaExportar, camadas: telaCamadas, ajustes: telaAjustes, ajuda: telaAjuda })[b.dataset.t]();
 acoesFolha['ajustar-planta'] = () => entrarAjuste();
-acoesFolha['trajeto-limpar'] = async () => {
-  if (!confirm('Apagar o trajeto gravado até agora?')) return;
-  await dbTrajeto.limpar(); E.trajeto = []; ultimoTrajeto = null; desenharTrajeto(); toast('Trajeto apagado.');
+acoesFolha['sync-agora'] = async () => { fecharFolha(); toast('Sincronizando…'); await sincronizar(); const st = statusSync(); toast(st.status === 'ok' ? (st.pendentes ? `${st.pendentes} itens aguardando envio` : 'Tudo salvo no sistema') : st.status === 'offline' ? 'Sem internet: fica salvo no aparelho e vai depois.' : st.status === 'login' ? 'Entre no sistema para enviar.' : 'Não foi possível sincronizar agora. Tenta de novo sozinho.'); };
+acoesFolha.concluir = async () => {
+  const v = V();
+  v.status = v.status === 'concluida' ? 'andamento' : 'concluida';
+  if (v.status === 'concluida') v.concluidaEm = agoraISO();
+  await salvarVistoria(v);
+  redesenharTudo();
+  fecharFolha();
+  toast(v.status === 'concluida' ? 'Vistoria concluída. Ela continua disponível para consulta e edição.' : 'Vistoria reaberta.');
 };
-acoesFolha['apagar-tudo'] = async () => {
-  if (!confirm('Apagar TODAS as câmeras, pontos, fotos, conferência e trajeto deste celular?')) return;
-  if (!confirm('Tem certeza? Se ainda não exportou, isso não tem volta.')) return;
-  await dbPontos.limpar(); await dbFotos.limpar(); await dbTrajeto.limpar();
-  for (const k of ['conferencia', 'vistoria']) await kv.del(k);
+acoesFolha.sair = async () => {
+  const st = statusSync();
+  if (st.pendentes && !confirm(`Há ${st.pendentes} itens ainda não enviados. Eles continuam guardados neste aparelho e vão quando você entrar de novo. Sair mesmo assim?`)) return;
+  await fetch('api/logout', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+  E.usuario = null;
   location.reload();
 };
 function telaAjustes() {
@@ -1270,45 +1517,139 @@ $('#inputPlanta').addEventListener('change', async (e) => {
 });
 
 // lembrete de exportar ao sair
-window.addEventListener('beforeunload', (e) => {
-  if (E.pontos.size && E._naoExportado) { e.preventDefault(); e.returnValue = ''; }
-});
+
+
+// ------------------------------------------------------------------ carregar
+/** Dia local (não UTC) de um ISO: a vistoria das 21h continua sendo "hoje". */
+const diaLocal = (iso) => { const d = new Date(iso); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+
+/**
+ * Versão anterior do app: os pontos ficavam só no celular, sem vistoria. Na
+ * primeira abertura desta versão, tudo vira a "Vistoria 1 – data" e fica
+ * pendente de envio (a sincronização manda para o sistema sozinha).
+ */
+async function migrarV1() {
+  if (await kv.get('migradoV2')) return;
+  const semV = [...E.pontos.values()].filter((p) => !p.vistoriaId);
+  const trajSem = E.trajeto.filter((t) => !t.vistoriaId);
+  const [vOld, confOld] = [await kv.get('vistoria'), await kv.get('conferencia')];
+  if (semV.length || trajSem.length || (vOld && vOld.iniciada)) {
+    const datas = [...semV.map((p) => p.criadoEm), vOld && vOld.inicio].filter(Boolean).sort();
+    const dia = datas[0] ? diaLocal(datas[0]) : hojeISO();
+    const n = vistoriasOrdenadas().length + 1;
+    const v = {
+      id: novoId(), nome: `Vistoria ${n} – ${dataBR(dia)}`, data: dia, responsavel: (await kv.get('ultimoResponsavel')) || '', status: 'andamento',
+      iniciada: !!(vOld && vOld.iniciada), portao: (vOld && vOld.portao) || '02', inicio: (vOld && vOld.inicio) || null,
+      conferencia: confOld && Array.isArray(confOld.pares) ? confOld : { pares: [] }, criadoEm: datas[0] || agoraISO(), atualizadoEm: agoraISO(), recuperadaDoCelular: true,
+    };
+    E.vistorias.set(v.id, v);
+    await dbVist.salvar(v);
+    for (const p of semV) { p.vistoriaId = v.id; delete p.enviadoEm; await dbPontos.salvar(p); }
+    for (const t of trajSem) { t.vistoriaId = v.id; t.enviado = false; await dbTrajeto.salvar(t); }
+    await kv.set('vistoriaAtual', v.id);
+    E._recuperada = { nome: v.nome, n: semV.length };
+  }
+  await kv.set('migradoV2', true);
+}
+
+// ------------------------------------------------------------------ sincronização (indicador e login)
+function mostrarStatus(st) {
+  const el = $('#statusSync');
+  if (!el) return;
+  const n = st.pendentes || 0;
+  const itens = `${n} ${n === 1 ? 'item aguardando' : 'itens aguardando'} envio`;
+  let txt = 'Verificando o sistema…', cls = '';
+  if (st.status === 'ok') { txt = n ? itens : 'Tudo salvo no sistema'; cls = n ? 'pendente' : 'ok'; }
+  else if (st.status === 'enviando') { txt = n ? `Enviando ${n} ${n === 1 ? 'item' : 'itens'}…` : 'Sincronizando…'; cls = 'pendente'; }
+  else if (st.status === 'offline') { txt = n ? `Sem internet · ${itens}` : 'Sem internet · salvo no aparelho'; cls = n ? 'pendente' : ''; }
+  else if (st.status === 'login') { txt = n ? `Entre no sistema · ${itens}` : 'Entre no sistema para sincronizar'; cls = 'pendente'; }
+  else if (st.status === 'erro') { txt = n ? itens : 'Não sincronizou agora (tenta de novo)'; cls = 'pendente'; }
+  el.textContent = txt;
+  el.className = `status-sync ${cls}`;
+}
+$('#statusSync').addEventListener('click', () => (statusSync().status === 'login' ? telaLogin() : acoesFolha['sync-agora']()));
+function telaLogin() {
+  abrirFolha(`${cabeca('Entrar no sistema', 'Para salvar e ver as vistorias em qualquer aparelho')}
+    <div class="campo"><label for="lUser">Usuário</label><input class="txt" id="lUser" autocomplete="username" autocapitalize="none" spellcheck="false"></div>
+    <div class="campo"><label for="lSenha">Senha</label><input class="txt" id="lSenha" type="password" autocomplete="current-password"></div>
+    <p class="sub" data-erro style="color:#ff9b9b"></p>
+    <div class="btns"><button class="btn principal" type="button" data-acao="fazer-login">Entrar</button></div>
+    <p class="nota">O que você marcar sem estar conectado fica guardado neste aparelho e é enviado depois do login.</p>`);
+}
+acoesFolha['tela-login'] = () => telaLogin();
+acoesFolha['fazer-login'] = async (b) => {
+  b.disabled = true;
+  try {
+    E.usuario = await entrar(conteudo.querySelector('#lUser').value, conteudo.querySelector('#lSenha').value);
+    fecharFolha();
+    toast(`Olá, ${E.usuario.nome}. Sincronizando…`);
+    sincronizar();
+  } catch (e) {
+    conteudo.querySelector('[data-erro]').textContent = navigator.onLine ? e.message : 'Sem internet.';
+    b.disabled = false;
+  }
+};
+
+async function aoReceber({ vistorias, pontos, apagados, trajeto, encaixe }) {
+  for (const v of vistorias) E.vistorias.set(v.id, v);
+  for (const p of pontos) E.pontos.set(p.id, p);
+  for (const id of apagados) { const p = await dbPontos.pegar(id); if (p) E.pontos.set(id, p); removerMarcador(id); if (E.selecionado === id) fecharFolha(); }
+  if (trajeto.length) E.trajeto.push(...trajeto);
+  if (encaixe) { E.encaixe = encaixe; recalcularPlano(); camadaPlanta.atualizar(); montarDigital(); }
+  recalcularConferencia();
+  redesenharTudo();
+  const aberto = E.selecionado && pontos.some((p) => p.id === E.selecionado);
+  if (aberto && !folha.hidden && !conteudo.contains(document.activeElement)) rerender();
+  if (!folha.hidden && conteudo.querySelector('[data-acao="nova-vistoria"]')) telaInicio();
+}
+function aoEnviado({ vistorias, pontos }) {
+  for (const { id, enviadoEm } of vistorias) { const v = E.vistorias.get(id); if (v && v.atualizadoEm === enviadoEm) v.enviadoEm = enviadoEm; }
+  for (const { id, enviadoEm } of pontos) { const p = E.pontos.get(id); if (p && p.atualizadoEm === enviadoEm) p.enviadoEm = enviadoEm; }
+}
 
 // ------------------------------------------------------------------ carregar
 async function carregar() {
   pedirArmazenamentoPersistente();
-  const [enc, conf, vist, cam, opac, aj, custom] = await Promise.all(['encaixe', 'conferencia', 'vistoria', 'camadas', 'opacidade', 'ajustes', 'plantaCustom'].map((k) => kv.get(k)));
+  const [enc, cam, opac, aj, custom, vidAtual, verT, ocultas] = await Promise.all(['encaixe', 'camadas', 'opacidade', 'ajustes', 'plantaCustom', 'vistoriaAtual', 'verTodas', 'ocultas'].map((k) => kv.get(k)));
   if (enc) E.encaixe = enc;
-  if (conf) E.conf = conf;
-  if (vist) E.vistoria = vist;
   if (cam) Object.assign(E.camadas, cam);
   if (typeof opac === 'number') E.opacidade = opac;
   if (aj) Object.assign(E.ajustes, aj);
   if (custom) E.plantaUrl = URL.createObjectURL(custom);
   recalcularPlano();
-  recalcularConferencia();
   montarSatelite();
   montarDigital();
+  for (const v of await dbVist.todos()) E.vistorias.set(v.id, v);
   for (const p of await dbPontos.todos()) E.pontos.set(p.id, p);
   E.trajeto = await dbTrajeto.todos();
-  ultimoTrajeto = E.trajeto.at(-1) || null;
+  await migrarV1();
+  const vid = (await kv.get('vistoriaAtual')) || vidAtual;
+  E.vid = vid && E.vistorias.has(vid) ? vid : null;
+  E.verTodas = !!verT;
+  E.ocultas = new Set(ocultas || []);
+  recalcularConferencia();
+  ultimoTrajeto = E.trajeto.filter((t) => t.vistoriaId === E.vid).sort((a, b) => a.t - b.t).at(-1) || null;
   aplicarCamadas();
   redesenharTudo();
   map.fitBounds(L.latLngBounds(E.encaixe), { padding: [10, 10] });
   aplicarZoomClasse();
   atualizarChipGps();
+  mostrarStatus(statusSync());
   // GPS: se já houver permissão, liga direto; senão, explica antes de pedir.
   try {
     const st = navigator.permissions ? await navigator.permissions.query({ name: 'geolocation' }) : null;
     if (st && st.state === 'granted') iniciarGps();
     if (st && st.state === 'denied') { E.gps.estado = 'negado'; atualizarChipGps(); }
   } catch { /* Safari antigo */ }
-  if (E.vistoria.iniciada) { iniciarGps(); manterTelaLigada(); }
+  if (V() && V().iniciada && V().status !== 'concluida' && !E.verTodas) { iniciarGps(); manterTelaLigada(); }
   else telaInicio();
-  const ult = await kv.get('ultimaExportacao');
-  const ultAlt = [...E.pontos.values()].reduce((m, p) => (p.atualizadoEm > m ? p.atualizadoEm : m), '');
-  E._naoExportado = ultAlt && (!ult || ult < ultAlt);
-  if (E._naoExportado && E.pontos.size >= 5) setTimeout(() => toast('Lembrete: exporte a vistoria pelo menu ao terminar.', 4500), 1500);
+  if (E._recuperada) toast(`${E._recuperada.n} pontos guardados neste celular foram reunidos em "${E._recuperada.nome}" e serão enviados ao sistema.`, 6000);
+  E.usuario = (await quemSou()) || null;
+  // vistoria recuperada sem "quem fez": usa o nome de quem está logado
+  if (E.usuario) for (const v of E.vistorias.values()) if (v.recuperadaDoCelular && !v.responsavel) { v.responsavel = E.usuario.nome; await salvarVistoria(v); }
+  iniciarSync({ aoReceber, aoEnviado, aoStatus: mostrarStatus });
+  // com login: completa a cópia do app para funcionar sem internet
+  if (E.usuario && navigator.serviceWorker) navigator.serviceWorker.ready.then((r) => r.active && r.active.postMessage('guardar-app')).catch(() => {});
 }
 carregar();
 
@@ -1317,4 +1658,4 @@ if ('serviceWorker' in navigator) {
 }
 
 // para os testes automáticos
-window.__vistoria = { E, map, posPonto, planoParaLL, llParaPlano, corrigir };
+window.__vistoria = { E, map, posPonto, planoParaLL, llParaPlano, corrigir, sincronizar, statusSync };

@@ -2,6 +2,7 @@
 import * as D from './dados.js';
 import { fotos as dbFotos } from './db.js';
 import { imagemTile, urlTile } from './offline.js';
+import { baixarFoto } from './sync.js';
 
 const carimbo = () => { const d = new Date(), z = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}${z(d.getMonth() + 1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`; };
 const dataBR = (iso) => (iso ? new Date(iso).toLocaleString('pt-BR').replace(',', '') : '');
@@ -13,9 +14,19 @@ function blobParaBase64(blob) {
 }
 export async function exportarJSON(est) {
   const fotos = [];
-  for (const f of await dbFotos.todas()) fotos.push({ id: f.id, pontoId: f.pontoId, criadoEm: f.criadoEm, gps: f.gps, tipo: f.blob.type || 'image/jpeg', base64: await blobParaBase64(f.blob) });
-  const pontos = est.pontos.map(({ _pos, _plano, ...p }) => { delete p._t; return { ...p, latitude: _pos[0], longitude: _pos[1], plantaX: Math.round(_plano[0] * D.PLANTA.largura), plantaY: Math.round(_plano[1] * D.PLANTA.altura) }; });
-  const dados = { app: 'fundac-vistoria', versao: 1, exportadoEm: new Date().toISOString(), vistoria: est.vistoria, encaixe: est.encaixe, conferencia: est.conf, trajeto: est.trajeto, pontos, fotos };
+  const quais = new Set(est.pontos.flatMap((p) => p.fotos || []));
+  for (const f of await dbFotos.todas()) if (quais.has(f.id) && f.blob) fotos.push({ id: f.id, pontoId: f.pontoId, criadoEm: f.criadoEm, gps: f.gps, tipo: f.blob.type || 'image/jpeg', base64: await blobParaBase64(f.blob) });
+  // fotos tiradas em outro aparelho e ainda não abertas neste: busca no sistema
+  const tem = new Set(fotos.map((f) => f.id));
+  for (const p of est.pontos) for (const id of p.fotos || []) {
+    if (tem.has(id)) continue;
+    try { const blob = await baixarFoto(id, p.id); fotos.push({ id, pontoId: p.id, criadoEm: p.atualizadoEm, gps: null, tipo: 'image/jpeg', base64: await blobParaBase64(blob) }); tem.add(id); } catch { /* sem internet ou foto ainda não enviada */ }
+  }
+  const pontos = est.pontos.map(({ _pos, _plano, enviadoEm, ...p }) => { delete p._t; return { ...p, latitude: _pos[0], longitude: _pos[1], plantaX: Math.round(_plano[0] * D.PLANTA.largura), plantaY: Math.round(_plano[1] * D.PLANTA.altura) }; });
+  const ids = new Set(pontos.map((p) => p.vistoriaId));
+  const vistorias = [...est.vistorias.values()].filter((v) => ids.has(v.id)).map(({ enviadoEm, ...v }) => v);
+  const trajeto = est.trajeto.filter((t) => ids.has(t.vistoriaId)).map(({ enviado, ...t }) => t);
+  const dados = { app: 'fundac-vistoria', versao: 2, exportadoEm: new Date().toISOString(), vistorias, encaixe: est.encaixe, trajeto, pontos, fotos };
   return new File([JSON.stringify(dados)], `fundac-vistoria-${carimbo()}.json`, { type: 'application/json' });
 }
 
@@ -29,17 +40,19 @@ export async function importarArquivo(arq) {
     return { id: f.id, pontoId: f.pontoId, criadoEm: f.criadoEm, gps: f.gps, blob: new Blob([bytes], { type: f.tipo || 'image/jpeg' }) };
   });
   const pontos = d.pontos.map(({ latitude, longitude, plantaX, plantaY, ...p }) => p);
-  return { pontos, fotos, trajeto: d.trajeto || [], encaixe: d.encaixe, conf: d.conferencia, vistoria: d.vistoria };
+  return { pontos, fotos, trajeto: d.trajeto || [], vistorias: d.vistorias || [], encaixe: d.encaixe, conf: d.conferencia, vistoria: d.vistoria };
 }
 
 // ------------------------------------------------------------------ CSV
 export function exportarCSV(est) {
-  const cab = ['código', 'tipo', 'grupo', 'local', 'rua', 'situação', 'tipo de câmera', 'direção (graus)', 'abertura', 'abertura (graus)', 'alcance (m)', 'altura', 'pega rosto', 'cobertura', 'prioridade IA', 'latitude', 'longitude', 'planta x (px)', 'planta y (px)', 'marcado por', 'ajustado à mão', 'precisão GPS (m)', 'fotos', 'observações', 'criado em', 'alterado em'];
+  const cab = ['vistoria', 'data da vistoria', 'código', 'tipo', 'grupo', 'local', 'rua', 'situação', 'tipo de câmera', 'direção (graus)', 'abertura', 'abertura (graus)', 'alcance (m)', 'altura', 'pega rosto', 'cobertura', 'prioridade IA', 'latitude', 'longitude', 'planta x (px)', 'planta y (px)', 'marcado por', 'ajustado à mão', 'precisão GPS (m)', 'fotos', 'observações', 'criado em', 'alterado em'];
   const linhas = est.pontos.map((p) => {
     const cam = p.tipo === 'camera';
     const ab = D.ABERTURAS.find((a) => a.id === p.abertura);
     const outro = D.OUTROS.find((x) => x.id === p.categoria);
+    const v = est.vistorias.get(p.vistoriaId);
     return [
+      v ? v.nome : '', v && v.data ? v.data.split('-').reverse().join('/') : '',
       cam ? p.codigo : '', cam ? 'câmera' : (outro ? outro.nome : 'outro ponto'), cam ? p.grupo : '', cam ? p.local : '', cam ? (p.rua ?? '') : '',
       cam ? p.situacao : '', cam ? p.tipoCam : '', cam && p.direcao != null ? Math.round(p.direcao) : '', cam && ab ? ab.nome : '', cam && ab ? ab.graus : '', cam ? p.alcance : '',
       cam ? (D.ALTURAS.find((a) => a.id === p.altura)?.nome || '') : '', cam ? p.rosto : '', cam ? (p.cobre || []).join(', ') : '', cam ? (p.prioridadeIA || '') : '',

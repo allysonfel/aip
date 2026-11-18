@@ -1,0 +1,9 @@
+{
+  "name": "fundac-vistoria",
+  "private": true,
+  "description": "Vistoria de câmeras da Feira da Fundac: app (PWA) e servidor com Postgres",
+  "main": "server.js",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=20" },
+  "dependencies": { "postgres": "^3.4.5" }
+}

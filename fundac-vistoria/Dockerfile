@@ -1,14 +1,15 @@
-# App web estático (PWA) da vistoria de câmeras da Fundac, servido por nginx
-# em /fundac-vistoria, com senha simples (FV_USUARIO / FV_SENHA).
-FROM nginx:1.27-alpine
-RUN apk add --no-cache openssl
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY senha.sh /docker-entrypoint.d/40-senha.sh
-RUN chmod +x /docker-entrypoint.d/40-senha.sh
-COPY index.html manifest.webmanifest sw.js /usr/share/nginx/html/fundac-vistoria/
-COPY css /usr/share/nginx/html/fundac-vistoria/css
-COPY js /usr/share/nginx/html/fundac-vistoria/js
-COPY vendor /usr/share/nginx/html/fundac-vistoria/vendor
-COPY fonts /usr/share/nginx/html/fundac-vistoria/fonts
-COPY img /usr/share/nginx/html/fundac-vistoria/img
+# Vistoria de câmeras da Fundac: servidor Node (app + API) com Postgres.
+FROM node:22-alpine
+WORKDIR /app
+ENV NODE_ENV=production PORT=80
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev && npm cache clean --force
+COPY server.js ./
+COPY index.html entrar.html manifest.webmanifest sw.js ./public/
+COPY css ./public/css
+COPY js ./public/js
+COPY vendor ./public/vendor
+COPY fonts ./public/fonts
+COPY img ./public/img
 EXPOSE 80
+CMD ["node", "server.js"]

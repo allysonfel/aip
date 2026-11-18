@@ -18,7 +18,7 @@
     <span class="marca" aria-label="AIP"><span class="logo"></span></span>
     <div class="titulo">
       <strong>Vistoria de câmeras</strong>
-      <span>Feira da Fundac · Caruaru</span>
+      <button type="button" id="statusSync" class="status-sync" aria-live="polite">Verificando o sistema…</button>
     </div>
     <button class="chip-gps" id="chipGps" type="button" aria-live="polite">GPS</button>
     <button class="btn-icone" id="btnMenu" type="button" aria-label="Menu">
@@ -26,6 +26,7 @@
     </button>
   </header>
 
+  <div id="barraVistoria" class="barra-vistoria" hidden></div>
   <div id="aviso" class="aviso" hidden></div>
   <div id="modoMapa" class="modo-mapa" hidden></div>
 

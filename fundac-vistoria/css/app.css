@@ -48,7 +48,7 @@ button { cursor: pointer; }
 .aviso { position: relative; z-index: 1000; padding: 10px 14px; font-weight: 600; font-size: 15px; background: #3a0d0d; border-bottom: 1px solid var(--erro); color: #ffd6d6; }
 .aviso.amarelo { background: #3a2a05; border-color: var(--alerta); color: #ffe9a8; }
 .aviso button { margin-left: 8px; background: var(--texto); color: #000; border: 0; border-radius: 6px; padding: 6px 10px; font-weight: 600; }
-.modo-mapa { position: relative; z-index: 1000; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--ciano); color: #000; font-weight: 700; font-size: 16px; }
+.modo-mapa { position: absolute; top: 0; left: 0; right: 0; z-index: 1000; display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--ciano); color: #000; font-weight: 700; font-size: 16px; }
 .modo-mapa span { flex: 1; }
 .modo-mapa button { background: #000; color: #fff; border: 0; border-radius: 8px; padding: 10px 14px; font-weight: 600; min-height: 44px; }
 
@@ -208,3 +208,38 @@ input.txt:focus, select.txt:focus, textarea.txt:focus, .opc:focus-visible, .btn:
 .opcs.grade6 .opc { padding: 8px 2px; }
 .opc.conferido:not([aria-pressed="true"]) { border: 2px solid var(--ok); color: var(--ok); }
 #mapa.marcando .leaflet-marker-icon { pointer-events: none; }
+
+/* ---------- sincronização e vistorias */
+.status-sync { background: none; border: 0; padding: 0; margin: 0; text-align: left; font-size: 13px; color: var(--cinza); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.status-sync.ok { color: var(--ok); }
+.status-sync.pendente { color: var(--alerta); }
+.barra-vistoria { display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: #070707; border-bottom: 1px solid var(--linha); overflow-x: auto; white-space: nowrap; z-index: 1000; position: relative; scrollbar-width: none; }
+.barra-vistoria::-webkit-scrollbar { display: none; }
+.barra-vistoria > i, .chip-v i { width: 12px; height: 12px; border-radius: 50%; flex: none; display: inline-block; }
+.barra-vistoria .nome-v { flex: 1; min-width: 0; font-weight: 600; font-size: 14px; overflow: hidden; text-overflow: ellipsis; }
+.barra-vistoria .rot-barra { font-weight: 700; font-size: 14px; color: var(--ciano); }
+.chip-v { display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--linha); background: var(--painel-2); font-weight: 600; font-size: 14px; flex: none; }
+.chip-v.off { opacity: 0.4; text-decoration: line-through; }
+.chip-v.sair { margin-left: auto; }
+.selo-dia { position: absolute; left: 22px; top: -10px; padding: 1px 5px; border-radius: 5px; font: 700 11px/1.3 var(--titulo); color: #000; border: 1.5px solid #000; white-space: nowrap; }
+.marco .selo-dia { left: 20px; top: -12px; }
+.vist { display: flex; align-items: center; gap: 12px; padding: 12px 2px; border-bottom: 1px solid var(--linha); }
+.vist.atual { background: rgb(95 211 255 / 0.06); }
+.vist-cor { width: 12px; align-self: stretch; border-radius: 6px; flex: none; }
+.vist-txt { flex: 1; min-width: 0; }
+.vist-txt b { display: block; font-family: var(--titulo); font-size: 20px; }
+.vist-txt span { display: block; font-size: 14px; color: var(--cinza); }
+.vist .opc { flex: none; min-width: 110px; }
+.aviso-juntar { border-left: 3px solid var(--ciano); padding: 6px 10px; background: rgb(95 211 255 / 0.06); margin-top: 10px !important; }
+.campo.juntar .btn { margin-top: 8px; font-size: 15px; justify-content: flex-start; text-align: left; }
+.foto .carregando { font-size: 12px; color: var(--cinza); padding: 6px; }
+
+/* ---------- computador: telas num painel à direita do mapa */
+@media (min-width: 900px) {
+  .folha, .folha.cheia { left: auto; right: 12px; top: calc(env(safe-area-inset-top, 0px) + 112px); bottom: 96px; width: 520px; max-height: none; border-radius: 14px; border: 1px solid var(--linha); }
+  .folha-alca { display: none; }
+  .acoes { grid-template-columns: repeat(6, 1fr); }
+  .btn-acao.sec { min-height: 60px; }
+  .flutuantes { right: auto; left: 10px; }
+  .painel-ajuste { left: auto; right: 12px; width: 520px; }
+}
