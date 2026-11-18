@@ -244,7 +244,7 @@ body.doc {
 .banda {
   position: relative;
   margin: 4.5cqw -8cqw 0;
-  height: 22cqw;
+  height: 27cqw;
   overflow: hidden;
   flex: none;
 }
@@ -460,4 +460,31 @@ body.doc {
   margin-left: 1.4cqw;
   vertical-align: -0.35cqw;
   border-radius: 0.3cqw;
+}
+
+/* aviso discreto de uma linha (abaixo da lista das Câmeras IA) */
+.aviso {
+  margin: auto 0 5cqw;
+  display: flex;
+  align-items: center;
+  gap: 2cqw;
+  padding: 2cqw 2.4cqw;
+  border: 1px solid rgb(95 211 255 / 0.45);
+  border-left: 0.7cqw solid #5fd3ff;
+  border-radius: 1.4cqw;
+  background: rgb(95 211 255 / 0.04);
+  font-size: 1.72cqw;
+  line-height: 1.3;
+  white-space: nowrap;
+  color: rgb(255 255 255 / 0.85);
+}
+.aviso svg {
+  flex: none;
+  width: 2.8cqw;
+  height: 2.8cqw;
+  color: #5fd3ff;
+}
+.aviso b {
+  color: #fff;
+  font-weight: 600;
 }

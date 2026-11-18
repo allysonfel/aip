@@ -38,7 +38,7 @@ const TOTEM = [
 
 const CONDICOES = [
   "Sem trocar equipamento: a IA vai para as câmeras que o município já tem",
-  "Câmeras novas, quando necessárias, com instalação isenta",
+  "Câmeras novas, quando necessárias, com projeto e orçamento sob medida",
   "Totem sem investimento inicial de implantação: modelo de comodato",
   "Implantação, checagem presencial e suporte ativo pela equipe local",
   "LGPD, dados protegidos, perfis de acesso e auditoria",
@@ -121,17 +121,15 @@ export default function PrecosSetorPublico() {
               </li>
             ))}
           </ul>
-          <div className="destaque">
-            <div>
-              <h3>Precisa de mais câmeras?</h3>
-              <p>Se o município precisar de câmeras novas, a AIP fornece e instala, com instalação isenta. Mais pontos cobertos, mais segurança para a cidade.</p>
-            </div>
-            <span className="selo">
-              INSTALAÇÃO
-              <br />
-              ISENTA
+          <p className="aviso">
+            <svg viewBox="0 0 24 24" aria-hidden fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 11v5M12 7.6v.1" />
+            </svg>
+            <span>
+              <b>Precisa de câmeras novas?</b> Fazemos o projeto e o orçamento sob medida para o município.
             </span>
-          </div>
+          </p>
         </div>
         <Rodape n={2} />
       </section>
