@@ -35,12 +35,12 @@ export default function Inicio() {
         visual={
           <VideoSecao
             rotulo="Vídeo da AIP apresentando as Câmeras IA: análise de vídeo, contagem de pessoas e horários de maior movimento"
-            poster="/site/media/cameras-mais.jpg"
+            poster="/site/media/cameras-mais-v2.jpg"
             fontes={[
-              { src: "/site/media/cameras-mais-celular.webm", tipo: 'video/webm; codecs="av01.0.09M.10"', celular: true },
-              { src: "/site/media/cameras-mais.webm", tipo: 'video/webm; codecs="av01.0.09M.10"' },
-              { src: "/site/media/cameras-mais-celular.mp4", tipo: "video/mp4", celular: true },
-              { src: "/site/media/cameras-mais.mp4", tipo: "video/mp4" },
+              { src: "/site/media/cameras-mais-v2-celular.webm", tipo: 'video/webm; codecs="av01.0.09M.10"', celular: true },
+              { src: "/site/media/cameras-mais-v2.webm", tipo: 'video/webm; codecs="av01.0.09M.10"' },
+              { src: "/site/media/cameras-mais-v2-celular.mp4", tipo: "video/mp4", celular: true },
+              { src: "/site/media/cameras-mais-v2.mp4", tipo: "video/mp4" },
             ]}
           />
         }
