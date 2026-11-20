@@ -25,7 +25,7 @@ Fotos antigas removidas por não estarem mais em uso: `condominio.jpg`, `condomi
 `camera-ia-lente-limpa.jpg`: lente de câmera com detecções da IA, fornecida pela AIP (2026-11-10; marca "STARVIS" apagada do aro em 2026-11-12), usada no bloco Câmeras IA da página inicial.
 
 
-`cameras-mais.mp4`, `cameras-mais-celular.mp4`, `cameras-mais.webm`, `cameras-mais-celular.webm`, `cameras-mais.jpg`: vídeo institucional da AIP ("aipbrasil video_1", 2026-11-12) no bloco "Suas câmeras podem fazer mais" da página inicial. Sem áudio; a capa é o primeiro quadro.
+`cameras-mais-v2.mp4`, `cameras-mais-v2-celular.mp4`, `cameras-mais-v2.webm`, `cameras-mais-v2-celular.webm`, `cameras-mais-v2.jpg`: vídeo institucional da AIP ("aipbrasil.com", 2026-11-20, assinatura aipbrasil.com) no bloco "Suas câmeras podem fazer mais" da página inicial. Sem áudio, cortado em 37,45 s (sem o final preto); a capa é o quadro final com o logo.
 
 A antiga `camera-poste.jpg` (câmera em poste, Johny Goh, Pexels) foi removida: não é mais usada no site.
 
