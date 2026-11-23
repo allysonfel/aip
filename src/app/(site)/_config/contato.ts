@@ -4,4 +4,5 @@ export const EMAIL = "";
 export const CIDADE = ""; // cidade e estado exibidos no rodapé. Ex.: Recife, PE
 export const INSTAGRAM = "aipbrasil"; // perfil, sem @ (link: instagram.com/<perfil>)
 
-export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aip-production.up.railway.app";
+// Endereço público do site (canonical, sitemap, Open Graph). O Railway saiu de uso em 2026-11-12.
+export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://aipbrasil.com";

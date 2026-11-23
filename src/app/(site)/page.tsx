@@ -1,4 +1,4 @@
-import { metadados } from "./_config/metadados";
+import type { Metadata } from "next";
 import { Botao, Cabecalho, Encerramento, Hero, TelaDividida, TelaFoto } from "./_components/Base";
 import Carrossel from "./_components/Carrossel";
 import { CartaoSegmento } from "./_components/Cartoes";
@@ -6,7 +6,31 @@ import { SEGMENTOS } from "./_content/solucoes";
 import Reveal from "./_components/Reveal";
 import VideoSecao from "./_components/VideoSecao";
 
-export const metadata = metadados("/", "Transformamos imagens em inteligência", "Inteligência artificial nas câmeras que você já tem: identificação de pessoas, análise de fluxos e acompanhamento da operação, sem trocar equipamento.");
+// Prévia de compartilhamento (WhatsApp, Instagram, LinkedIn, Google): posicionamento amplo da AIP.
+const TITULO = "AIP | Inteligência Patrimonial para gestão e segurança";
+const DESCRICAO = "A AIP desenvolve soluções tecnológicas que tornam organizações públicas e privadas mais seguras e eficientes.";
+const IMAGEM = "https://aipbrasil.com/og-aip.jpg";
+
+export const metadata: Metadata = {
+  title: { absolute: TITULO },
+  description: DESCRICAO,
+  alternates: { canonical: "/" },
+  openGraph: {
+    title: TITULO,
+    description: DESCRICAO,
+    url: "https://aipbrasil.com",
+    siteName: "AIP",
+    locale: "pt_BR",
+    type: "website",
+    images: [{ url: IMAGEM, width: 1200, height: 630, alt: "AIP, Inteligência Patrimonial para gestão e segurança" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: TITULO,
+    description: DESCRICAO,
+    images: [{ url: IMAGEM, alt: "AIP, Inteligência Patrimonial para gestão e segurança" }],
+  },
+};
 
 export default function Inicio() {
   return (
