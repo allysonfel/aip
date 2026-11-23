@@ -13,7 +13,7 @@ export default function Inicio() {
     <>
       <Hero
         titulo="Inteligência Patrimonial para gestão e segurança."
-        texto="Soluções de inteligência artificial que interpretam o que as câmeras registram e transformam imagens em informações úteis para ambientes públicos e privados."
+        texto="Unimos inteligência artificial, monitoramento 24h e equipe de resposta para antecipar riscos e melhorar a gestão de organizações públicas e privadas."
         botoes={<Botao href="/contato">Solicitar uma consulta</Botao>}
         midia={{
           poster: "hero-inicio.jpg",
