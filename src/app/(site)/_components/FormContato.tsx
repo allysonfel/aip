@@ -160,9 +160,21 @@ export default function FormContato({ tipo, origem }: { tipo?: string; origem: s
       </div>
 
       <div className="sm:col-span-2">
-        <label className="flex items-start gap-3 text-sm text-white/85">
-          <input type="checkbox" name="aceite" defaultChecked={v.aceite === "on"} className="mt-0.5 h-5 w-5 shrink-0 accent-white" />
-          <span>
+        <label className="flex cursor-pointer items-start gap-3 py-2 text-sm text-white/85">
+          {/* caixa própria: a nativa com accent-white some no iPhone (marcada fica branca sobre branca) */}
+          <span className="relative mt-px flex h-6 w-6 shrink-0">
+            <input
+              type="checkbox"
+              name="aceite"
+              defaultChecked={v.aceite === "on"}
+              aria-invalid={e.aceite ? true : undefined}
+              className="peer absolute inset-0 m-0 h-full w-full cursor-pointer appearance-none rounded-[4px] border border-white/60 bg-transparent transition-colors checked:border-[#5FD3FF] checked:bg-[#5FD3FF] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5FD3FF]"
+            />
+            <svg viewBox="0 0 24 24" aria-hidden className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-black opacity-0 peer-checked:opacity-100" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m5 12.5 4.2 4.2L19 7" />
+            </svg>
+          </span>
+          <span className="pt-0.5">
             Li e aceito a{" "}
             <Link href="/privacidade" target="_blank" className="underline underline-offset-2">Política de Privacidade</Link>.
           </span>
