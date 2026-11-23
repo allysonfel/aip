@@ -64,6 +64,40 @@ function Opcoes({ nome, legenda, opcoes, marcados, multiplo = false, erro }: { n
   );
 }
 
+/**
+ * "Li e aceito a Política de Privacidade". Botão com estado próprio em vez de
+ * checkbox nativo: no iPhone o toque na caixa nativa não marcava. O valor vai
+ * no formulário por um campo oculto (aceite=on), como o checkbox mandava.
+ */
+function Aceite({ inicial, invalido }: { inicial: boolean; invalido: boolean }) {
+  const [marcado, setMarcado] = useState(inicial);
+  return (
+    <div className="flex items-start text-sm text-white/85">
+      {marcado && <input type="hidden" name="aceite" value="on" />}
+      <button
+        type="button"
+        role="checkbox"
+        aria-checked={marcado}
+        aria-invalid={invalido || undefined}
+        onClick={() => setMarcado((m) => !m)}
+        className="-my-2 -ml-2 flex touch-manipulation items-start gap-3 rounded-lg py-2 pl-2 pr-[0.3em] text-left outline-none focus-visible:outline-2 focus-visible:outline-[#5FD3FF]"
+      >
+        <span aria-hidden className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-[4px] border transition-colors ${marcado ? "border-[#5FD3FF] bg-[#5FD3FF] text-black" : invalido ? "border-white" : "border-white/60"}`}>
+          {marcado && (
+            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+              <path d="m5 12.5 4.2 4.2L19 7" />
+            </svg>
+          )}
+        </span>
+        <span className="pt-0.5">Li e aceito a</span>
+      </button>
+      <span className="pt-0.5">
+        <Link href="/privacidade" target="_blank" className="underline underline-offset-2">Política de Privacidade</Link>.
+      </span>
+    </div>
+  );
+}
+
 /** Canal (Telefone, Telegram, WhatsApp) + código do país + número. */
 function Telefone({ valores, erro }: { valores: Record<string, string>; erro?: string }) {
   const [canal, setCanal] = useState(valores.canal || "WhatsApp");
@@ -160,25 +194,7 @@ export default function FormContato({ tipo, origem }: { tipo?: string; origem: s
       </div>
 
       <div className="sm:col-span-2">
-        <label className="flex cursor-pointer items-start gap-3 py-2 text-sm text-white/85">
-          {/* caixa própria: a nativa com accent-white some no iPhone (marcada fica branca sobre branca) */}
-          <span className="relative mt-px flex h-6 w-6 shrink-0">
-            <input
-              type="checkbox"
-              name="aceite"
-              defaultChecked={v.aceite === "on"}
-              aria-invalid={e.aceite ? true : undefined}
-              className="peer absolute inset-0 m-0 h-full w-full cursor-pointer appearance-none rounded-[4px] border border-white/60 bg-transparent transition-colors checked:border-[#5FD3FF] checked:bg-[#5FD3FF] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#5FD3FF]"
-            />
-            <svg viewBox="0 0 24 24" aria-hidden className="pointer-events-none absolute inset-0 m-auto h-4 w-4 text-black opacity-0 peer-checked:opacity-100" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-              <path d="m5 12.5 4.2 4.2L19 7" />
-            </svg>
-          </span>
-          <span className="pt-0.5">
-            Li e aceito a{" "}
-            <Link href="/privacidade" target="_blank" className="underline underline-offset-2">Política de Privacidade</Link>.
-          </span>
-        </label>
+        <Aceite inicial={v.aceite === "on"} invalido={Boolean(e.aceite)} />
         <Erro texto={e.aceite} />
       </div>
 
