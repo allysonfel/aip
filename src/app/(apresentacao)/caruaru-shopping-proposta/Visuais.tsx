@@ -1,6 +1,9 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { ENTRADAS as ENTRADAS_PLANTA, FUNDO } from "@/lib/shopping/planta";
+import { ESBOCO, type Poligono } from "@/lib/shopping/plantaEsboco";
+import { simular } from "@/lib/shopping/simulacao";
 import { ECONOMIA } from "../../(site)/_config/economia";
 import { MiniVisual, type VisualId } from "../../(site)/_components/MiniVisuais";
 import { Icone, type NomeIcone } from "../_compartilhado/Icones";
@@ -440,9 +443,10 @@ function reaisCurto(v: number) {
 }
 
 /**
- * Câmeras novas com IA embarcada x as câmeras do shopping com a AIP. Mostra só
- * o custo de trocar e a economia estimada (R$ e %), nunca o valor da AIP. A
- * quantidade de câmeras muda ao vivo no controle.
+ * A economia é a protagonista: câmeras novas com IA embarcada (barra cheia,
+ * cinza, valor discreto) x a AIP nas câmeras atuais (barra curta, ciano, sem
+ * valor). Em destaque, o percentual; embaixo, a economia em R$ que acompanha
+ * o controle. Nunca mostra o valor da AIP.
  */
 export function Economia({ inicial = 120 }: { inicial?: number }) {
   const ativo = useAtivo();
@@ -451,16 +455,19 @@ export function Economia({ inicial = 120 }: { inicial?: number }) {
   const pct = ECONOMIA.economiaPercentual;
   const trocaMin = qtd * ECONOMIA.precoMinimo;
   const trocaMax = qtd * ECONOMIA.precoMaximo;
-  const larguraTroca = 35 + ((qtd - MIN_CAM) / (MAX_CAM - MIN_CAM)) * 65;
+  // Barra cheia cresce com a quantidade (como no site); a da AIP é ~20% dela.
+  const larguraTroca = 45 + ((qtd - MIN_CAM) / (MAX_CAM - MIN_CAM)) * 55;
+  const larguraAip = larguraTroca * (1 - pct / 100);
   return (
     <div className="rounded-2xl border border-white/10 bg-[#111214] p-[clamp(1.1rem,2.6vh,2.25rem)]">
+      {/* 1. controle */}
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <label htmlFor={`${id}-qtd`} className="ap-pequeno font-medium">
           Câmeras do shopping
         </label>
         <span className="flex items-center gap-3">
           <span className="rounded-full border border-white/20 px-2.5 py-0.5 text-[clamp(0.55rem,1vh,0.7rem)] font-medium uppercase tracking-[0.16em] text-white/50">Estimativa</span>
-          <span className="ap-num text-[clamp(2rem,min(3.4vw,6vh),3.6rem)] font-bold leading-none tabular-nums" aria-hidden>
+          <span className="ap-num text-[clamp(1.8rem,min(3vw,5.4vh),3.2rem)] font-bold leading-none tabular-nums" aria-hidden>
             {qtd}
           </span>
         </span>
@@ -477,27 +484,144 @@ export function Economia({ inicial = 120 }: { inicial?: number }) {
         className="controle-calc mt-[clamp(0.6rem,1.6vh,1rem)] w-full"
         style={{ "--pos": `${((qtd - MIN_CAM) / (MAX_CAM - MIN_CAM)) * 100}%` } as React.CSSProperties}
       />
-      <div className="mt-[clamp(1.25rem,3.4vh,2.25rem)]">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-          <p className="ap-pequeno font-medium">Comprar câmeras novas com IA embarcada</p>
-          <p className="ap-pequeno tabular-nums text-white/70">
-            {reaisCurto(trocaMin)} a {reaisCurto(trocaMax)}
-          </p>
+
+      {/* 2. comparação */}
+      <div className="mt-[clamp(1.25rem,3.4vh,2.25rem)] space-y-[clamp(0.9rem,2.4vh,1.5rem)]">
+        <div>
+          <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+            <p className="ap-pequeno text-white/75">Câmeras novas com IA embarcada</p>
+            <p className="text-[clamp(0.6rem,1.1vh,0.78rem)] tabular-nums text-white/40">
+              referência de mercado: {reaisCurto(trocaMin)} a {reaisCurto(trocaMax)}
+            </p>
+          </div>
+          <div className="mt-2 h-[clamp(1.5rem,3.6vh,2.25rem)] rounded-lg bg-white/[0.04]">
+            <div className="h-full rounded-lg bg-white/30 transition-[width] duration-700 ease-out" style={{ width: ativo ? `${larguraTroca}%` : "0%" }} />
+          </div>
         </div>
-        <div className="mt-2 h-[clamp(1.75rem,4vh,2.5rem)] rounded-lg bg-white/[0.04]">
-          <div className="h-full rounded-lg bg-white/80 transition-[width] duration-700 ease-out" style={{ width: ativo ? `${larguraTroca}%` : "0%" }} />
+        <div>
+          <p className="ap-pequeno text-white">Com a AIP, usando as câmeras atuais</p>
+          <div className="mt-2 flex h-[clamp(1.5rem,3.6vh,2.25rem)] items-center gap-3 rounded-lg">
+            <div className="h-full rounded-lg bg-[#5FD3FF] transition-[width] delay-150 duration-700 ease-out" style={{ width: ativo ? `${larguraAip}%` : "0%" }} />
+            <span className="whitespace-nowrap font-titulo text-[clamp(0.95rem,min(1.4vw,2.4vh),1.4rem)] font-semibold text-[#5FD3FF]">≈ {pct}% menos</span>
+          </div>
         </div>
       </div>
+
+      {/* 3 e 4. destaque */}
       <div className="mt-[clamp(1.25rem,3.4vh,2.25rem)] border-t border-white/10 pt-[clamp(1.25rem,3.4vh,2.25rem)]">
-        <p className="ap-pequeno text-white/60">Economia estimada usando as câmeras que o shopping já tem</p>
-        <div className="mt-2 flex flex-wrap items-end gap-x-[clamp(1rem,2.5vw,2.5rem)] gap-y-2">
-          <p className="ap-num text-[clamp(3rem,min(6vw,10vh),6.5rem)] font-bold leading-none text-[#5FD3FF]">~{pct}%</p>
-          <p className="pb-[0.35em] font-titulo text-[clamp(1.4rem,min(2.4vw,4.2vh),2.8rem)] font-bold leading-tight tabular-nums text-white">
-            {reaisCurto(trocaMin * (pct / 100))} a {reaisCurto(trocaMax * (pct / 100))}
-          </p>
+        <div className="flex flex-wrap items-end gap-x-[clamp(0.75rem,1.6vw,1.5rem)] gap-y-1">
+          <p className="ap-num text-[clamp(3.25rem,min(7vw,12vh),8rem)] font-bold leading-[0.85] text-[#5FD3FF]">≈ {pct}%</p>
+          <p className="pb-[0.3em] ap-texto text-white/85">de economia em média neste projeto</p>
         </div>
+        <p className="mt-[clamp(0.75rem,2vh,1.25rem)] ap-pequeno tabular-nums text-white/70">
+          Economia estimada: <span className="font-medium text-white">{reaisCurto(trocaMin * (pct / 100))} a {reaisCurto(trocaMax * (pct / 100))}</span>
+        </p>
       </div>
+
+      {/* 5. nota */}
       <p className="mt-[clamp(1rem,2.6vh,1.6rem)] text-[clamp(0.6rem,1.1vh,0.78rem)] leading-relaxed text-white/45">Valores de referência. O cálculo final depende do levantamento das câmeras.</p>
+    </div>
+  );
+}
+
+/* ------------------------------ mapa de calor sobre a planta ------------------------------ */
+
+// Mesma lógica do mapa de calor simulado do painel (/shopping-caruaru), sem
+// alterá-lo: simulação de um dia inteiro, grade de 125 x 70 sobre a planta de
+// 1000 x 560, calor só onde se anda (corredores, estacionamento, entradas),
+// escala pelo percentil 92 e a mesma rampa azul → verde → amarelo → vermelho.
+const GW = 125;
+const GH = 70;
+
+function dentroPoli(x: number, y: number, p: Poligono): boolean {
+  let dentro = false;
+  for (const anel of p)
+    for (let i = 0, j = anel.length - 1; i < anel.length; j = i++) {
+      const [xi, yi] = anel[i];
+      const [xj, yj] = anel[j];
+      if (yi > y !== yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi) dentro = !dentro;
+    }
+  return dentro;
+}
+
+function corCalor(v: number): [number, number, number, number] {
+  const pares: [number, [number, number, number]][] = [
+    [0, [59, 130, 246]],
+    [0.35, [16, 185, 129]],
+    [0.65, [250, 204, 21]],
+    [1, [220, 38, 38]],
+  ];
+  let i = 0;
+  while (i < pares.length - 2 && v > pares[i + 1][0]) i++;
+  const [a, ca] = pares[i];
+  const [b, cb] = pares[i + 1];
+  const k = Math.min(1, Math.max(0, (v - a) / (b - a)));
+  return [ca[0] + (cb[0] - ca[0]) * k, ca[1] + (cb[1] - ca[1]) * k, ca[2] + (cb[2] - ca[2]) * k, Math.min(225, 80 + v * 300)];
+}
+
+/** Calcula a imagem do calor do térreo (dia inteiro simulado) num canvas 125 x 70. */
+function desenharCalor(canvas: HTMLCanvasElement) {
+  const sim = simular([], 20261012);
+  const am = sim.amostras;
+  const grade = new Float32Array(GW * GH);
+  for (let i = 0; i < am.t.length; i++) {
+    if (am.andar[i] !== 0) continue;
+    const gx = Math.floor(am.x[i] / 8);
+    const gy = Math.floor(am.y[i] / 8);
+    for (let dy = -2; dy <= 2; dy++)
+      for (let dx = -2; dx <= 2; dx++) {
+        const x = gx + dx;
+        const y = gy + dy;
+        if (x < 0 || y < 0 || x >= GW || y >= GH) continue;
+        grade[y * GW + x] += Math.exp(-(dx * dx + dy * dy) / 3);
+      }
+  }
+  const polis = [...ESBOCO.T.corredores, ...ESBOCO.T.estacionamento];
+  const entradas = ENTRADAS_PLANTA.filter((e) => e.andar === "T").map((e) => e.rect);
+  const masc = new Uint8Array(GW * GH);
+  for (let j = 0; j < GH; j++)
+    for (let i = 0; i < GW; i++) {
+      const x = (i + 0.5) * 8;
+      const y = (j + 0.5) * 8;
+      if (polis.some((p) => dentroPoli(x, y, p)) || entradas.some((r) => x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h)) masc[j * GW + i] = 1;
+    }
+  const vals: number[] = [];
+  for (let i = 0; i < grade.length; i++) if (masc[i] && grade[i] > 0) vals.push(grade[i]);
+  vals.sort((a, b) => a - b);
+  const max = vals.length ? vals[Math.floor(vals.length * 0.92)] : 0;
+  canvas.width = GW;
+  canvas.height = GH;
+  const ctx = canvas.getContext("2d")!;
+  const img = ctx.createImageData(GW, GH);
+  for (let i = 0; i < grade.length; i++) {
+    if (!masc[i] || grade[i] <= 0 || !max) continue;
+    img.data.set(corCalor(Math.min(1, Math.sqrt(grade[i] / max))), i * 4);
+  }
+  ctx.putImageData(img, 0, 0);
+}
+
+export function MapaCalorPlanta() {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const ativo = useAtivo();
+  const [pronto, setPronto] = useState(false);
+  useEffect(() => {
+    // A simulação leva um instante: só roda no navegador, logo depois de abrir a página.
+    const t = window.setTimeout(() => {
+      if (canvas.current) desenharCalor(canvas.current);
+      setPronto(true);
+    }, 50);
+    return () => window.clearTimeout(t);
+  }, []);
+  const f = FUNDO.T;
+  return (
+    <div className="relative overflow-hidden rounded-xl bg-black" style={{ aspectRatio: "1000 / 500" }}>
+      <div className="absolute inset-x-0" style={{ top: "-6%", height: "112%" }}>
+      {/* eslint-disable-next-line @next/next/no-img-element -- planta oficial do térreo, a mesma do painel. */}
+      <img src={f.src} alt="Planta do térreo do Caruaru Shopping com o mapa de calor simulado" className="absolute select-none opacity-[0.38] grayscale" style={{ left: `${(f.x / 1000) * 100}%`, top: `${(f.y / 560) * 100}%`, width: `${(f.w / 1000) * 100}%`, height: `${(f.h / 560) * 100}%` }} draggable={false} />
+      {/* a planta oficial traz o logo do shopping impresso no canto: fica coberto */}
+      <span aria-hidden className="absolute bg-[rgb(60_60_60)]" style={{ left: `${((f.x + 1330 * 0.56) / 1000) * 100}%`, top: `${((20 * 0.56) / 560) * 100}%`, width: `${((240 * 0.56) / 1000) * 100}%`, height: `${((285 * 0.56) / 560) * 100}%` }} />
+      <canvas ref={canvas} aria-hidden className="absolute inset-0 h-full w-full transition-opacity duration-1000 [filter:blur(5px)_saturate(1.15)]" style={{ opacity: pronto && ativo ? 0.95 : 0 }} />
+      </div>
     </div>
   );
 }

@@ -6,7 +6,7 @@ import { Icone, type NomeIcone } from "../_compartilhado/Icones";
 import { LogoAIPNome } from "../_compartilhado/Logos";
 import { Marca, Moldura, Rotulo, useNavegacao } from "../_compartilhado/Moldura";
 import { d, Slide } from "../_compartilhado/slide";
-import { CartaoVisual, Economia, Estacionamento, ListaRestricao, LogoCaruaru, Mini, PainelExemplo, PlantaCerca, Rota, SeloExemplo, SeloSobProjeto } from "./Visuais";
+import { CartaoVisual, Economia, Estacionamento, ListaRestricao, LogoCaruaru, MapaCalorPlanta, Mini, PainelExemplo, PlantaCerca, Rota, SeloExemplo, SeloSobProjeto } from "./Visuais";
 
 // Apresentação comercial exclusiva do Caruaru Shopping (página oculta: sem link
 // no site, fora do sitemap, noindex, fora da regra de idiomas). Números são de
@@ -164,24 +164,42 @@ export default function Apresentacao() {
         <Slide id="pessoas" rotulo="Pessoas">
           <div className="ap-margem">
             <Rotulo>Pessoas</Rotulo>
-            <h2 className="ap-in ap-titulo-m max-w-[26ch]" style={d(80)}>
+            <h2 className="ap-in ap-titulo-p max-w-[34ch]" style={d(80)}>
               Quem entra, por onde circula e quando o movimento cresce.
             </h2>
-            <ul className="mt-[clamp(2rem,6vh,4rem)] grid gap-[clamp(0.75rem,1.4vw,1.5rem)] md:grid-cols-3">
-              {PESSOAS.map((p, i) => (
-                <li key={p.titulo} className="ap-in flex flex-col rounded-2xl border border-white/10 bg-[#111214] p-[clamp(1rem,2vw,1.75rem)]" style={d(220 + i * 120)}>
-                  <div className="h-[clamp(7rem,19vh,12rem)]">
-                    <Mini id={p.id} />
+            <div className="mt-[clamp(1rem,3vh,2rem)] grid gap-[clamp(0.75rem,1.4vw,1.5rem)] lg:grid-cols-3">
+              {/* mapas de calor e rotas: a planta do shopping, maior que os outros */}
+              <div className="ap-in flex flex-col rounded-2xl border border-white/10 bg-[#111214] p-[clamp(0.9rem,1.6vw,1.4rem)] lg:col-span-2 lg:row-span-2" style={d(220)}>
+                <MapaCalorPlanta />
+                <div className="mt-[clamp(0.75rem,2vh,1.25rem)] flex flex-wrap items-end justify-between gap-x-6 gap-y-2">
+                  <div>
+                    <h3 className="font-titulo text-[clamp(1.35rem,min(2vw,3.6vh),2.3rem)] font-bold leading-[1.05]">Mapas de calor e rotas</h3>
+                    <p className="mt-1 ap-pequeno text-white/65">Onde o público circula, para e quais caminhos usa.</p>
                   </div>
-                  <h3 className="mt-[clamp(1rem,2.6vh,1.6rem)] font-titulo text-[clamp(1.35rem,min(2vw,3.6vh),2.3rem)] font-bold leading-[1.05]">{p.titulo}</h3>
-                  <p className="mt-2 ap-pequeno text-white/65">{p.texto}</p>
-                  <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/10 pt-[clamp(0.6rem,1.6vh,1rem)] [margin-top:clamp(1rem,2.6vh,1.6rem)]">
-                    <span className="text-[clamp(0.7rem,1.3vh,0.9rem)] font-medium text-white">{p.exemplo}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="flex items-center gap-2 text-[clamp(0.6rem,1.1vh,0.78rem)] text-white/55">
+                      Pouco
+                      <span className="h-2 w-[clamp(4rem,8vw,7rem)] rounded-full" style={{ background: "linear-gradient(90deg, #3b82f6, #10b981, #facc15, #dc2626)" }} />
+                      Muito
+                    </span>
                     <SeloExemplo />
                   </div>
-                </li>
+                </div>
+              </div>
+              {PESSOAS.filter((p) => p.id !== "V2").map((p, i) => (
+                <div key={p.titulo} className="ap-in flex flex-col rounded-2xl border border-white/10 bg-[#111214] p-[clamp(0.9rem,1.6vw,1.4rem)]" style={d(340 + i * 120)}>
+                  <div className="h-[clamp(4.5rem,11vh,7.5rem)]">
+                    <Mini id={p.id} />
+                  </div>
+                  <h3 className="mt-[clamp(0.6rem,1.6vh,1rem)] font-titulo text-[clamp(1.2rem,min(1.7vw,3vh),1.9rem)] font-bold leading-[1.05]">{p.titulo}</h3>
+                  <p className="mt-1 ap-pequeno text-white/65">{p.texto}</p>
+                  <div className="mt-auto flex items-center justify-between gap-3 border-t border-white/10 pt-[clamp(0.5rem,1.2vh,0.8rem)] [margin-top:clamp(0.6rem,1.6vh,1rem)]">
+                    <span className="text-[clamp(0.65rem,1.2vh,0.85rem)] font-medium text-white">{p.exemplo}</span>
+                    <SeloExemplo />
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </Slide>
 
@@ -237,7 +255,7 @@ export default function Apresentacao() {
 
         {/* 9 · Economia */}
         <Slide id="economia" rotulo="Economia">
-          <Bloco rotulo="Economia" titulo="A inteligência de câmeras novas, sem trocar as que o shopping já tem." visual={<Economia />} proporcao="lg:grid-cols-[0.8fr_1.2fr]" />
+          <Bloco rotulo="Economia" titulo="Até 80% menos investimento para ter inteligência artificial nas câmeras." texto="Em vez de comprar câmeras novas com IA embarcada, a AIP aplica a inteligência nas câmeras que o shopping já tem." visual={<Economia />} proporcao="lg:grid-cols-[0.85fr_1.15fr]" />
         </Slide>
 
         {/* 10 · Privacidade e LGPD */}
@@ -296,25 +314,21 @@ export default function Apresentacao() {
             </div>
             <div className="ap-in relative rounded-2xl border border-[#5FD3FF]/35 bg-[#5FD3FF]/[0.045] p-[clamp(1.25rem,3vh,2.25rem)]" style={d(300)}>
               <p className="ap-pequeno text-white/55">Mensalidade</p>
-              <p className="ap-num mt-1 text-[clamp(2rem,min(3.6vw,6.4vh),4.2rem)] font-bold leading-none text-[#5FD3FF]">[A DEFINIR]</p>
+              <p className="mt-1 font-titulo text-[clamp(1.5rem,min(2.4vw,4.2vh),2.75rem)] font-semibold leading-[1.1] text-white">Definida conforme o número de câmeras do projeto.</p>
               <div className="mt-[clamp(1rem,3vh,2rem)] border-t border-white/10 pt-[clamp(1rem,3vh,2rem)]">
-                <p className="ap-pequeno text-white/70">
-                  Setup de{" "}
-                  <span className="relative inline-block whitespace-nowrap text-white">
-                    [A DEFINIR]
-                    <span aria-hidden className="ap-linha-x absolute left-[-3%] top-1/2 h-[2px] w-[106%] -translate-y-1/2 bg-[#5FD3FF]" style={{ "--d": "1000ms", "--t": "550ms" } as React.CSSProperties} />
-                  </span>{" "}
-                  (aplicação da IA, configuração e painel): isento para o Caruaru Shopping.
-                </p>
-                <span className="mt-[clamp(0.6rem,1.8vh,1rem)] inline-block rotate-[-4deg]">
-                  <span className="ap-in block rounded-md border-2 border-[#5FD3FF] px-3 py-0.5 font-titulo text-[clamp(1rem,min(1.6vw,2.8vh),1.6rem)] font-bold tracking-[0.2em] text-[#5FD3FF] shadow-[0_0_24px_rgb(95_211_255/0.25)]" style={d(1500)}>
-                    ISENTO
+                <p className="ap-pequeno text-white/55">Setup: aplicação da IA, configuração e painel</p>
+                <div className="mt-1 flex flex-wrap items-center gap-x-5 gap-y-2">
+                  <p className="font-titulo text-[clamp(1.5rem,min(2.4vw,4.2vh),2.75rem)] font-semibold leading-[1.1] text-[#5FD3FF]">Isento para o Caruaru Shopping.</p>
+                  <span className="inline-block rotate-[-4deg]">
+                    <span className="ap-in block rounded-md border-2 border-[#5FD3FF] px-3 py-0.5 font-titulo text-[clamp(1rem,min(1.6vw,2.8vh),1.6rem)] font-bold tracking-[0.2em] text-[#5FD3FF] shadow-[0_0_24px_rgb(95_211_255/0.25)]" style={d(1200)}>
+                      ISENTO
+                    </span>
                   </span>
-                </span>
+                </div>
               </div>
               <div className="mt-[clamp(1rem,3vh,2rem)] border-t border-white/10 pt-[clamp(1rem,3vh,2rem)]">
                 <p className="ap-pequeno text-white/55">Período de teste</p>
-                <p className="mt-1 ap-item text-white">[A DEFINIR]</p>
+                <p className="mt-1 font-titulo text-[clamp(1.5rem,min(2.4vw,4.2vh),2.75rem)] font-semibold leading-[1.1] text-white">30 dias, a partir da entrega da primeira versão.</p>
               </div>
             </div>
           </div>
