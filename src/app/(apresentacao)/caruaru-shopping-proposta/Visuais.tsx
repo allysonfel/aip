@@ -1,6 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { useId, useState, type ReactNode } from "react";
+import { ECONOMIA } from "../../(site)/_config/economia";
 import { MiniVisual, type VisualId } from "../../(site)/_components/MiniVisuais";
 import { Icone, type NomeIcone } from "../_compartilhado/Icones";
 import { d, useAtivo } from "../_compartilhado/slide";
@@ -59,15 +60,16 @@ export function Rota({ etapas }: { etapas: { icone: NomeIcone; titulo: string; t
   const dur = 1800;
   const quando = (i: number) => inicio + (dur * i) / (etapas.length - 1);
   const tam = "h-[clamp(3.25rem,8vh,5rem)] w-[clamp(3.25rem,8vh,5rem)]";
+  const borda = `${50 / etapas.length}%`;
   return (
     <div className="relative">
-      <div aria-hidden className="absolute left-[12.5%] right-[12.5%] top-[clamp(1.625rem,4vh,2.5rem)] hidden h-px bg-white/15 md:block">
+      <div aria-hidden className="absolute top-[clamp(1.625rem,4vh,2.5rem)] hidden h-px bg-white/15 md:block" style={{ left: borda, right: borda }}>
         <div className="ap-linha-x h-full w-full bg-[#5FD3FF]" style={{ "--d": `${inicio}ms`, "--t": `${dur}ms`, transitionTimingFunction: "linear" } as React.CSSProperties} />
       </div>
       <div aria-hidden className="absolute bottom-6 left-[clamp(1.625rem,4vh,2.5rem)] top-6 w-px bg-white/15 md:hidden">
         <div className="ap-linha-y h-full w-full bg-[#5FD3FF]" style={{ "--d": `${inicio}ms`, "--t": `${dur}ms`, transitionTimingFunction: "linear" } as React.CSSProperties} />
       </div>
-      <ol className="relative grid gap-6 md:grid-cols-4">
+      <ol className="relative grid gap-6 md:grid-cols-[repeat(var(--n),minmax(0,1fr))]" style={{ "--n": etapas.length } as React.CSSProperties}>
         {etapas.map((e, i) => (
           <li key={e.titulo} className="flex items-start gap-5 md:flex-col md:items-center md:gap-5 md:text-center">
             <span className={`relative shrink-0 ${tam}`}>
@@ -82,7 +84,7 @@ export function Rota({ etapas }: { etapas: { icone: NomeIcone; titulo: string; t
               <span className="ap-acende block font-titulo text-[clamp(1.3rem,min(2vw,3.6vh),2.4rem)] font-semibold leading-tight" style={d(quando(i))}>
                 {e.titulo}
               </span>
-              <span className="ap-acende mt-2 block ap-pequeno text-white/65 md:mx-auto md:max-w-[22ch]" style={d(quando(i) + 150)}>
+              <span className="ap-acende mt-2 block ap-pequeno text-white/65 md:mx-auto md:max-w-[30ch]" style={d(quando(i) + 150)}>
                 {e.texto}
               </span>
             </span>
@@ -215,10 +217,10 @@ export function ChatExemplo() {
           Das 18h às 19h, com 1.140 entradas. É 9% acima da média das terças.
         </Balao>
         <Balao de="voce" atraso={1400}>
-          Quais são as zonas mortas?
+          Qual acesso teve mais entradas hoje?
         </Balao>
         <Balao de="aip" atraso={1900}>
-          A ala sul do piso 1 está 38% abaixo da média do shopping.
+          O acesso principal, com 3.980 entradas até agora.
         </Balao>
       </div>
     </div>
@@ -270,6 +272,232 @@ export function ListaRestricao() {
         <span className="ap-pequeno font-medium text-white">Aviso para a segurança na entrada</span>
         <SeloSobProjeto />
       </div>
+    </div>
+  );
+}
+
+/* ------------------------------ planta: cerca digital ------------------------------ */
+
+// Planta oficial do térreo (public/plantas/terreo.jpg, 1615 x 1000), a mesma do
+// painel. Por cima: a cerca digital proposta (contorno), linhas de contagem nos
+// acessos e pontos de câmera. É o que será montado, não o que já funciona.
+const CERCA: [number, number][] = [
+  [165, 715], [165, 430], [245, 295], [330, 160], [405, 35], [720, 22], [1150, 22], [1240, 140], [1452, 345], [1456, 800], [1400, 862], [1232, 935], [742, 940], [700, 908], [480, 908], [300, 805],
+];
+/** Linhas de contagem: [x1, y1, x2, y2] (entradas de pedestres e acessos do estacionamento). */
+const CONTAGEM: [number, number, number, number][] = [
+  [508, 728, 552, 748], // entrada principal
+  [292, 478, 322, 506], // entrada oeste
+  [752, 712, 790, 712], // entrada do estacionamento
+  [1192, 705, 1226, 705], // entrada leste
+  [165, 540, 165, 600], // acesso do estacionamento oeste
+  [940, 940, 1020, 939], // acesso do estacionamento sul
+  [1455, 540, 1455, 610], // acesso leste
+  [860, 22, 940, 22], // acesso norte
+];
+const CAMERAS: [number, number][] = [
+  [470, 470], [620, 420], [720, 600], [860, 690], [1050, 690], [950, 450], [1200, 470], [560, 700], [980, 860], [250, 560], [1420, 600], [800, 70],
+];
+
+export function PlantaCerca() {
+  const ativo = useAtivo();
+  const pontos = CERCA.map(([x, y]) => `${x},${y}`).join(" ");
+  const id = useId();
+  return (
+    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-black">
+      <svg viewBox="130 0 1350 1000" className="block h-auto w-full" aria-label="Planta do Caruaru Shopping com a cerca digital proposta em volta do shopping e do estacionamento">
+        <defs>
+          <filter id={`${id}-cinza`}>
+            <feColorMatrix type="saturate" values="0.08" />
+          </filter>
+          <radialGradient id={`${id}-vinheta`} cx="50%" cy="50%" r="70%">
+            <stop offset="55%" stopColor="#000" stopOpacity="0" />
+            <stop offset="100%" stopColor="#000" stopOpacity="0.75" />
+          </radialGradient>
+        </defs>
+        <image href="/plantas/terreo.jpg" x="0" y="0" width="1615" height="1000" filter={`url(#${id}-cinza)`} opacity="0.42" />
+        {/* a planta oficial traz o logo do shopping impresso no canto: fica coberto (o logo vai inteiro na capa) */}
+        <rect x="1362" y="20" width="130" height="285" fill="rgb(66 66 66)" />
+        <rect x="130" y="0" width="1350" height="1000" fill={`url(#${id}-vinheta)`} />
+        {/* área dentro da cerca, bem leve */}
+        <polygon points={pontos} fill="rgb(95 211 255 / 0.05)" style={{ opacity: ativo ? 1 : 0, transition: "opacity 1s ease 1.8s" }} />
+        {/* a cerca sendo desenhada */}
+        <polygon points={pontos} fill="none" stroke="#5FD3FF" strokeWidth="3.2" strokeLinejoin="round" pathLength={1} strokeDasharray="1" style={{ strokeDashoffset: ativo ? 0 : 1, transition: "stroke-dashoffset 2.4s cubic-bezier(.45,.05,.35,1) .3s" }} />
+        {/* linhas de contagem acendendo */}
+        {CONTAGEM.map(([x1, y1, x2, y2], i) => (
+          <g key={i} style={{ opacity: ativo ? 1 : 0, transition: `opacity .45s ease ${2.6 + i * 0.18}s` }}>
+            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#fff" strokeWidth="7" strokeLinecap="round" />
+            <line x1={x1} y1={y1} x2={x2} y2={y2} stroke="#5FD3FF" strokeWidth="3" strokeLinecap="round" />
+          </g>
+        ))}
+        {/* pontos de câmera */}
+        {CAMERAS.map(([x, y], i) => (
+          <g key={i} style={{ opacity: ativo ? 1 : 0, transition: `opacity .4s ease ${1.2 + i * 0.08}s` }}>
+            <circle cx={x} cy={y} r="16" fill="rgb(255 255 255 / 0.08)" />
+            <circle cx={x} cy={y} r="6.5" fill="#fff" />
+          </g>
+        ))}
+      </svg>
+      <div className="absolute bottom-[clamp(0.5rem,1.4vh,0.9rem)] left-[clamp(0.6rem,1.4vw,1rem)] flex flex-wrap gap-x-5 gap-y-1 text-[clamp(0.6rem,1.15vh,0.8rem)] text-white/70">
+        <span className="flex items-center gap-2">
+          <span className="h-[2px] w-5 bg-[#5FD3FF]" /> Cerca digital
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="h-[3px] w-3 rounded-full bg-[#5FD3FF] ring-2 ring-white/60" /> Linha de contagem
+        </span>
+        <span className="flex items-center gap-2">
+          <span className="h-2 w-2 rounded-full bg-white" /> Câmera
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------ estacionamento ------------------------------ */
+
+/** Recorte do estacionamento da planta, com caixas (só cantos) em volta de carros e uma placa lida (fictícia e borrada). */
+export function Estacionamento() {
+  const ativo = useAtivo();
+  const id = useId();
+  const caixas: [number, number, number, number][] = [
+    [862, 846, 18, 28],
+    [935, 846, 18, 28],
+    [1062, 846, 18, 28],
+    [1150, 846, 18, 28],
+  ];
+  const k = 5;
+  return (
+    <div className="overflow-hidden rounded-2xl border border-white/10 bg-[#111214]">
+      <div className="relative">
+        <svg viewBox="745 788 470 140" className="block h-auto w-full" aria-hidden>
+          <defs>
+            <filter id={`${id}-cinza`}>
+              <feColorMatrix type="saturate" values="0.15" />
+            </filter>
+            <filter id={`${id}-borra`}>
+              <feGaussianBlur stdDeviation="1.6" />
+            </filter>
+          </defs>
+          <image href="/plantas/terreo.jpg" x="0" y="0" width="1615" height="1000" filter={`url(#${id}-cinza)`} opacity="0.55" />
+          {caixas.map(([x, y, w, h], i) => (
+            <path
+              key={i}
+              d={`M${x} ${y + k} V${y} H${x + k} M${x + w - k} ${y} H${x + w} V${y + k} M${x + w} ${y + h - k} V${y + h} H${x + w - k} M${x + k} ${y + h} H${x} V${y + h - k}`}
+              stroke={i === 2 ? "#5FD3FF" : "#fff"}
+              strokeWidth="1.4"
+              fill="none"
+              style={{ opacity: ativo ? 1 : 0, transition: `opacity .4s ease ${0.4 + i * 0.2}s` }}
+            />
+          ))}
+          {/* etiqueta da placa lida (fictícia e borrada) */}
+          <g style={{ opacity: ativo ? 1 : 0, transition: "opacity .5s ease 1.4s" }}>
+            <path d="M1071 846 L1086 826" stroke="#5FD3FF" strokeWidth="1" />
+            <rect x="1086" y="808" width="96" height="24" rx="4" fill="rgb(0 0 0 / 0.85)" stroke="#5FD3FF" strokeWidth="1" />
+            <text x="1093" y="818" fill="#5FD3FF" fontSize="6.5" letterSpacing="0.8" fontFamily="var(--font-barlow)">
+              PLACA LIDA
+            </text>
+            <g filter={`url(#${id}-borra)`}>
+              <text x="1093" y="828" fill="#fff" fontSize="8.5" fontWeight="600" letterSpacing="1.6" fontFamily="var(--font-barlow-condensed)">
+                ABC1D23
+              </text>
+            </g>
+          </g>
+        </svg>
+      </div>
+      <div className="grid grid-cols-3 gap-px border-t border-white/10 bg-white/10">
+        {(
+          [
+            ["Veículos agora", "612"],
+            ["Ocupação", "74%"],
+            ["Permanência média", "1h52"],
+          ] as [string, string][]
+        ).map(([r, v]) => (
+          <div key={r} className="bg-[#111214] px-[clamp(0.7rem,1.4vw,1.1rem)] py-[clamp(0.6rem,1.4vh,0.9rem)]">
+            <p className="text-[clamp(0.6rem,1.1vh,0.78rem)] text-white/50">{r}</p>
+            <p className="ap-num mt-1 text-[clamp(1.2rem,min(2vw,3.4vh),2.1rem)] font-bold leading-none">{v}</p>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-end border-t border-white/10 px-4 py-2">
+        <SeloExemplo />
+      </div>
+    </div>
+  );
+}
+
+/* ------------------------------ economia (calculadora) ------------------------------ */
+
+const MIN_CAM = 10;
+const MAX_CAM = 300;
+
+/** "R$ 130 mil", "R$ 1,3 milhão", "R$ 4,2 milhões" (mesma escrita da calculadora do site). */
+function reaisCurto(v: number) {
+  if (v >= 1_000_000) {
+    const m = v / 1_000_000;
+    return `R$ ${m.toLocaleString("pt-BR", { maximumFractionDigits: 1 })} ${m < 2 ? "milhão" : "milhões"}`;
+  }
+  return `R$ ${Math.round(v / 1000).toLocaleString("pt-BR")} mil`;
+}
+
+/**
+ * Câmeras novas com IA embarcada x as câmeras do shopping com a AIP. Mostra só
+ * o custo de trocar e a economia estimada (R$ e %), nunca o valor da AIP. A
+ * quantidade de câmeras muda ao vivo no controle.
+ */
+export function Economia({ inicial = 120 }: { inicial?: number }) {
+  const ativo = useAtivo();
+  const id = useId();
+  const [qtd, setQtd] = useState(inicial);
+  const pct = ECONOMIA.economiaPercentual;
+  const trocaMin = qtd * ECONOMIA.precoMinimo;
+  const trocaMax = qtd * ECONOMIA.precoMaximo;
+  const larguraTroca = 35 + ((qtd - MIN_CAM) / (MAX_CAM - MIN_CAM)) * 65;
+  return (
+    <div className="rounded-2xl border border-white/10 bg-[#111214] p-[clamp(1.1rem,2.6vh,2.25rem)]">
+      <div className="flex flex-wrap items-baseline justify-between gap-3">
+        <label htmlFor={`${id}-qtd`} className="ap-pequeno font-medium">
+          Câmeras do shopping
+        </label>
+        <span className="flex items-center gap-3">
+          <span className="rounded-full border border-white/20 px-2.5 py-0.5 text-[clamp(0.55rem,1vh,0.7rem)] font-medium uppercase tracking-[0.16em] text-white/50">Estimativa</span>
+          <span className="ap-num text-[clamp(2rem,min(3.4vw,6vh),3.6rem)] font-bold leading-none tabular-nums" aria-hidden>
+            {qtd}
+          </span>
+        </span>
+      </div>
+      <input
+        id={`${id}-qtd`}
+        type="range"
+        min={MIN_CAM}
+        max={MAX_CAM}
+        step={5}
+        value={qtd}
+        onChange={(e) => setQtd(Number(e.target.value))}
+        aria-valuetext={`${qtd} câmeras`}
+        className="controle-calc mt-[clamp(0.6rem,1.6vh,1rem)] w-full"
+        style={{ "--pos": `${((qtd - MIN_CAM) / (MAX_CAM - MIN_CAM)) * 100}%` } as React.CSSProperties}
+      />
+      <div className="mt-[clamp(1.25rem,3.4vh,2.25rem)]">
+        <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
+          <p className="ap-pequeno font-medium">Comprar câmeras novas com IA embarcada</p>
+          <p className="ap-pequeno tabular-nums text-white/70">
+            {reaisCurto(trocaMin)} a {reaisCurto(trocaMax)}
+          </p>
+        </div>
+        <div className="mt-2 h-[clamp(1.75rem,4vh,2.5rem)] rounded-lg bg-white/[0.04]">
+          <div className="h-full rounded-lg bg-white/80 transition-[width] duration-700 ease-out" style={{ width: ativo ? `${larguraTroca}%` : "0%" }} />
+        </div>
+      </div>
+      <div className="mt-[clamp(1.25rem,3.4vh,2.25rem)] border-t border-white/10 pt-[clamp(1.25rem,3.4vh,2.25rem)]">
+        <p className="ap-pequeno text-white/60">Economia estimada usando as câmeras que o shopping já tem</p>
+        <div className="mt-2 flex flex-wrap items-end gap-x-[clamp(1rem,2.5vw,2.5rem)] gap-y-2">
+          <p className="ap-num text-[clamp(3rem,min(6vw,10vh),6.5rem)] font-bold leading-none text-[#5FD3FF]">~{pct}%</p>
+          <p className="pb-[0.35em] font-titulo text-[clamp(1.4rem,min(2.4vw,4.2vh),2.8rem)] font-bold leading-tight tabular-nums text-white">
+            {reaisCurto(trocaMin * (pct / 100))} a {reaisCurto(trocaMax * (pct / 100))}
+          </p>
+        </div>
+      </div>
+      <p className="mt-[clamp(1rem,2.6vh,1.6rem)] text-[clamp(0.6rem,1.1vh,0.78rem)] leading-relaxed text-white/45">Valores de referência. O cálculo final depende do levantamento das câmeras.</p>
     </div>
   );
 }
