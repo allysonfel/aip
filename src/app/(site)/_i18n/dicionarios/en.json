@@ -11,8 +11,8 @@
     "proximo": "Next",
     "solucoesPorSegmento": "Solutions by sector",
     "produto": "Product",
-    "valoresEmReais": "Prices in Brazilian reais (R$).",
-    "pularConteudo": "Skip to content"
+    "pularConteudo": "Skip to content",
+    "notaMoeda": "Approximate values in US dollars."
   },
   "menu": {
     "principal": "Main",

@@ -11,7 +11,7 @@ import { f } from "../../_i18n/dicionario";
 import { LOCALE } from "../../_i18n/idiomas";
 import Link from "../../_i18n/LinkI";
 import { i18n } from "../../_i18n/servidor";
-import { ECONOMIA } from "../../_config/economia";
+import { faixaPreco } from "../../_config/economia";
 
 export async function generateMetadata() {
   const { idioma, d } = await i18n();
@@ -49,7 +49,8 @@ function Destaques({ itens }: { itens: [keyof typeof ICONES, string][] }) {
 export default async function CamerasIA() {
   const { idioma, d } = await i18n();
   const t = d.cameras;
-  const reais = (v: number) => new Intl.NumberFormat(LOCALE[idioma], { style: "currency", currency: "BRL", maximumFractionDigits: 0 }).format(v);
+  const preco = faixaPreco(idioma);
+  const moeda = (v: number) => new Intl.NumberFormat(LOCALE[idioma], { style: "currency", currency: preco.moeda, maximumFractionDigits: 0 }).format(v);
   const FAQ = t.faq.map((q) => ({
     p: q.p,
     r:
@@ -89,7 +90,7 @@ export default async function CamerasIA() {
             <p className="rotulo mb-4">{t.economiaRotulo}</p>
             <h2 className="titulo-secao">{t.economiaTitulo}</h2>
             <p className="corpo mt-6">
-              {f(t.economiaTexto, { min: reais(ECONOMIA.precoMinimo), max: reais(ECONOMIA.precoMaximo) })}
+              {f(t.economiaTexto, { min: moeda(preco.minimo), max: moeda(preco.maximo) })}
             </p>
             <div className="mt-8">
               <Botao href={CONTATO}>{t.economiaBotao}</Botao>
@@ -99,7 +100,7 @@ export default async function CamerasIA() {
             <Calculadora />
             <p className="mt-4 text-xs leading-relaxed text-white/55">
               {t.economiaNota}
-              {idioma !== "pt" && ` ${d.comum.valoresEmReais}`}
+              {idioma !== "pt" && ` ${d.comum.notaMoeda}`}
             </p>
           </Reveal>
         </div>

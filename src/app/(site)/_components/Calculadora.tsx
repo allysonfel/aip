@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { ECONOMIA } from "../_config/economia";
+import { ECONOMIA, faixaPreco } from "../_config/economia";
 import { useIdioma } from "../_i18n/Contexto";
 import { f } from "../_i18n/dicionario";
 import { LOCALE, type Idioma } from "../_i18n/idiomas";
@@ -9,9 +9,9 @@ import { LOCALE, type Idioma } from "../_i18n/idiomas";
 const MIN = 4;
 const MAX = 200;
 
-/** "R$ 130 mil", "R$ 1,3 milhão", "R$ 4,2 milhões"; em inglês e russo, o formato compacto de cada idioma (sempre em reais). */
-function reaisCurto(v: number, idioma: Idioma) {
-  if (idioma !== "pt") return new Intl.NumberFormat(LOCALE[idioma], { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1 }).format(v);
+/** "R$ 130 mil", "R$ 1,3 milhão", "R$ 4,2 milhões"; em inglês e russo, dólares no formato compacto de cada idioma ("$22K", "22 тыс. $"). */
+function valorCurto(v: number, idioma: Idioma) {
+  if (idioma !== "pt") return new Intl.NumberFormat(LOCALE[idioma], { style: "currency", currency: "USD", notation: "compact", maximumFractionDigits: 1 }).format(v);
   if (v >= 1_000_000) {
     const m = v / 1_000_000;
     const t = m.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
@@ -54,7 +54,8 @@ export default function Calculadora() {
   // A barra de troca cresce com a quantidade (de ~35% a 100% da largura).
   const larguraTroca = 35 + ((qtd - MIN) / (MAX - MIN)) * 65;
   const larguraAip = larguraTroca * (1 - pct / 100);
-  const faixa = f(c.faixa, { min: reaisCurto(qtd * ECONOMIA.precoMinimo, idioma), max: reaisCurto(qtd * ECONOMIA.precoMaximo, idioma) });
+  const preco = faixaPreco(idioma);
+  const faixa = f(c.faixa, { min: valorCurto(qtd * preco.minimo, idioma), max: valorCurto(qtd * preco.maximo, idioma) });
 
   return (
     <div ref={ref} className="rounded-2xl border border-white/10 bg-[#111214] p-6 sm:p-10">
