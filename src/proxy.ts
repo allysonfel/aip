@@ -19,6 +19,7 @@ const FORA = [
   "/santa-joana-proposta",
   "/fundac-proposta",
   "/cafe-do-virgulino-proposta",
+  "/caruaru-shopping-proposta",
   "/precos-setor-publico",
   "/posts-instagram",
   "/painel",
