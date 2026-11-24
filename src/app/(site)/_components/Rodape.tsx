@@ -23,7 +23,7 @@ export default function Rodape() {
   return (
     <footer className="border-t border-linha">
       <div className="margem grid grid-cols-2 gap-x-6 gap-y-12 py-16 sm:gap-x-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.1fr] lg:gap-x-12">
-        <div className="col-span-2 lg:col-span-1">
+        <div className="col-span-2 flex flex-col items-start gap-8 lg:col-span-1">
           {/* Assinatura: o nome centralizado embaixo do AIP, no mesmo desenho das
               apresentações comerciais (texto com ~18% da altura do logo, espaçado). */}
           <Link
@@ -39,6 +39,23 @@ export default function Rodape() {
               Agência de Inteligência Patrimonial
             </span>
           </Link>
+          {/* Redes sociais: embaixo da marca, separadas dos canais de contato */}
+          {INSTAGRAM && (
+            <a
+              href={`https://instagram.com/${INSTAGRAM}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Instagram da AIP: @${INSTAGRAM}`}
+              className="flex items-center gap-2 text-sm text-white/75 hover:text-white"
+            >
+              <svg viewBox="0 0 24 24" aria-hidden className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5">
+                <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none" />
+              </svg>
+              @{INSTAGRAM}
+            </a>
+          )}
         </div>
 
         {COLUNAS.map((c) => (
@@ -61,7 +78,7 @@ export default function Rodape() {
 
         <div>
           <h2 className="rotulo">Contato</h2>
-          {(EMAIL || WHATSAPP || INSTAGRAM || CIDADE) && (
+          {(EMAIL || WHATSAPP || CIDADE) && (
             <ul className="mt-4 flex flex-col gap-2.5 text-sm">
               {EMAIL && (
                 <li>
@@ -80,25 +97,6 @@ export default function Rodape() {
                     className="text-white/75 hover:text-white"
                   >
                     WhatsApp
-                  </a>
-                </li>
-              )}
-              {INSTAGRAM && (
-                <li>
-                  <a
-                    href={`https://instagram.com/${INSTAGRAM}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Instagram da AIP: @${INSTAGRAM}`}
-                    className="inline-flex items-center gap-2 text-white/75 hover:text-white"
-                  >
-                    {/* ícone de traço fino, na cor do texto */}
-                    <svg viewBox="0 0 24 24" aria-hidden className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5">
-                      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
-                      <circle cx="12" cy="12" r="4" />
-                      <circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none" />
-                    </svg>
-                    Instagram
                   </a>
                 </li>
               )}
