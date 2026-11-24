@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import Image from "next/image";
 import FotoEntra from "./FotoEntra";
-import Link from "next/link";
+import Link from "../_i18n/LinkI";
 import Reveal from "./Reveal";
 
 const M = "/site/media";

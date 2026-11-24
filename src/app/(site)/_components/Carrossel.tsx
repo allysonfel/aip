@@ -1,11 +1,13 @@
 "use client";
 
 import { useRef, type ReactNode } from "react";
+import { useIdioma } from "../_i18n/Contexto";
 
 // Faixa de cartões arrastáveis: toque nativo no celular; no desktop, arrastar
 // com o mouse, rolagem horizontal do trackpad ou da roda (Shift + roda) e
 // setas redondas embaixo. O teclado alcança a faixa, que rola com as setas.
 export default function Carrossel({ itens, rotulo, largura = "w-[82vw] sm:w-[420px]" }: { itens: { chave: string; conteudo: ReactNode }[]; rotulo: string; largura?: string }) {
+  const { d } = useIdioma();
   const faixa = useRef<HTMLUListElement>(null);
   const arraste = useRef<{ x: number; inicio: number; moveu: boolean } | null>(null);
 
@@ -48,7 +50,7 @@ export default function Carrossel({ itens, rotulo, largura = "w-[82vw] sm:w-[420
         ))}
       </ul>
       <div className="mt-8 flex justify-center gap-3">
-        {([[-1, "Anterior", "M15 5l-7 7 7 7"], [1, "Próximo", "M9 5l7 7-7 7"]] as const).map(([d, nome, caminho]) => (
+        {([[-1, d.comum.anterior, "M15 5l-7 7 7 7"], [1, d.comum.proximo, "M9 5l7 7-7 7"]] as const).map(([d, nome, caminho]) => (
           <button key={nome} type="button" aria-label={nome} onClick={() => mover(d)} className="flex h-12 w-12 items-center justify-center rounded-full border border-white/30 transition-colors hover:bg-white hover:text-black">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5" aria-hidden>
               <path d={caminho} strokeLinecap="round" strokeLinejoin="round" />

@@ -1,21 +1,14 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LogoAIP } from "@/components/shopping/Logo";
-import { PRODUTOS, SOLUCOES, type ItemMenu as Item } from "../_config/navegacao";
+import { menu, type ItemMenu as Item } from "../_config/navegacao";
+import { useIdioma } from "../_i18n/Contexto";
+import Link from "../_i18n/LinkI";
+import SeletorIdioma from "../_i18n/SeletorIdioma";
 
-const GRUPOS = [
-  { id: "produtos", rotulo: "Produtos", itens: PRODUTOS },
-  { id: "solucoes", rotulo: "Soluções", itens: SOLUCOES },
-] as const;
-
-const SIMPLES: Item[] = [
-  { href: "/sobre", rotulo: "Sobre" },
-];
-
-type Grupo = (typeof GRUPOS)[number]["id"];
+type Grupo = "produtos" | "solucoes";
 
 function Seta({ aberto }: { aberto: boolean }) {
   return (
@@ -31,6 +24,13 @@ function Seta({ aberto }: { aberto: boolean }) {
 // com os grupos expansíveis.
 export default function Navegacao() {
   const caminho = usePathname();
+  const { idioma, d, l } = useIdioma();
+  const itens = menu(idioma);
+  const GRUPOS: { id: Grupo; rotulo: string; itens: Item[] }[] = [
+    { id: "produtos", rotulo: d.menu.produtos, itens: itens.produtos },
+    { id: "solucoes", rotulo: d.menu.solucoes, itens: itens.solucoes },
+  ];
+  const SIMPLES: Item[] = [{ href: "/sobre", rotulo: d.menu.sobre }];
   const [aberto, setAberto] = useState(false);
   const [suspenso, setSuspenso] = useState<Grupo | null>(null);
   const [expandido, setExpandido] = useState<Grupo | null>(null);
@@ -107,7 +107,7 @@ export default function Navegacao() {
   }, [aberto]);
 
   const oculta = escondido && !aberto && !suspenso;
-  const ativo = (href: string) => caminho === href;
+  const ativo = (href: string) => caminho === l(href);
   const grupoAtivo = (itens: readonly Item[]) => itens.some((i) => ativo(i.href));
 
   return (
@@ -120,13 +120,13 @@ export default function Navegacao() {
         <div aria-hidden className={`pointer-events-none absolute inset-x-0 top-0 h-32 bg-gradient-to-b from-black/70 via-black/30 to-transparent transition-opacity duration-500 ${noTopo || aberto ? "opacity-0" : "opacity-100"}`} />
         <nav
           ref={nav}
-          aria-label="Principal"
+          aria-label={d.menu.principal}
           onBlur={(e) => {
             if (!e.currentTarget.contains(e.relatedTarget as Node)) setSuspenso(null);
           }}
           className="margem relative flex h-20 items-center justify-between gap-4"
         >
-          <Link href="/" aria-label="AIP, página inicial" className="flex items-center">
+          <Link href="/" aria-label={d.menu.paginaInicial} className="flex items-center">
             <LogoAIP className="h-6 text-white" />
           </Link>
 
@@ -148,20 +148,21 @@ export default function Navegacao() {
                 </button>
               </li>
             ))}
-            {SIMPLES.map((l) => (
-              <li key={l.href}>
-                <Link href={l.href} aria-current={ativo(l.href) ? "page" : undefined} className={`flex h-10 items-center px-3.5 text-sm transition-colors hover:text-white ${ativo(l.href) ? "text-white" : "text-white/70"}`}>
-                  {l.rotulo}
+            {SIMPLES.map((x) => (
+              <li key={x.href}>
+                <Link href={x.href} aria-current={ativo(x.href) ? "page" : undefined} className={`flex h-10 items-center px-3.5 text-sm transition-colors hover:text-white ${ativo(x.href) ? "text-white" : "text-white/70"}`}>
+                  {x.rotulo}
                 </Link>
               </li>
             ))}
           </ul>
 
           <div className="flex items-center gap-2">
+            <SeletorIdioma className="mr-3 hidden lg:flex" />
             <Link href="/contato" className="botao botao-claro botao-pequeno botao-simples min-h-10">
-              Fale conosco
+              {d.comum.faleConosco}
             </Link>
-            <button ref={botao} type="button" aria-label={aberto ? "Fechar menu" : "Abrir menu"} aria-expanded={aberto} aria-controls="menu-movel" onClick={() => setAberto(!aberto)} className="-mr-2 flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden">
+            <button ref={botao} type="button" aria-label={aberto ? d.menu.fecharMenu : d.menu.abrirMenu} aria-expanded={aberto} aria-controls="menu-movel" onClick={() => setAberto(!aberto)} className="-mr-2 flex h-10 w-10 flex-col items-center justify-center gap-1.5 lg:hidden">
               <span className={`h-px w-6 bg-white transition-transform duration-300 ${aberto ? "translate-y-[7px] rotate-45" : ""}`} />
               <span className={`h-px w-6 bg-white transition-opacity duration-200 ${aberto ? "opacity-0" : ""}`} />
               <span className={`h-px w-6 bg-white transition-transform duration-300 ${aberto ? "-translate-y-[7px] -rotate-45" : ""}`} />
@@ -213,14 +214,15 @@ export default function Navegacao() {
               </ul>
             </li>
           ))}
-          {[...SIMPLES, { href: "/contato", rotulo: "Contato" }].map((l) => (
-            <li key={l.href}>
-              <Link href={l.href} onClick={() => setAberto(false)} className="font-titulo text-4xl font-semibold">
-                {l.rotulo}
+          {[...SIMPLES, { href: "/contato", rotulo: d.menu.contato }].map((x) => (
+            <li key={x.href}>
+              <Link href={x.href} onClick={() => setAberto(false)} className="font-titulo text-4xl font-semibold">
+                {x.rotulo}
               </Link>
             </li>
           ))}
         </ul>
+        <SeletorIdioma className="mt-12 text-sm" />
       </div>
     </>
   );

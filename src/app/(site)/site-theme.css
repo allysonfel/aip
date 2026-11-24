@@ -16,6 +16,13 @@
   --aip-visao: #5ce1e6;
 }
 
+/* Russo: a Barlow não tem cirílico. Nas páginas em russo, texto e títulos
+   usam a Roboto e a Roboto Condensed (carregadas no layout). */
+html:lang(ru) {
+  --font-barlow: var(--font-cirilico);
+  --font-barlow-condensed: var(--font-cirilico-titulo);
+}
+
 @theme inline {
   --color-fundo: var(--aip-fundo);
   --color-painel: var(--aip-painel);

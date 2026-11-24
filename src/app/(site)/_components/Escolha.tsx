@@ -1,4 +1,5 @@
 "use client";
+import { useIdioma } from "../_i18n/Contexto";
 
 import { useEffect, useId, useMemo, useRef, useState, type ReactNode } from "react";
 
@@ -49,6 +50,7 @@ export default function Escolha({
   classeGatilho?: string;
   classePainel?: string;
 }) {
+  const { d } = useIdioma();
   const base = useId();
   const [aberto, setAberto] = useState(false);
   const [filtro, setFiltro] = useState("");
@@ -182,7 +184,7 @@ export default function Escolha({
                 onChange={(e) => setFiltro(e.target.value)}
                 onKeyDown={teclas}
                 placeholder="Buscar"
-                aria-label="Buscar na lista"
+                aria-label={d.contato.buscar}
                 aria-controls={idLista}
                 aria-activedescendant={visiveis[ativo] ? idOpcao(ativo) : undefined}
                 autoComplete="off"
@@ -216,7 +218,7 @@ export default function Escolha({
                 {o.detalhe && <span className="shrink-0 text-white/50">{o.detalhe}</span>}
               </li>
             ))}
-            {!visiveis.length && <li className="px-4 py-3 text-sm text-white/50">Nada encontrado</li>}
+            {!visiveis.length && <li className="px-4 py-3 text-sm text-white/50">{d.contato.nadaEncontrado}</li>}
           </ul>
         </div>
       )}

@@ -1,25 +1,28 @@
-import Link from "next/link";
 import { LogoAIP } from "@/components/shopping/Logo";
 import { CIDADE, EMAIL, INSTAGRAM, WHATSAPP } from "../_config/contato";
-import { PRODUTOS, SOLUCOES } from "../_config/navegacao";
-
-const COLUNAS = [
-  { titulo: "Produtos", itens: PRODUTOS },
-  { titulo: "Soluções", itens: SOLUCOES },
-  {
-    titulo: "Institucional",
-    itens: [
-      { href: "/sobre", rotulo: "Sobre" },
-      { href: "/contato", rotulo: "Contato" },
-      { href: "/privacidade", rotulo: "Política de privacidade" },
-    ],
-  },
-];
+import { menu } from "../_config/navegacao";
+import Link from "../_i18n/LinkI";
+import SeletorIdioma from "../_i18n/SeletorIdioma";
+import { i18n } from "../_i18n/servidor";
 
 // Desktop: marca + 4 colunas (Produtos, Soluções, Institucional, Contato) pela
 // largura toda. Tablet e celular: marca em cima e os grupos em 2 colunas.
 // Contatos vazios em _config/contato.ts não aparecem.
-export default function Rodape() {
+export default async function Rodape() {
+  const { idioma, d } = await i18n();
+  const itens = menu(idioma);
+  const COLUNAS = [
+    { titulo: d.rodape.produtos, itens: itens.produtos },
+    { titulo: d.rodape.solucoes, itens: itens.solucoes },
+    {
+      titulo: d.rodape.institucional,
+      itens: [
+        { href: "/sobre", rotulo: d.rodape.sobre },
+        { href: "/contato", rotulo: d.rodape.contato },
+        { href: "/privacidade", rotulo: d.rodape.privacidade },
+      ],
+    },
+  ];
   return (
     <footer className="border-t border-linha">
       <div className="margem grid grid-cols-2 gap-x-6 gap-y-12 py-16 sm:gap-x-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr_1.1fr] lg:gap-x-12">
@@ -28,7 +31,7 @@ export default function Rodape() {
               apresentações comerciais (texto com ~18% da altura do logo, espaçado). */}
           <Link
             href="/"
-            aria-label="AIP — Agência de Inteligência Patrimonial, página inicial"
+            aria-label={d.rodape.inicio}
             className="inline-flex flex-col items-center"
           >
             <LogoAIP className="h-11 text-white" />
@@ -36,7 +39,7 @@ export default function Rodape() {
               aria-hidden
               className="mt-[0.55em] whitespace-nowrap text-[8px] font-medium uppercase tracking-[0.14em] text-white/70"
             >
-              Agência de Inteligência Patrimonial
+              {d.comum.assinatura}
             </span>
           </Link>
           {/* Redes sociais: embaixo da marca, separadas dos canais de contato */}
@@ -45,7 +48,7 @@ export default function Rodape() {
               href={`https://instagram.com/${INSTAGRAM}`}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label={`Instagram da AIP: @${INSTAGRAM}`}
+              aria-label={`${d.rodape.instagram}: @${INSTAGRAM}`}
               className="flex items-center gap-2 text-sm text-white/75 hover:text-white"
             >
               <svg viewBox="0 0 24 24" aria-hidden className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -77,7 +80,7 @@ export default function Rodape() {
         ))}
 
         <div>
-          <h2 className="rotulo">Contato</h2>
+          <h2 className="rotulo">{d.rodape.contatoTitulo}</h2>
           {(EMAIL || WHATSAPP || CIDADE) && (
             <ul className="mt-4 flex flex-col gap-2.5 text-sm">
               {EMAIL && (
@@ -107,7 +110,7 @@ export default function Rodape() {
             href="/contato"
             className="botao botao-claro botao-pequeno botao-simples mt-4"
           >
-            Fale conosco
+            {d.comum.faleConosco}
           </Link>
         </div>
       </div>
@@ -115,11 +118,11 @@ export default function Rodape() {
       <div className="margem">
         <div className="flex flex-col gap-2 border-t border-linha py-8 text-sm text-cinza sm:flex-row sm:items-center sm:justify-between">
           <p>
-            © {new Date().getFullYear()} AIP — Agência de Inteligência
-            Patrimonial
+            © {new Date().getFullYear()} {d.rodape.direitos}
           </p>
+          <SeletorIdioma />
           <p>
-            Empresa do ecossistema{" "}
+            {d.rodape.ecossistema}{" "}
             <a
               href="https://logoscompany.io"
               target="_blank"

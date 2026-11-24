@@ -2,12 +2,16 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { ECONOMIA } from "../_config/economia";
+import { useIdioma } from "../_i18n/Contexto";
+import { f } from "../_i18n/dicionario";
+import { LOCALE, type Idioma } from "../_i18n/idiomas";
 
 const MIN = 4;
 const MAX = 200;
 
-/** "R$ 130 mil", "R$ 1,3 milhão", "R$ 4,2 milhões" */
-function reaisCurto(v: number) {
+/** "R$ 130 mil", "R$ 1,3 milhão", "R$ 4,2 milhões"; em inglês e russo, o formato compacto de cada idioma (sempre em reais). */
+function reaisCurto(v: number, idioma: Idioma) {
+  if (idioma !== "pt") return new Intl.NumberFormat(LOCALE[idioma], { style: "currency", currency: "BRL", notation: "compact", maximumFractionDigits: 1 }).format(v);
   if (v >= 1_000_000) {
     const m = v / 1_000_000;
     const t = m.toLocaleString("pt-BR", { maximumFractionDigits: 1 });
@@ -24,6 +28,8 @@ function reaisCurto(v: number) {
  */
 export default function Calculadora() {
   const id = useId();
+  const { idioma, d } = useIdioma();
+  const c = d.calculadora;
   const ref = useRef<HTMLDivElement>(null);
   const [qtd, setQtd] = useState(20);
   const [visivel, setVisivel] = useState(false);
@@ -48,13 +54,13 @@ export default function Calculadora() {
   // A barra de troca cresce com a quantidade (de ~35% a 100% da largura).
   const larguraTroca = 35 + ((qtd - MIN) / (MAX - MIN)) * 65;
   const larguraAip = larguraTroca * (1 - pct / 100);
-  const faixa = `${reaisCurto(qtd * ECONOMIA.precoMinimo)} a ${reaisCurto(qtd * ECONOMIA.precoMaximo)}`;
+  const faixa = f(c.faixa, { min: reaisCurto(qtd * ECONOMIA.precoMinimo, idioma), max: reaisCurto(qtd * ECONOMIA.precoMaximo, idioma) });
 
   return (
     <div ref={ref} className="rounded-2xl border border-white/10 bg-[#111214] p-6 sm:p-10">
       <div className="flex flex-wrap items-baseline justify-between gap-3">
         <label htmlFor={`${id}-qtd`} className="font-medium">
-          Quantas câmeras você tem?
+          {c.pergunta}
         </label>
         <p className="font-titulo text-4xl font-bold leading-none tabular-nums" aria-hidden>
           {qtd}
@@ -68,7 +74,7 @@ export default function Calculadora() {
         step={1}
         value={qtd}
         onChange={(e) => setQtd(Number(e.target.value))}
-        aria-valuetext={`${qtd} câmeras`}
+        aria-valuetext={f(c.cameras, { n: qtd })}
         className="controle-calc mt-4 w-full"
         style={{ "--pos": `${((qtd - MIN) / (MAX - MIN)) * 100}%` } as React.CSSProperties}
       />
@@ -79,7 +85,7 @@ export default function Calculadora() {
 
       <div className="mt-8">
         <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1">
-          <p className="font-medium">Trocar por câmeras com IA embarcada</p>
+          <p className="font-medium">{c.trocar}</p>
           <p className="text-sm text-white/70 tabular-nums">{faixa}</p>
         </div>
         <div className="mt-3 h-10 rounded-lg bg-white/[0.04]">
@@ -88,7 +94,7 @@ export default function Calculadora() {
       </div>
 
       <div className="mt-6">
-        <p className="font-medium">Suas câmeras + AIP</p>
+        <p className="font-medium">{c.aip}</p>
         <div className="mt-3 h-10 rounded-lg bg-white/[0.04]">
           <div className="h-full rounded-lg bg-[#5FD3FF] transition-[width] delay-150 duration-700 ease-out motion-reduce:transition-none" style={{ width: visivel ? `${larguraAip}%` : "0%" }} />
         </div>
@@ -96,10 +102,10 @@ export default function Calculadora() {
 
       <div className="mt-10 flex flex-wrap items-end gap-x-5 gap-y-2 border-t border-white/10 pt-8">
         <p className="font-titulo text-7xl font-bold leading-none text-[#5FD3FF] sm:text-8xl">~{pct}%</p>
-        <p className="pb-2 text-lg leading-snug text-white/85">de economia aproximada</p>
+        <p className="pb-2 text-lg leading-snug text-white/85">{c.economia}</p>
       </div>
       <p className="sr-only" aria-live="polite">
-        Com {qtd} câmeras, trocar por câmeras com IA embarcada custaria de {faixa}. Com as suas câmeras e a AIP, a economia aproximada é de {pct}%.
+        {f(c.resumo, { n: qtd, faixa, pct })}
       </p>
     </div>
   );

@@ -1,4 +1,6 @@
 "use client";
+import { useIdioma } from "../_i18n/Contexto";
+import { f } from "../_i18n/dicionario";
 
 import Image from "next/image";
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
@@ -99,6 +101,7 @@ const BOTAO_SETA = "flex h-11 w-11 items-center justify-center rounded-full bord
 
 /** Desktop: totem fixo à direita, lista "+" à esquerda e etapas pela rolagem. */
 function Desktop({ titulo, etapas }: { titulo: string; etapas: EtapaTotem[] }) {
+  const { d } = useIdioma();
   const n = etapas.length;
   const secao = useRef<HTMLDivElement>(null);
   const area = useRef<HTMLDivElement>(null);
@@ -179,10 +182,10 @@ function Desktop({ titulo, etapas }: { titulo: string; etapas: EtapaTotem[] }) {
             <h2 className="titulo-secao max-w-[30rem]">{titulo}</h2>
             <div className="mt-10 flex gap-5">
               <div className="flex flex-col gap-2 pt-1">
-                <button type="button" className={BOTAO_SETA} onClick={() => irPara(ativa - 1)} disabled={ativa === 0} aria-label="Item anterior">
+                <button type="button" className={BOTAO_SETA} onClick={() => irPara(ativa - 1)} disabled={ativa === 0} aria-label={d.totem.itemAnterior}>
                   <Seta cima />
                 </button>
-                <button type="button" className={BOTAO_SETA} onClick={() => irPara(ativa + 1)} disabled={ativa === n - 1} aria-label="Próximo item">
+                <button type="button" className={BOTAO_SETA} onClick={() => irPara(ativa + 1)} disabled={ativa === n - 1} aria-label={d.totem.itemProximo}>
                   <Seta cima={false} />
                 </button>
               </div>
@@ -227,6 +230,7 @@ function Desktop({ titulo, etapas }: { titulo: string; etapas: EtapaTotem[] }) {
  * de progresso e o texto da etapa ativa embaixo. Só transform e opacity animam.
  */
 function Celular({ titulo, etapas }: { titulo: string; etapas: EtapaTotem[] }) {
+  const { d } = useIdioma();
   const n = etapas.length;
   const secao = useRef<HTMLDivElement>(null);
   const area = useRef<HTMLDivElement>(null);
@@ -311,7 +315,7 @@ function Celular({ titulo, etapas }: { titulo: string; etapas: EtapaTotem[] }) {
           {/* Progresso */}
           <div className="margem relative z-10 flex gap-1.5 py-4">
             {etapas.map((x, i) => (
-              <button key={x.titulo} type="button" onClick={() => irPara(i)} aria-label={`Ir para ${x.titulo}`} className="flex h-6 w-6 items-center">
+              <button key={x.titulo} type="button" onClick={() => irPara(i)} aria-label={f(d.totem.irPara, { item: x.titulo })} className="flex h-6 w-6 items-center">
                 <span className={`block h-[3px] w-full origin-left rounded-full transition-[background-color,transform] duration-300 ${i === ativa ? "bg-[#5FD3FF]" : "scale-x-50 bg-white/25"}`} />
               </button>
             ))}

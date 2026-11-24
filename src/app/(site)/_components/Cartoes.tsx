@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "../_i18n/LinkI";
 import { hrefSegmento, type Segmento } from "../_content/solucoes";
 import { SetaBotao } from "./Base";
 

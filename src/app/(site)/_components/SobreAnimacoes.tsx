@@ -1,4 +1,5 @@
 "use client";
+import { useIdioma } from "../_i18n/Contexto";
 
 import { useEffect, useRef, useState, type CSSProperties } from "react";
 import { PONTOS_MAPA } from "../_content/mapa-mundi";
@@ -104,10 +105,11 @@ const ORIGENS = [
  * em ciano com um anel pulsando.
  */
 export function MapaMundi() {
+  const rotuloMapa = useIdioma().d.sobre.mapaAlt;
   const [ref, visto] = useVisto<HTMLDivElement>(0.35);
   return (
     <div ref={ref} className={`cartao-uso ${visto ? "ativo" : ""}`}>
-      <svg viewBox="0 6 360 150" role="img" aria-label="Mapa-múndi com linhas saindo dos Estados Unidos, da Europa, da Rússia, da China e de Israel em direção ao Brasil" className="h-auto w-full overflow-visible" fill="none">
+      <svg viewBox="0 6 360 150" role="img" aria-label={rotuloMapa} className="h-auto w-full overflow-visible" fill="none">
         <g fill="rgb(255 255 255 / 0.32)">
           {PONTOS_MAPA.map(([x, y], i) => (
             <circle key={i} cx={x} cy={y} r="1.05" />
@@ -234,10 +236,11 @@ function Globo({ mover }: { mover: boolean }) {
 
 /** 02 — Contornos de EUA, Europa, Rússia, China e Israel; uma linha passa por eles e termina no Brasil. */
 function Paises() {
+  const rotuloPaises = useIdioma().d.sobre.paisesAlt;
   const passo = 50;
   const fim = CONTORNOS.length * passo + 14;
   return (
-    <svg viewBox={`0 0 ${fim + 8} 40`} className="h-20 w-auto max-w-full" fill="none" role="img" aria-label="Contornos dos Estados Unidos, da Europa, da Rússia, da China e de Israel, ligados por uma linha até o Brasil">
+    <svg viewBox={`0 0 ${fim + 8} 40`} className="h-20 w-auto max-w-full" fill="none" role="img" aria-label={rotuloPaises}>
       <path className="mv-linha" style={{ "--d": "500ms" } as CSSProperties} d={`M2 20H${fim}`} stroke={C} strokeOpacity="0.6" strokeWidth="0.7" pathLength={1} />
       {CONTORNOS.map((p, i) => (
         <g key={p.nome} className="mv-ponto" style={{ "--d": `${i * 140}ms` } as CSSProperties} transform={`translate(${2 + i * passo} 5)`}>

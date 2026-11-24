@@ -1,0 +1,807 @@
+{
+  "comum": {
+    "assinatura": "Agência de Inteligência Patrimonial",
+    "marcaCompleta": "AIP — Agência de Inteligência Patrimonial",
+    "solicitarDemonstracao": "Solicitar demonstração",
+    "verSolucao": "Ver solução",
+    "ver": "Ver",
+    "perguntasFrequentes": "Perguntas frequentes",
+    "faleConosco": "Fale conosco",
+    "anterior": "Anterior",
+    "proximo": "Próximo",
+    "solucoesPorSegmento": "Soluções por segmento",
+    "produto": "Produto",
+    "valoresEmReais": "Valores em reais.",
+    "pularConteudo": "Ir para o conteúdo"
+  },
+  "menu": {
+    "principal": "Principal",
+    "paginaInicial": "AIP, página inicial",
+    "produtos": "Produtos",
+    "solucoes": "Soluções",
+    "sobre": "Sobre",
+    "contato": "Contato",
+    "abrirMenu": "Abrir menu",
+    "fecharMenu": "Fechar menu",
+    "idioma": "Idioma"
+  },
+  "produtos": {
+    "cameras": {
+      "nome": "Câmeras IA",
+      "descricao": "Inteligência artificial nas câmeras que você já tem."
+    },
+    "totem": {
+      "nome": "Totem IA",
+      "descricao": "Cobertura onde não há infraestrutura convencional."
+    }
+  },
+  "rodape": {
+    "inicio": "AIP — Agência de Inteligência Patrimonial, página inicial",
+    "instagram": "Instagram da AIP",
+    "produtos": "Produtos",
+    "solucoes": "Soluções",
+    "institucional": "Institucional",
+    "sobre": "Sobre",
+    "contato": "Contato",
+    "privacidade": "Política de privacidade",
+    "contatoTitulo": "Contato",
+    "direitos": "AIP — Agência de Inteligência Patrimonial",
+    "ecossistema": "Empresa do ecossistema"
+  },
+  "meta": {
+    "inicio": {
+      "titulo": "AIP | Inteligência Patrimonial para gestão e segurança",
+      "descricao": "A AIP desenvolve soluções tecnológicas que tornam organizações públicas e privadas mais seguras e eficientes.",
+      "imagemAlt": "AIP, Inteligência Patrimonial para gestão e segurança"
+    },
+    "sobre": {
+      "titulo": "Sobre a AIP: tecnologia brasileira para defender e entender patrimônios",
+      "descricao": "A AIP desenvolve soluções de inteligência artificial e visão computacional que transformam as imagens das câmeras em segurança, monitoramento avançado e eficiência."
+    },
+    "cameras": {
+      "titulo": "Câmeras IA",
+      "descricao": "Inteligência artificial nas câmeras que você já tem, sem trocar equipamento: detecção de pessoas, análise de fluxos e busca de registros."
+    },
+    "totem": {
+      "titulo": "Totem IA",
+      "descricao": "Monitoramento inteligente para locais que precisam de cobertura adicional ou não possuem infraestrutura convencional."
+    },
+    "contato": {
+      "titulo": "Solicite uma consulta",
+      "descricao": "Conte um pouco sobre sua necessidade e nossa equipe entrará em contato."
+    },
+    "privacidade": {
+      "titulo": "Política de Privacidade",
+      "descricao": "Como a AIP trata os dados pessoais recebidos pelo site. Texto-base em revisão jurídica."
+    }
+  },
+  "inicio": {
+    "heroTitulo": "Inteligência Patrimonial para gestão e segurança.",
+    "heroTexto": "A AIP desenvolve soluções tecnológicas que tornam organizações públicas e privadas mais seguras e eficientes.",
+    "heroBotao": "Solicitar uma consulta",
+    "maisTitulo": "Suas câmeras podem fazer mais.",
+    "maisTexto": "Imagens registram pessoas, veículos, acessos e movimentações. Com inteligência artificial, esses registros podem ser interpretados e convertidos em informações úteis. A AIP conecta monitoramento, análise visual e inteligência em uma única solução.",
+    "videoRotulo": "Vídeo da AIP apresentando as Câmeras IA: análise de vídeo, contagem de pessoas e horários de maior movimento",
+    "camerasAlt": "Lente de uma câmera de segurança refletindo uma via com pessoas e veículos marcados pela inteligência artificial",
+    "camerasTexto": "Inteligência artificial aplicada às câmeras que você já tem ou a uma nova estrutura planejada com a AIP, para identificar movimentações, analisar fluxos, localizar registros e acompanhar sua operação.",
+    "camerasBotao": "Conheça as Câmeras IA",
+    "totemAlt": "Totem IA da AIP instalado em frente a um prédio comercial",
+    "totemTexto": "Uma estrutura integrada de monitoramento inteligente para ampliar a cobertura em locais públicos e privados.",
+    "totemBotao": "Conheça o Totem IA",
+    "segmentosTitulo": "Diferentes ambientes. Novas possibilidades.",
+    "encerramentoTitulo": "Descubra novas possibilidades para suas câmeras.",
+    "encerramentoTexto": "Conheça as soluções da AIP.",
+    "encerramentoBotao": "Fale com nossa equipe"
+  },
+  "sobre": {
+    "rotulo": "Sobre a AIP",
+    "heroTitulo": "Tecnologia brasileira para defender e entender patrimônios.",
+    "heroTexto": "A AIP (Agência de Inteligência Patrimonial) desenvolve soluções de inteligência artificial e visão computacional para empresas, institutos e o setor público. Transformamos as imagens das câmeras em segurança, monitoramento avançado e eficiência para cada operação.",
+    "heroAlt": "Operador de costas numa sala escura, diante de uma parede de telas com imagens de câmeras e mapas analisados pela inteligência artificial",
+    "inovacaoRotulo": "Inovação",
+    "inovacaoTitulo": "O que há de mais avançado no mundo, pensado para a realidade brasileira.",
+    "inovacaoTextos": [
+      "As soluções da AIP nascem de estudos e pesquisas da nossa equipe de especialistas, somados à experiência internacional de quem acompanha de perto as tecnologias de visão computacional usadas por grandes empresas, serviços de inteligência e governos ao redor do mundo.",
+      "Um dos nossos diretores traz essa vivência para o Brasil, e a nossa equipe a transforma em soluções adaptadas às nossas cidades, ao nosso clima, às nossas leis e às necessidades de cada operação.",
+      "Acreditamos que o Brasil deve desenvolver a própria tecnologia, e não apenas importá-la. Cada solução da AIP é desenhada, configurada e acompanhada por uma equipe brasileira, contribuindo para a soberania digital do país."
+    ],
+    "mapaAlt": "Mapa-múndi com linhas saindo dos Estados Unidos, da Europa, da Rússia, da China e de Israel em direção ao Brasil",
+    "paisesAlt": "Contornos dos Estados Unidos, da Europa, da Rússia, da China e de Israel, ligados por uma linha até o Brasil",
+    "destaques": [
+      {
+        "titulo": "Pesquisa própria",
+        "texto": "Estudos da nossa equipe de especialistas em visão computacional."
+      },
+      {
+        "titulo": "Referências internacionais",
+        "texto": "Tecnologias usadas por empresas, serviços de inteligência e governos no mundo todo."
+      },
+      {
+        "titulo": "Soberania digital",
+        "texto": "Tecnologia desenvolvida no Brasil."
+      }
+    ],
+    "missaoRotulo": "Missão",
+    "missao": "Transformar imagens em inteligência para a segurança, o monitoramento avançado e a eficiência de cada operação.",
+    "visaoRotulo": "Visão",
+    "visao": "Um mundo em que imagens não sejam apenas guardadas, mas compreendidas.",
+    "principiosRotulo": "Princípios",
+    "principios": [
+      {
+        "titulo": "Precisão",
+        "texto": "Informação só tem valor se for confiável. Validamos cada aplicação antes de entregar."
+      },
+      {
+        "titulo": "Responsabilidade",
+        "texto": "Tratamos dados com finalidade definida, controle de acesso e respeito à legislação."
+      },
+      {
+        "titulo": "Tecnologia nacional",
+        "texto": "Tecnologia própria, desenvolvida com independência e soberania."
+      },
+      {
+        "titulo": "Parceria",
+        "texto": "Acompanhamos cada projeto do diagnóstico ao resultado."
+      }
+    ],
+    "etapasTitulo": "Do diagnóstico ao resultado.",
+    "etapas": [
+      {
+        "titulo": "Diagnóstico",
+        "texto": "Entendemos a operação e avaliamos as câmeras existentes."
+      },
+      {
+        "titulo": "Projeto",
+        "texto": "Definimos as aplicações e a configuração ideal."
+      },
+      {
+        "titulo": "Implantação",
+        "texto": "Presencial, no Brasil e no exterior."
+      },
+      {
+        "titulo": "Acompanhamento",
+        "texto": "Suporte remoto e evolução contínua."
+      }
+    ],
+    "privacidadeTitulo": "Inteligência com responsabilidade.",
+    "privacidadeTexto": "Cada projeto segue a LGPD, com finalidade definida, perfis de acesso, registro de auditoria e retenção de dados configurável. Aplicações sensíveis, como o reconhecimento facial, passam por avaliação técnica e jurídica antes de serem implantadas.",
+    "ecossistema": "A AIP faz parte do ecossistema Logos Company.",
+    "encerramentoTitulo": "Vamos conversar sobre o seu projeto.",
+    "encerramentoBotao": "Fale conosco"
+  },
+  "cameras": {
+    "heroTitulo": "As câmeras que você já tem, agora com IA.",
+    "heroTexto": "Sem trocar equipamento: a AIP conecta inteligência artificial à sua estrutura atual, que passa a detectar pessoas, analisar fluxos e localizar registros.",
+    "heroAlt": "Lente de uma câmera de segurança refletindo uma via com pessoas e veículos marcados pela inteligência artificial",
+    "comoFuncionaTitulo": "Como funciona.",
+    "comoFunciona": [
+      {
+        "titulo": "Conectamos às suas câmeras.",
+        "texto": "A AIP se integra às câmeras e gravadores que você já tem. Sem obra e sem trocar equipamento."
+      },
+      {
+        "titulo": "A IA analisa as imagens.",
+        "texto": "A IA detecta pessoas, veículos e objetos e é configurada para o que importa na sua operação: contar, acompanhar, avisar ou reconhecer comportamentos específicos. A tecnologia se adapta à sua necessidade."
+      },
+      {
+        "titulo": "Você acompanha no seu painel.",
+        "texto": "Tudo chega a um painel exclusivo da sua operação, no computador ou no celular, de qualquer lugar."
+      }
+    ],
+    "economiaRotulo": "Economia",
+    "economiaTitulo": "A inteligência de uma câmera com IA, sem trocar as suas.",
+    "economiaTexto": "Uma câmera com inteligência artificial embarcada custa hoje entre {min} e {max} por unidade. A AIP leva a mesma inteligência para as câmeras que você já tem.",
+    "economiaBotao": "Quero uma simulação para minha operação",
+    "economiaNota": "Valores de referência de mercado para câmeras com analíticos embarcados. A economia varia conforme o número de câmeras, os recursos contratados e a compatibilidade dos equipamentos.",
+    "destaques": [
+      "Sem obra",
+      "Sem trocar cabeamento",
+      "Implantação mais rápida"
+    ],
+    "segmentosTitulo": "Soluções para cada segmento.",
+    "segmentosTexto": "Veja como a AIP é aplicada no seu tipo de operação.",
+    "faq": [
+      {
+        "p": "Preciso trocar minhas câmeras atuais?",
+        "r": "Não necessariamente. Câmeras compatíveis com os requisitos técnicos podem ser usadas. Avaliamos a sua estrutura antes da implantação."
+      },
+      {
+        "p": "A solução funciona à noite?",
+        "r": "Sim, dentro das condições da câmera. O desempenho depende da iluminação e da qualidade das imagens."
+      },
+      {
+        "p": "A AIP faz reconhecimento facial?",
+        "r": "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores."
+      },
+      {
+        "p": "Quanto tempo leva a implantação?",
+        "r": "Depende da quantidade de câmeras, da infraestrutura e da configuração necessária. Após a avaliação técnica, informamos o prazo do seu projeto."
+      },
+      {
+        "p": "A AIP atende só os segmentos apresentados no site?",
+        "r": "Não. Os segmentos do site são exemplos de aplicação. Atendemos qualquer operação que use câmeras e desenvolvemos soluções sob medida para cada necessidade. Conte o seu caso para a nossa equipe.",
+        "link": "Fale com a gente"
+      },
+      {
+        "p": "Quem pode acessar o sistema?",
+        "r": "O acesso é organizado por perfis e permissões. Cada pessoa vê apenas o que precisa."
+      }
+    ],
+    "encerramentoTitulo": "Aproveite melhor as informações que suas câmeras registram."
+  },
+  "calculadora": {
+    "pergunta": "Quantas câmeras você tem?",
+    "cameras": "{n} câmeras",
+    "trocar": "Trocar por câmeras com IA embarcada",
+    "faixa": "{min} a {max}",
+    "aip": "Suas câmeras + AIP",
+    "economia": "de economia aproximada",
+    "resumo": "Com {n} câmeras, trocar por câmeras com IA embarcada custaria de {faixa}. Com as suas câmeras e a AIP, a economia aproximada é de {pct}%."
+  },
+  "totem": {
+    "heroTitulo": "Segurança inteligente em qualquer lugar.",
+    "heroTexto": "Monitoramento inteligente para locais que precisam de cobertura adicional ou não possuem infraestrutura convencional.",
+    "altFrente": "Totem IA da AIP visto de frente, com giroflex, quatro câmeras e linhas de LED azul, sobre fundo preto",
+    "altTopo": "Topo do Totem IA em close: giroflex vermelho e azul e câmeras com a marca AIP",
+    "altTresQuartos": "Totem IA em três quartos, mostrando as câmeras laterais e o corpo de 3 metros",
+    "altLateral": "Totem IA visto de lado, com as linhas de LED azul acesas ao longo do corpo",
+    "porDentroTitulo": "Cada detalhe pensado para proteger.",
+    "etapas": [
+      {
+        "titulo": "Giroflex conectado",
+        "texto": "Sinalização luminosa acionada pela nossa central de monitoramento 24h, com conexão aos órgãos de segurança pública."
+      },
+      {
+        "titulo": "4 câmeras com IA",
+        "texto": "Cobertura de 360° com detecção de pessoas, veículos, comportamentos suspeitos, ocorrências e armas."
+      },
+      {
+        "titulo": "Leitura de placas e reconhecimento facial",
+        "texto": "Identificação de veículos e de pessoas, com alertas em tempo real para a central e para as autoridades responsáveis."
+      },
+      {
+        "titulo": "Áreas restritas",
+        "texto": "Aviso imediato quando alguém entra em locais ou horários definidos."
+      },
+      {
+        "titulo": "Presença visível",
+        "texto": "Linhas de LED que tornam o totem visível de dia e de noite e inibem ações suspeitas."
+      },
+      {
+        "titulo": "Estrutura de 3 metros",
+        "texto": "Aço tratado contra corrosão, preparado para qualquer ambiente e conectado à plataforma AIP por 4G ou rede local."
+      }
+    ],
+    "itemAnterior": "Item anterior",
+    "itemProximo": "Próximo item",
+    "irPara": "Ir para {item}",
+    "tempoTitulo": "Feito para resistir ao tempo.",
+    "tempoTexto": "Chuva forte, sol, vento e variações de temperatura fazem parte da rotina de quem fica na rua. O Totem IA é projetado para operar ao ar livre, com estrutura e equipamentos preparados para qualquer ambiente, para que o monitoramento continue quando o tempo muda.",
+    "tempoAlt": "Totem IA sob chuva forte, visto de baixo para cima, com nuvens carregadas ao fundo",
+    "tempoBotao": "Solicitar avaliação técnica",
+    "centralAlt": "Agente da central AIP, de costas e com fone, diante de uma parede de telas com imagens de câmeras analisadas pela inteligência artificial",
+    "centralRotulo": "Central AIP",
+    "centralTitulo": "Olhos atentos 24 horas por dia.",
+    "centralTexto": "Além da inteligência artificial, cada Totem IA está conectado à nossa central de monitoramento. Agentes da AIP acompanham as imagens 24 horas por dia, 7 dias por semana, confirmam cada ocorrência e notificam quem precisa agir.",
+    "central": [
+      {
+        "titulo": "24/7",
+        "texto": "Monitoramento contínuo, todos os dias do ano."
+      },
+      {
+        "titulo": "Agentes próprios",
+        "texto": "Nossa equipe monitora 24 horas por dia, confirma cada ocorrência e notifica as autoridades ou os responsáveis pelo local."
+      },
+      {
+        "titulo": "Integração com a segurança pública",
+        "texto": "Conexão com Polícia Militar, Polícia Civil, Polícia Federal, Guarda Municipal e centrais integradas de segurança, conforme cada projeto."
+      }
+    ],
+    "cenariosTitulo": "Uma estrutura para diferentes cenários.",
+    "cenariosRotulo": "Aplicações do Totem IA",
+    "aplicacoes": [
+      {
+        "alt": "Totem IA numa praça urbana ao anoitecer, com bancos, árvores e prédios ao fundo",
+        "titulo": "Espaços públicos",
+        "texto": "Monitoramento de praças, parques, áreas de convivência e espaços de circulação."
+      },
+      {
+        "alt": "Totem IA na esquina de um cruzamento movimentado à noite, com faixa de pedestres e semáforos",
+        "titulo": "Vias e mobilidade",
+        "texto": "Acompanhamento de ruas, cruzamentos, acessos e pontos estratégicos."
+      },
+      {
+        "alt": "Totem IA num festival à noite, com o palco iluminado e o público ao fundo",
+        "titulo": "Eventos",
+        "texto": "Estrutura de monitoramento para locais com grande circulação de pessoas e necessidades temporárias."
+      },
+      {
+        "alt": "Totem IA ao lado de um canteiro de obras com guindaste e prédio em construção",
+        "titulo": "Obras e áreas operacionais",
+        "texto": "Acompanhamento de ambientes que exigem cobertura durante períodos específicos."
+      },
+      {
+        "alt": "Totem IA na entrada de um condomínio residencial, com portaria e cancela",
+        "titulo": "Condomínios e empreendimentos",
+        "texto": "Monitoramento de acessos, áreas externas e pontos de circulação."
+      }
+    ],
+    "faq": [
+      {
+        "p": "O Totem substitui uma instalação convencional?",
+        "r": "Em muitos casos, sim. Ele reúne câmeras, processamento e conectividade numa estrutura só, ideal para locais sem infraestrutura ou que precisam de cobertura adicional. Avaliamos cada local antes da instalação."
+      },
+      {
+        "p": "Como funciona a conexão?",
+        "r": "O Totem se conecta à plataforma AIP por 4G ou pela rede local, conforme o que estiver disponível no ponto de instalação."
+      },
+      {
+        "p": "O Totem é conectado à polícia?",
+        "r": "Sim. Além da nossa central 24h, o Totem pode ser integrado a órgãos de segurança pública, como as Polícias Militar, Civil e Federal, a Guarda Municipal e as centrais integradas de segurança, conforme cada projeto."
+      },
+      {
+        "p": "Pode ser utilizado temporariamente?",
+        "r": "Sim. Eventos, obras e operações temporárias podem ser atendidos, conforme as condições de instalação."
+      },
+      {
+        "p": "Como os dados são tratados?",
+        "r": "Seguimos a LGPD, com finalidade definida, perfis de acesso, registro de auditoria e retenção configurável. O reconhecimento facial é aplicado conforme a finalidade de cada projeto e a legislação aplicável."
+      }
+    ],
+    "encerramentoTitulo": "Leve inteligência a novos pontos de monitoramento.",
+    "encerramentoBotao": "Conversar sobre meu projeto"
+  },
+  "segmento": {
+    "voceEstaEm": "Você está em",
+    "inicio": "Início",
+    "solucoes": "Soluções",
+    "comoUsada": "Como a tecnologia é usada",
+    "comoUsadaEm": "Como a tecnologia é usada em {nome}",
+    "comoFunciona": "Como funciona na prática",
+    "governanca": "Governança e responsabilidade.",
+    "outros": "Soluções para outros segmentos",
+    "outrosRotulo": "Outros segmentos",
+    "sobProjeto": "Sob projeto",
+    "exemplo": "Exemplo",
+    "textoPratica": "Implantação sobre a estrutura existente, com resultados no painel desde os primeiros dias.",
+    "passosPadrao": [
+      {
+        "titulo": "Conexão",
+        "texto": "Integramos as câmeras atuais pelo gravador (NVR), sem trocar equipamento quando há compatibilidade."
+      },
+      {
+        "titulo": "Calibração",
+        "texto": "Desenhamos linhas de contagem e zonas sobre a imagem de cada câmera."
+      },
+      {
+        "titulo": "Indicadores",
+        "texto": "Fluxo, ocupação e mapas de calor passam a aparecer no painel em tempo real."
+      }
+    ],
+    "encerramentoPrivado": {
+      "titulo": "Sua estrutura de câmeras pode oferecer mais informações para o negócio.",
+      "texto": "Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.",
+      "cta": "Solicitar demonstração"
+    }
+  },
+  "segmentos": {
+    "shoppings-e-varejo": {
+      "nome": "Shoppings e varejo",
+      "descricaoMenu": "Fluxo, mapas de calor e áreas pouco movimentadas.",
+      "linhaCartao": "Fluxo de pessoas, ocupação e circulação.",
+      "heroTitulo": "Inteligência artificial para entender a circulação.",
+      "heroTexto": "Saiba quantas pessoas entram, por onde circulam e onde o movimento diminui, usando as câmeras que já existem.",
+      "alt": "Átrio de um shopping com curvas e escadas rolantes, visto de cima",
+      "usos": [
+        {
+          "titulo": "Fluxo por entrada e corredor",
+          "texto": "Contagem de pessoas hora a hora, em cada acesso.",
+          "exemplo": "1.248 entradas/dia"
+        },
+        {
+          "titulo": "Mapas de calor e rotas",
+          "texto": "Onde o público circula, onde para e quais caminhos usa.",
+          "exemplo": "Corredor B: 42% do fluxo"
+        },
+        {
+          "titulo": "Áreas pouco movimentadas",
+          "texto": "Identificação das zonas abaixo da média e acompanhamento das ações para ativá-las.",
+          "exemplo": "Ala sul: -38%"
+        },
+        {
+          "titulo": "Picos e comparativos",
+          "texto": "Horários de maior movimento e comparação entre períodos e datas comerciais.",
+          "exemplo": "Pico: 18h"
+        },
+        {
+          "titulo": "Busca visual",
+          "texto": "Localização de pessoas nas imagens pela descrição de roupas e características, com confirmação humana.",
+          "exemplo": "3 registros encontrados"
+        },
+        {
+          "titulo": "Aglomerações",
+          "texto": "Identificação de aglomerações em praças de evento e corredores, com aviso às equipes.",
+          "exemplo": "Praça de eventos: aviso"
+        }
+      ],
+      "ultimoPasso": {
+        "titulo": "Decisão",
+        "texto": "A gestão usa os dados para organizar equipes, espaços e ações comerciais."
+      },
+      "faq": [
+        {
+          "p": "Preciso trocar minhas câmeras?",
+          "r": "Não. A IA é aplicada em qualquer câmera, inclusive nas que você já tem."
+        },
+        {
+          "p": "A contagem diferencia entrada e saída?",
+          "r": "Sim. As linhas de contagem registram a direção da passagem."
+        },
+        {
+          "p": "A AIP faz reconhecimento facial?",
+          "r": "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores."
+        },
+        {
+          "p": "Quem acessa os dados?",
+          "r": "Apenas usuários cadastrados, com permissões definidas por perfil."
+        }
+      ]
+    },
+    "industria-e-logistica": {
+      "nome": "Indústria e logística",
+      "descricaoMenu": "Circulação, perímetro e ocupação das áreas.",
+      "linhaCartao": "Monitoramento de áreas e movimentações.",
+      "heroTitulo": "Inteligência artificial para áreas operacionais.",
+      "heroTexto": "Acompanhe a circulação de pessoas, proteja perímetros e entenda a rotina da operação a partir das imagens.",
+      "alt": "Área operacional de uma fábrica moderna, com corredores sinalizados e estantes",
+      "usos": [
+        {
+          "titulo": "Controle de EPI",
+          "texto": "Identificação de pessoas sem capacete, colete ou outros equipamentos de proteção, com aviso ao responsável pela área.",
+          "exemplo": "Setor de carga: 2 sem capacete"
+        },
+        {
+          "titulo": "Circulação em áreas operacionais",
+          "texto": "Contagem e acompanhamento de pessoas por área e período.",
+          "exemplo": "86 pessoas no turno"
+        },
+        {
+          "titulo": "Áreas restritas",
+          "texto": "Aviso de presença em locais e horários definidos.",
+          "exemplo": "Fora do horário: 1 aviso"
+        },
+        {
+          "titulo": "Controle de veículos",
+          "texto": "Leitura de placas em portarias e docas.",
+          "exemplo": "Doca 2: 14 entradas"
+        },
+        {
+          "titulo": "Indicadores de ocupação",
+          "texto": "Quantas pessoas estão em cada área ao longo do turno.",
+          "exemplo": "Ocupação: 64%"
+        },
+        {
+          "titulo": "Ocorrências",
+          "texto": "Trechos de vídeo exportados com as marcações da IA para análise.",
+          "exemplo": "Trecho exportado: 00:42"
+        },
+        {
+          "titulo": "Perímetro",
+          "texto": "Aviso quando alguém cruza cercas e limites do pátio fora do horário.",
+          "exemplo": "Pátio norte: 1 aviso"
+        }
+      ],
+      "ultimoPasso": {
+        "titulo": "Operação",
+        "texto": "Segurança e gestão acompanham perímetro e circulação no mesmo painel."
+      },
+      "faq": [
+        {
+          "p": "Funciona em galpões com pouca iluminação?",
+          "r": "O desempenho depende da câmera e da iluminação. Avaliamos cada ponto antes da implantação."
+        },
+        {
+          "p": "A leitura de placas já está disponível?",
+          "r": "Sim. A leitura de placas está disponível e é configurada conforme a necessidade de cada operação."
+        },
+        {
+          "p": "Dá para integrar com o sistema de câmeras atual?",
+          "r": "Sim. A IA é aplicada em qualquer câmera, inclusive nas que a operação já tem."
+        },
+        {
+          "p": "Os dados ficam disponíveis para quem?",
+          "r": "Apenas para os perfis autorizados pela empresa."
+        }
+      ]
+    },
+    "condominios": {
+      "nome": "Condomínios",
+      "descricaoMenu": "Portaria, áreas comuns e garagem.",
+      "linhaCartao": "Acessos, circulação e áreas comuns.",
+      "heroTitulo": "Mais segurança e informação para o condomínio.",
+      "heroTexto": "Portaria, áreas comuns e garagem acompanhadas com inteligência artificial nas câmeras existentes.",
+      "alt": "Torre residencial de alto padrão com área de lazer e piscina, vista do alto",
+      "usos": [
+        {
+          "titulo": "Perímetro e muros",
+          "texto": "Aviso quando alguém cruza muros, cercas e limites definidos.",
+          "exemplo": "Muro lateral: 1 aviso"
+        },
+        {
+          "titulo": "Permanência suspeita",
+          "texto": "Aviso quando alguém permanece tempo demais perto do portão ou da garagem.",
+          "exemplo": "Portão: 6 min"
+        },
+        {
+          "titulo": "Áreas comuns",
+          "texto": "Ocupação de piscina, academia, salão e playground ao longo do dia.",
+          "exemplo": "Piscina: 72% às 16h"
+        },
+        {
+          "titulo": "Portaria e garagem",
+          "texto": "Registro de placas na entrada e na saída.",
+          "exemplo": "Entrada: 08:14"
+        },
+        {
+          "titulo": "Áreas restritas",
+          "texto": "Aviso de movimento em locais e horários definidos.",
+          "exemplo": "Casa de máquinas: 1 aviso"
+        },
+        {
+          "titulo": "Busca visual",
+          "texto": "Localização de registros nas imagens pela descrição, com confirmação humana.",
+          "exemplo": "2 registros encontrados"
+        },
+        {
+          "titulo": "Acesso por perfil",
+          "texto": "Síndico, administração e portaria veem apenas o que precisam.",
+          "exemplo": "3 perfis"
+        }
+      ],
+      "ultimoPasso": {
+        "titulo": "Gestão",
+        "texto": "Síndico e administração acompanham o condomínio pelo navegador."
+      },
+      "faq": [
+        {
+          "p": "É preciso trocar as câmeras do condomínio?",
+          "r": "Não. A IA é aplicada em qualquer câmera, inclusive nas que o condomínio já tem."
+        },
+        {
+          "p": "A AIP faz reconhecimento facial?",
+          "r": "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores."
+        },
+        {
+          "p": "Quem pode ver as imagens?",
+          "r": "Apenas os usuários cadastrados, com acesso definido por perfil."
+        },
+        {
+          "p": "Por quanto tempo as imagens ficam guardadas?",
+          "r": "O prazo de retenção é definido pelo condomínio."
+        }
+      ]
+    },
+    "restaurantes": {
+      "nome": "Restaurantes",
+      "descricaoMenu": "Inteligência para gestão de restaurantes.",
+      "linhaCartao": "Entenda o fluxo e a ocupação do salão.",
+      "heroTitulo": "Entenda o movimento do seu restaurante.",
+      "heroTexto": "Acompanhe a ocupação do salão, identifique horários de pico e transforme imagens em informações para sua operação.",
+      "alt": "Salão de restaurante elegante com mesas postas, flores e iluminação suave",
+      "usos": [
+        {
+          "titulo": "Ocupação do salão",
+          "texto": "Acompanhe quais áreas estão ocupadas e como o espaço é utilizado.",
+          "exemplo": "Salão: 18 de 24 mesas"
+        },
+        {
+          "titulo": "Fluxo de pessoas",
+          "texto": "Identifique o movimento de entrada e saída por horário.",
+          "exemplo": "Pico de entrada: 20h"
+        },
+        {
+          "titulo": "Mapas de calor",
+          "texto": "Visualize as áreas de maior circulação e os espaços pouco utilizados.",
+          "exemplo": "Varanda: área mais usada"
+        },
+        {
+          "titulo": "Horários de pico",
+          "texto": "Compare períodos e identifique padrões de movimento ao longo do dia.",
+          "exemplo": "Sábado: +46%"
+        },
+        {
+          "titulo": "Busca visual",
+          "texto": "Localize registros por características de roupas e aparência, com confirmação humana.",
+          "exemplo": "1 registro encontrado"
+        }
+      ],
+      "ultimoPasso": {
+        "titulo": "Análise",
+        "texto": "Consulte indicadores e compare períodos para orientar decisões sobre a operação."
+      },
+      "faq": [
+        {
+          "p": "Preciso trocar as câmeras do restaurante?",
+          "r": "Não. A IA é aplicada em qualquer câmera, inclusive nas que o restaurante já tem."
+        },
+        {
+          "p": "É possível identificar pessoas por reconhecimento facial?",
+          "r": "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade e a legislação aplicável. Também é possível localizar pessoas por características como roupas e cores."
+        },
+        {
+          "p": "Consigo identificar os horários de maior movimento?",
+          "r": "Sim. A plataforma acompanha o fluxo por horário e permite comparar períodos para identificar padrões de movimento."
+        },
+        {
+          "p": "Como acesso as informações do restaurante?",
+          "r": "Os indicadores ficam disponíveis em um painel pelo navegador, com acesso controlado por perfil de usuário."
+        }
+      ]
+    },
+    "setor-publico": {
+      "nome": "Setor público",
+      "descricaoMenu": "Espaços urbanos, prédios e serviços públicos.",
+      "linhaCartao": "Monitoramento e inteligência para gestão urbana.",
+      "heroTitulo": "Inteligência visual para a gestão pública.",
+      "heroTexto": "Visão computacional para apoiar o monitoramento, a segurança e a gestão de espaços urbanos.",
+      "alt": "Parque urbano e rotatória vistos do alto",
+      "usos": [
+        {
+          "titulo": "Identificação de pessoas procuradas",
+          "texto": "Reconhecimento facial integrado às bases das forças de segurança, mediante convênio e avaliação jurídica.",
+          "exemplo": "Integração com a central de segurança"
+        },
+        {
+          "titulo": "Aglomerações e tumultos",
+          "texto": "Identificação de aglomerações e situações anormais em praças, eventos e vias, com aviso às equipes.",
+          "exemplo": "Praça central: aviso às 22h10"
+        },
+        {
+          "titulo": "Perímetro",
+          "texto": "Aviso quando alguém cruza limites definidos em prédios e áreas públicas.",
+          "exemplo": "Escola municipal: 1 aviso"
+        },
+        {
+          "titulo": "Espaços públicos",
+          "texto": "Contagem de pessoas e ocupação de praças, parques e eventos.",
+          "exemplo": "Praça central: 1.540 pessoas"
+        },
+        {
+          "titulo": "Vias e acessos",
+          "texto": "Leitura de placas em entradas e pontos estratégicos.",
+          "exemplo": "Acesso norte: 3.200 veículos/dia"
+        },
+        {
+          "titulo": "Prédios e serviços públicos",
+          "texto": "Acompanhamento de escolas, unidades de saúde e prédios municipais.",
+          "exemplo": "12 unidades"
+        },
+        {
+          "titulo": "Apoio às equipes",
+          "texto": "Imagens em tempo real e trechos marcados para as equipes responsáveis.",
+          "exemplo": "Trecho enviado: 00:35"
+        },
+        {
+          "titulo": "Planejamento urbano",
+          "texto": "Comparação de movimentação entre períodos para avaliar obras e ações.",
+          "exemplo": "Antes/depois da obra: +22%"
+        }
+      ],
+      "pratica": "Cada projeto é avaliado conforme a infraestrutura, os objetivos e os requisitos técnicos e administrativos da instituição.",
+      "passos": [
+        {
+          "titulo": "Avaliação",
+          "texto": "Análise da infraestrutura de câmeras e centrais existentes."
+        },
+        {
+          "titulo": "Integração",
+          "texto": "Conexão das câmeras compatíveis e, onde não há estrutura, avaliação do Totem IA."
+        },
+        {
+          "titulo": "Configuração",
+          "texto": "Perfis de acesso, auditoria e prazos de retenção definidos pelo órgão."
+        },
+        {
+          "titulo": "Operação",
+          "texto": "Equipes acompanham indicadores e imagens num único painel."
+        }
+      ],
+      "governanca": {
+        "texto": "O tratamento das informações deve respeitar a finalidade pública, os requisitos legais e as condições estabelecidas contratualmente.",
+        "itens": [
+          "Perfis e permissões de usuários",
+          "Registros de atividades e auditoria",
+          "Identificação de autor e data das ações registradas",
+          "Definição de períodos de retenção e exclusão",
+          "Identificação de pessoas pelo rosto, com avaliação técnica e jurídica, conforme a finalidade pública e a legislação aplicável"
+        ]
+      },
+      "faq": [
+        {
+          "p": "Como o órgão contrata a AIP?",
+          "r": "As modalidades são definidas com as equipes técnicas e jurídicas do órgão, conforme a legislação aplicável."
+        },
+        {
+          "p": "É possível aproveitar as câmeras que a cidade já tem?",
+          "r": "Sim. A IA é aplicada em qualquer câmera, inclusive nas que a cidade já tem."
+        },
+        {
+          "p": "A AIP faz reconhecimento facial?",
+          "r": "Sim. A AIP identifica pessoas pelo rosto, com avaliação técnica e jurídica de cada aplicação, conforme a finalidade pública e a legislação aplicável."
+        },
+        {
+          "p": "Quem acessa as informações?",
+          "r": "Servidores autorizados, com acesso por perfil e registro em auditoria."
+        }
+      ],
+      "encerramento": {
+        "titulo": "Mais inteligência para os espaços públicos.",
+        "texto": "Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.",
+        "cta": "Fale com a equipe AIP"
+      }
+    }
+  },
+  "visuais": {
+    "pessoas": "PESSOAS",
+    "baseIntegrada": [
+      "Base",
+      "integrada"
+    ],
+    "doca": "Doca 12",
+    "estoque": "Estoque 34",
+    "linha": "Linha 40",
+    "colete": "✓ colete",
+    "capacete": "✕ capacete",
+    "perfis": [
+      "Síndico",
+      "Administração",
+      "Portaria"
+    ]
+  },
+  "contato": {
+    "titulo": "Solicite uma consulta.",
+    "texto": "Conte um pouco sobre sua necessidade e nossa equipe entrará em contato.",
+    "email": "E-mail",
+    "naoPreencha": "Não preencha este campo",
+    "nome": "Nome",
+    "telefone": "Telefone",
+    "canais": {
+      "Telefone": "Telefone",
+      "Telegram": "Telegram",
+      "WhatsApp": "WhatsApp"
+    },
+    "codigoPais": "Código do país: {pais} +{ddi}",
+    "numeroDo": "Número do {canal}",
+    "numero": "Número",
+    "tipoOrganizacao": "Tipo de organização",
+    "tipos": {
+      "Empresa": "Empresa",
+      "Órgão público ou instituição": "Órgão público ou instituição"
+    },
+    "mensagem": "Mensagem",
+    "aceiteAntes": "Li e aceito a",
+    "aceiteLink": "Política de Privacidade",
+    "enviar": "Enviar",
+    "enviando": "Enviando...",
+    "sucessoTitulo": "Recebemos suas informações.",
+    "sucessoTexto": "Nossa equipe entrará em contato.",
+    "buscar": "Buscar na lista",
+    "nadaEncontrado": "Nada encontrado",
+    "erros": {
+      "nome": "Informe seu nome.",
+      "email": "Informe um e-mail válido.",
+      "canal": "Escolha o canal e o código do país.",
+      "telefoneDdd": "Informe o número com DDD.",
+      "telefone": "Informe o número.",
+      "tipo": "Selecione o tipo de organização.",
+      "mensagem": "Escreva uma mensagem.",
+      "aceite": "É preciso aceitar a Política de Privacidade.",
+      "limite": "Muitos envios em pouco tempo. Tente novamente mais tarde.",
+      "falha": "Não foi possível enviar agora. Tente novamente em instantes."
+    }
+  },
+  "privacidade": {
+    "titulo": "Política de Privacidade",
+    "avisoOficial": ""
+  }
+}

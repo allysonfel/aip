@@ -1,0 +1,807 @@
+{
+  "comum": {
+    "assinatura": "Asset Intelligence Agency",
+    "marcaCompleta": "AIP — Asset Intelligence Agency",
+    "solicitarDemonstracao": "Request a demo",
+    "verSolucao": "View solution",
+    "ver": "View",
+    "perguntasFrequentes": "Frequently asked questions",
+    "faleConosco": "Contact us",
+    "anterior": "Previous",
+    "proximo": "Next",
+    "solucoesPorSegmento": "Solutions by sector",
+    "produto": "Product",
+    "valoresEmReais": "Prices in Brazilian reais (R$).",
+    "pularConteudo": "Skip to content"
+  },
+  "menu": {
+    "principal": "Main",
+    "paginaInicial": "AIP, home page",
+    "produtos": "Products",
+    "solucoes": "Solutions",
+    "sobre": "About",
+    "contato": "Contact",
+    "abrirMenu": "Open menu",
+    "fecharMenu": "Close menu",
+    "idioma": "Language"
+  },
+  "produtos": {
+    "cameras": {
+      "nome": "Camera AI",
+      "descricao": "Artificial intelligence for the cameras you already have."
+    },
+    "totem": {
+      "nome": "Totem AI",
+      "descricao": "Coverage where there is no conventional infrastructure."
+    }
+  },
+  "rodape": {
+    "inicio": "AIP — Asset Intelligence Agency, home page",
+    "instagram": "AIP on Instagram",
+    "produtos": "Products",
+    "solucoes": "Solutions",
+    "institucional": "Company",
+    "sobre": "About",
+    "contato": "Contact",
+    "privacidade": "Privacy policy",
+    "contatoTitulo": "Contact",
+    "direitos": "AIP — Asset Intelligence Agency",
+    "ecossistema": "Part of the"
+  },
+  "meta": {
+    "inicio": {
+      "titulo": "AIP | Asset intelligence for management and security",
+      "descricao": "AIP develops technology solutions that make public and private organizations safer and more efficient.",
+      "imagemAlt": "AIP, asset intelligence for management and security"
+    },
+    "sobre": {
+      "titulo": "About AIP: Brazilian technology to protect and understand assets",
+      "descricao": "AIP develops artificial intelligence and computer vision solutions that turn camera footage into security, advanced monitoring and efficiency."
+    },
+    "cameras": {
+      "titulo": "Camera AI",
+      "descricao": "Artificial intelligence for the cameras you already have, with no new equipment: people detection, flow analysis and footage search."
+    },
+    "totem": {
+      "titulo": "Totem AI",
+      "descricao": "Intelligent monitoring for places that need extra coverage or lack conventional infrastructure."
+    },
+    "contato": {
+      "titulo": "Request a consultation",
+      "descricao": "Tell us a little about what you need and our team will get in touch."
+    },
+    "privacidade": {
+      "titulo": "Privacy Policy",
+      "descricao": "How AIP handles the personal data received through this website."
+    }
+  },
+  "inicio": {
+    "heroTitulo": "Asset intelligence for management and security.",
+    "heroTexto": "AIP develops technology solutions that make public and private organizations safer and more efficient.",
+    "heroBotao": "Request a consultation",
+    "maisTitulo": "Your cameras can do more.",
+    "maisTexto": "Cameras record people, vehicles, access and movement. With artificial intelligence, that footage can be interpreted and turned into useful information. AIP brings monitoring, visual analysis and intelligence together in a single solution.",
+    "videoRotulo": "AIP video presenting Camera AI: video analytics, people counting and peak hours",
+    "camerasAlt": "Security camera lens reflecting a street with people and vehicles marked by artificial intelligence",
+    "camerasTexto": "Artificial intelligence applied to the cameras you already have, or to a new setup planned with AIP, to detect movement, analyze flows, find footage and keep track of your operation.",
+    "camerasBotao": "Explore Camera AI",
+    "totemAlt": "AIP Totem AI installed in front of a commercial building",
+    "totemTexto": "An integrated intelligent monitoring unit that extends coverage in public and private spaces.",
+    "totemBotao": "Explore Totem AI",
+    "segmentosTitulo": "Different spaces. New possibilities.",
+    "encerramentoTitulo": "Discover what your cameras can do.",
+    "encerramentoTexto": "Explore AIP's solutions.",
+    "encerramentoBotao": "Talk to our team"
+  },
+  "sobre": {
+    "rotulo": "About AIP",
+    "heroTitulo": "Brazilian technology to protect and understand assets.",
+    "heroTexto": "AIP develops artificial intelligence and computer vision solutions for companies, institutions and the public sector. We turn camera footage into security, advanced monitoring and efficiency for every operation.",
+    "heroAlt": "Operator seen from behind in a dark room, facing a wall of screens with camera feeds and maps analyzed by artificial intelligence",
+    "inovacaoRotulo": "Innovation",
+    "inovacaoTitulo": "The most advanced technology in the world, built for Brazil.",
+    "inovacaoTextos": [
+      "AIP's solutions come from research by our team of specialists, combined with international experience from people who closely follow the computer vision technologies used by major companies, intelligence services and governments around the world.",
+      "One of our directors brings that experience to Brazil, and our team turns it into solutions adapted to our cities, our climate, our laws and the needs of each operation.",
+      "We believe Brazil should develop its own technology, not just import it. Every AIP solution is designed, configured and supported by a Brazilian team, contributing to the country's digital sovereignty."
+    ],
+    "mapaAlt": "World map with lines running from the United States, Europe, Russia, China and Israel to Brazil",
+    "paisesAlt": "Outlines of the United States, Europe, Russia, China and Israel, connected by a line to Brazil",
+    "destaques": [
+      {
+        "titulo": "Our own research",
+        "texto": "Studies by our team of computer vision specialists."
+      },
+      {
+        "titulo": "International references",
+        "texto": "Technologies used by companies, intelligence services and governments worldwide."
+      },
+      {
+        "titulo": "Digital sovereignty",
+        "texto": "Technology developed in Brazil."
+      }
+    ],
+    "missaoRotulo": "Mission",
+    "missao": "To turn images into intelligence for the security, advanced monitoring and efficiency of every operation.",
+    "visaoRotulo": "Vision",
+    "visao": "A world where images are not just stored, but understood.",
+    "principiosRotulo": "Principles",
+    "principios": [
+      {
+        "titulo": "Accuracy",
+        "texto": "Information is only valuable when it is reliable. We validate every application before delivery."
+      },
+      {
+        "titulo": "Responsibility",
+        "texto": "We handle data with a defined purpose, access control and respect for the law."
+      },
+      {
+        "titulo": "Brazilian technology",
+        "texto": "Our own technology, developed with independence and sovereignty."
+      },
+      {
+        "titulo": "Partnership",
+        "texto": "We support every project from assessment to results."
+      }
+    ],
+    "etapasTitulo": "From assessment to results.",
+    "etapas": [
+      {
+        "titulo": "Assessment",
+        "texto": "We understand the operation and evaluate the existing cameras."
+      },
+      {
+        "titulo": "Design",
+        "texto": "We define the applications and the ideal setup."
+      },
+      {
+        "titulo": "Deployment",
+        "texto": "On site, in Brazil and abroad."
+      },
+      {
+        "titulo": "Support",
+        "texto": "Remote support and continuous improvement."
+      }
+    ],
+    "privacidadeTitulo": "Intelligence with responsibility.",
+    "privacidadeTexto": "Every project complies with Brazil's data protection law (LGPD), with a defined purpose, access profiles, audit logs and configurable data retention. Sensitive applications, such as facial recognition, undergo technical and legal review before deployment.",
+    "ecossistema": "AIP is part of the Logos Company ecosystem.",
+    "encerramentoTitulo": "Let's talk about your project.",
+    "encerramentoBotao": "Contact us"
+  },
+  "cameras": {
+    "heroTitulo": "The cameras you already have, now with AI.",
+    "heroTexto": "No new equipment: AIP connects artificial intelligence to your current setup, which starts detecting people, analyzing flows and finding footage.",
+    "heroAlt": "Security camera lens reflecting a street with people and vehicles marked by artificial intelligence",
+    "comoFuncionaTitulo": "How it works.",
+    "comoFunciona": [
+      {
+        "titulo": "We connect to your cameras.",
+        "texto": "AIP integrates with the cameras and recorders you already have. No construction work, no new equipment."
+      },
+      {
+        "titulo": "AI analyzes the footage.",
+        "texto": "The AI detects people, vehicles and objects and is configured for what matters to your operation: counting, tracking, alerting or recognizing specific behaviors. The technology adapts to your needs."
+      },
+      {
+        "titulo": "You follow it on your dashboard.",
+        "texto": "Everything comes together in a dashboard dedicated to your operation, on your computer or phone, from anywhere."
+      }
+    ],
+    "economiaRotulo": "Savings",
+    "economiaTitulo": "The intelligence of an AI camera, without replacing yours.",
+    "economiaTexto": "A camera with built-in artificial intelligence currently costs between {min} and {max} per unit. AIP brings the same intelligence to the cameras you already have.",
+    "economiaBotao": "Get a simulation for my operation",
+    "economiaNota": "Market reference prices for cameras with built-in analytics. Savings vary with the number of cameras, the features contracted and equipment compatibility.",
+    "destaques": [
+      "No construction work",
+      "No new cabling",
+      "Faster deployment"
+    ],
+    "segmentosTitulo": "Solutions for every sector.",
+    "segmentosTexto": "See how AIP works in your type of operation.",
+    "faq": [
+      {
+        "p": "Do I need to replace my current cameras?",
+        "r": "Not necessarily. Cameras that meet the technical requirements can be used. We assess your setup before deployment."
+      },
+      {
+        "p": "Does it work at night?",
+        "r": "Yes, within the camera's limits. Performance depends on lighting and image quality."
+      },
+      {
+        "p": "Does AIP use facial recognition?",
+        "r": "Yes. AIP identifies people by their faces, with a technical and legal review of each application, according to its purpose and the applicable law. People can also be found by features such as clothing and colors."
+      },
+      {
+        "p": "How long does deployment take?",
+        "r": "It depends on the number of cameras, the infrastructure and the configuration needed. After the technical assessment, we give you the timeline for your project."
+      },
+      {
+        "p": "Does AIP only serve the sectors shown on the website?",
+        "r": "No. The sectors on the website are examples. We work with any operation that uses cameras and build custom solutions for each need. Tell our team about your case.",
+        "link": "Get in touch"
+      },
+      {
+        "p": "Who can access the system?",
+        "r": "Access is organized by profiles and permissions. Each person sees only what they need."
+      }
+    ],
+    "encerramentoTitulo": "Get more out of what your cameras record."
+  },
+  "calculadora": {
+    "pergunta": "How many cameras do you have?",
+    "cameras": "{n} cameras",
+    "trocar": "Replace with AI cameras",
+    "faixa": "{min} to {max}",
+    "aip": "Your cameras + AIP",
+    "economia": "approximate savings",
+    "resumo": "With {n} cameras, replacing them with AI cameras would cost {faixa}. With your cameras and AIP, the approximate savings are {pct}%."
+  },
+  "totem": {
+    "heroTitulo": "Intelligent security, anywhere.",
+    "heroTexto": "Intelligent monitoring for places that need extra coverage or lack conventional infrastructure.",
+    "altFrente": "AIP Totem AI seen from the front, with emergency light, four cameras and blue LED lines, on a black background",
+    "altTopo": "Close-up of the top of the Totem AI: red and blue emergency light and AIP-branded cameras",
+    "altTresQuartos": "Three-quarter view of the Totem AI, showing the side cameras and the 3-meter body",
+    "altLateral": "Side view of the Totem AI, with blue LED lines lit along the body",
+    "porDentroTitulo": "Every detail designed to protect.",
+    "etapas": [
+      {
+        "titulo": "Connected emergency light",
+        "texto": "Light signal triggered by our 24/7 monitoring center, connected to public security agencies."
+      },
+      {
+        "titulo": "4 AI cameras",
+        "texto": "360° coverage detecting people, vehicles, suspicious behavior, incidents and weapons."
+      },
+      {
+        "titulo": "License plate reading and facial recognition",
+        "texto": "Identification of vehicles and people, with real-time alerts to the monitoring center and the responsible authorities."
+      },
+      {
+        "titulo": "Restricted areas",
+        "texto": "Instant alert when someone enters defined places or time windows."
+      },
+      {
+        "titulo": "Visible presence",
+        "texto": "LED lines make the totem visible day and night and deter suspicious activity."
+      },
+      {
+        "titulo": "3-meter structure",
+        "texto": "Corrosion-treated steel, built for any environment and connected to the AIP platform via 4G or local network."
+      }
+    ],
+    "itemAnterior": "Previous item",
+    "itemProximo": "Next item",
+    "irPara": "Go to {item}",
+    "tempoTitulo": "Built to withstand the weather.",
+    "tempoTexto": "Heavy rain, sun, wind and temperature swings are part of life outdoors. Totem AI is designed to operate in the open air, with a structure and equipment ready for any environment, so monitoring continues when the weather changes.",
+    "tempoAlt": "Totem AI in heavy rain, seen from below, with storm clouds in the background",
+    "tempoBotao": "Request a technical assessment",
+    "centralAlt": "AIP monitoring center agent, seen from behind wearing a headset, facing a wall of screens with camera feeds analyzed by artificial intelligence",
+    "centralRotulo": "AIP Monitoring Center",
+    "centralTitulo": "Watchful eyes, 24 hours a day.",
+    "centralTexto": "Beyond artificial intelligence, every Totem AI is connected to our monitoring center. AIP agents watch the feeds 24 hours a day, 7 days a week, confirm every incident and notify whoever needs to act.",
+    "central": [
+      {
+        "titulo": "24/7",
+        "texto": "Continuous monitoring, every day of the year."
+      },
+      {
+        "titulo": "Our own agents",
+        "texto": "Our team monitors around the clock, confirms every incident and notifies the authorities or the people responsible for the site."
+      },
+      {
+        "titulo": "Integration with public security",
+        "texto": "Connection with Brazil's state and federal police forces, municipal guards and integrated security centers, depending on each project."
+      }
+    ],
+    "cenariosTitulo": "One structure for many scenarios.",
+    "cenariosRotulo": "Totem AI applications",
+    "aplicacoes": [
+      {
+        "alt": "Totem AI in an urban square at dusk, with benches, trees and buildings in the background",
+        "titulo": "Public spaces",
+        "texto": "Monitoring of squares, parks, gathering areas and walkways."
+      },
+      {
+        "alt": "Totem AI on the corner of a busy intersection at night, with a crosswalk and traffic lights",
+        "titulo": "Roads and mobility",
+        "texto": "Coverage of streets, intersections, entrances and strategic points."
+      },
+      {
+        "alt": "Totem AI at a night festival, with the lit stage and the crowd in the background",
+        "titulo": "Events",
+        "texto": "Monitoring for crowded venues and temporary needs."
+      },
+      {
+        "alt": "Totem AI next to a construction site with a crane and a building under construction",
+        "titulo": "Construction sites and operational areas",
+        "texto": "Coverage for sites that need monitoring during specific periods."
+      },
+      {
+        "alt": "Totem AI at the entrance of a residential community, with a gatehouse and barrier",
+        "titulo": "Residential communities and developments",
+        "texto": "Monitoring of entrances, outdoor areas and walkways."
+      }
+    ],
+    "faq": [
+      {
+        "p": "Can the Totem replace a conventional installation?",
+        "r": "In many cases, yes. It combines cameras, processing and connectivity in a single structure, ideal for places without infrastructure or that need extra coverage. We assess each site before installation."
+      },
+      {
+        "p": "How does it connect?",
+        "r": "The Totem connects to the AIP platform via 4G or the local network, depending on what is available at the installation site."
+      },
+      {
+        "p": "Is the Totem connected to the police?",
+        "r": "Yes. Besides our 24/7 monitoring center, the Totem can be integrated with public security agencies, such as the state and federal police, municipal guards and integrated security centers, depending on each project."
+      },
+      {
+        "p": "Can it be used temporarily?",
+        "r": "Yes. Events, construction sites and temporary operations can be covered, depending on installation conditions."
+      },
+      {
+        "p": "How is data handled?",
+        "r": "We comply with Brazil's data protection law (LGPD), with a defined purpose, access profiles, audit logs and configurable retention. Facial recognition is applied according to each project's purpose and the applicable law."
+      }
+    ],
+    "encerramentoTitulo": "Bring intelligence to new monitoring points.",
+    "encerramentoBotao": "Discuss my project"
+  },
+  "segmento": {
+    "voceEstaEm": "You are here",
+    "inicio": "Home",
+    "solucoes": "Solutions",
+    "comoUsada": "How the technology is used",
+    "comoUsadaEm": "How the technology is used in {nome}",
+    "comoFunciona": "How it works in practice",
+    "governanca": "Governance and accountability.",
+    "outros": "Solutions for other sectors",
+    "outrosRotulo": "Other sectors",
+    "sobProjeto": "Custom project",
+    "exemplo": "Example",
+    "textoPratica": "Deployed on your existing setup, with results on the dashboard from the first days.",
+    "passosPadrao": [
+      {
+        "titulo": "Connection",
+        "texto": "We integrate your current cameras through the recorder (NVR), with no new equipment when compatible."
+      },
+      {
+        "titulo": "Calibration",
+        "texto": "We draw counting lines and zones over each camera's image."
+      },
+      {
+        "titulo": "Metrics",
+        "texto": "Flow, occupancy and heat maps appear on the dashboard in real time."
+      }
+    ],
+    "encerramentoPrivado": {
+      "titulo": "Your camera setup can deliver more information for your business.",
+      "texto": "Tell us a little about what you need and our team will get in touch.",
+      "cta": "Request a demo"
+    }
+  },
+  "segmentos": {
+    "shoppings-e-varejo": {
+      "nome": "Shopping malls and retail",
+      "descricaoMenu": "Foot traffic, heat maps and low-traffic areas.",
+      "linhaCartao": "Foot traffic, occupancy and circulation.",
+      "heroTitulo": "Artificial intelligence to understand foot traffic.",
+      "heroTexto": "Know how many people come in, where they go and where traffic drops, using the cameras you already have.",
+      "alt": "Shopping mall atrium with curves and escalators, seen from above",
+      "usos": [
+        {
+          "titulo": "Traffic by entrance and aisle",
+          "texto": "Hour-by-hour people counting at each entrance.",
+          "exemplo": "1,248 entries/day"
+        },
+        {
+          "titulo": "Heat maps and paths",
+          "texto": "Where visitors walk, where they stop and which routes they take.",
+          "exemplo": "Aisle B: 42% of traffic"
+        },
+        {
+          "titulo": "Low-traffic areas",
+          "texto": "Spotting below-average zones and tracking the actions to bring them to life.",
+          "exemplo": "South wing: -38%"
+        },
+        {
+          "titulo": "Peaks and comparisons",
+          "texto": "Busiest hours and comparisons across periods and shopping seasons.",
+          "exemplo": "Peak: 6 p.m."
+        },
+        {
+          "titulo": "Visual search",
+          "texto": "Finding people in the footage by describing clothing and features, with human confirmation.",
+          "exemplo": "3 records found"
+        },
+        {
+          "titulo": "Crowds",
+          "texto": "Detection of crowds in event areas and aisles, with alerts to the teams.",
+          "exemplo": "Event area: alert"
+        }
+      ],
+      "ultimoPasso": {
+        "titulo": "Decisions",
+        "texto": "Management uses the data to organize teams, spaces and commercial actions."
+      },
+      "faq": [
+        {
+          "p": "Do I need to replace my cameras?",
+          "r": "No. The AI works with any camera, including the ones you already have."
+        },
+        {
+          "p": "Does the count tell entries from exits?",
+          "r": "Yes. Counting lines record the direction of each crossing."
+        },
+        {
+          "p": "Does AIP use facial recognition?",
+          "r": "Yes. AIP identifies people by their faces, with a technical and legal review of each application, according to its purpose and the applicable law. People can also be found by features such as clothing and colors."
+        },
+        {
+          "p": "Who can access the data?",
+          "r": "Only registered users, with permissions set by profile."
+        }
+      ]
+    },
+    "industria-e-logistica": {
+      "nome": "Industry and logistics",
+      "descricaoMenu": "Circulation, perimeter and area occupancy.",
+      "linhaCartao": "Monitoring of areas and movement.",
+      "heroTitulo": "Artificial intelligence for operational areas.",
+      "heroTexto": "Track people's movement, protect perimeters and understand your operation's routine through the footage.",
+      "alt": "Operational area of a modern factory, with marked aisles and shelving",
+      "usos": [
+        {
+          "titulo": "PPE compliance",
+          "texto": "Detection of people without a hard hat, vest or other protective equipment, with an alert to the area manager.",
+          "exemplo": "Loading area: 2 without hard hats"
+        },
+        {
+          "titulo": "Movement in operational areas",
+          "texto": "Counting and tracking people by area and time period.",
+          "exemplo": "86 people on shift"
+        },
+        {
+          "titulo": "Restricted areas",
+          "texto": "Presence alerts for defined places and time windows.",
+          "exemplo": "After hours: 1 alert"
+        },
+        {
+          "titulo": "Vehicle control",
+          "texto": "License plate reading at gates and loading docks.",
+          "exemplo": "Dock 2: 14 entries"
+        },
+        {
+          "titulo": "Occupancy metrics",
+          "texto": "How many people are in each area throughout the shift.",
+          "exemplo": "Occupancy: 64%"
+        },
+        {
+          "titulo": "Incidents",
+          "texto": "Exported video clips with the AI's markings for review.",
+          "exemplo": "Clip exported: 00:42"
+        },
+        {
+          "titulo": "Perimeter",
+          "texto": "Alert when someone crosses fences and yard boundaries after hours.",
+          "exemplo": "North yard: 1 alert"
+        }
+      ],
+      "ultimoPasso": {
+        "titulo": "Operations",
+        "texto": "Security and management follow perimeter and movement on the same dashboard."
+      },
+      "faq": [
+        {
+          "p": "Does it work in poorly lit warehouses?",
+          "r": "Performance depends on the camera and lighting. We assess each point before deployment."
+        },
+        {
+          "p": "Is license plate reading already available?",
+          "r": "Yes. License plate reading is available and configured to each operation's needs."
+        },
+        {
+          "p": "Can it integrate with our current camera system?",
+          "r": "Yes. The AI works with any camera, including the ones the operation already has."
+        },
+        {
+          "p": "Who has access to the data?",
+          "r": "Only the profiles authorized by the company."
+        }
+      ]
+    },
+    "condominios": {
+      "nome": "Residential communities",
+      "descricaoMenu": "Gatehouse, common areas and garage.",
+      "linhaCartao": "Access, circulation and common areas.",
+      "heroTitulo": "More security and information for your community.",
+      "heroTexto": "Gatehouse, common areas and garage monitored with artificial intelligence on the existing cameras.",
+      "alt": "High-end residential tower with a leisure area and pool, seen from above",
+      "usos": [
+        {
+          "titulo": "Perimeter and walls",
+          "texto": "Alert when someone crosses walls, fences and defined boundaries.",
+          "exemplo": "Side wall: 1 alert"
+        },
+        {
+          "titulo": "Suspicious loitering",
+          "texto": "Alert when someone lingers too long near the gate or garage.",
+          "exemplo": "Gate: 6 min"
+        },
+        {
+          "titulo": "Common areas",
+          "texto": "Occupancy of the pool, gym, party room and playground throughout the day.",
+          "exemplo": "Pool: 72% at 4 p.m."
+        },
+        {
+          "titulo": "Gatehouse and garage",
+          "texto": "License plate logging at entry and exit.",
+          "exemplo": "Entry: 08:14"
+        },
+        {
+          "titulo": "Restricted areas",
+          "texto": "Movement alerts for defined places and time windows.",
+          "exemplo": "Machine room: 1 alert"
+        },
+        {
+          "titulo": "Visual search",
+          "texto": "Finding footage by description, with human confirmation.",
+          "exemplo": "2 records found"
+        },
+        {
+          "titulo": "Profile-based access",
+          "texto": "Property manager, administration and gatehouse see only what they need.",
+          "exemplo": "3 profiles"
+        }
+      ],
+      "ultimoPasso": {
+        "titulo": "Management",
+        "texto": "The property manager and administration follow the community from the browser."
+      },
+      "faq": [
+        {
+          "p": "Do we need to replace the community's cameras?",
+          "r": "No. The AI works with any camera, including the ones the community already has."
+        },
+        {
+          "p": "Does AIP use facial recognition?",
+          "r": "Yes. AIP identifies people by their faces, with a technical and legal review of each application, according to its purpose and the applicable law. People can also be found by features such as clothing and colors."
+        },
+        {
+          "p": "Who can see the footage?",
+          "r": "Only registered users, with access set by profile."
+        },
+        {
+          "p": "How long is footage kept?",
+          "r": "The retention period is set by the community."
+        }
+      ]
+    },
+    "restaurantes": {
+      "nome": "Restaurants",
+      "descricaoMenu": "Intelligence for restaurant management.",
+      "linhaCartao": "Understand traffic and dining room occupancy.",
+      "heroTitulo": "Understand how your restaurant moves.",
+      "heroTexto": "Track dining room occupancy, spot peak hours and turn footage into information for your operation.",
+      "alt": "Elegant restaurant dining room with set tables, flowers and soft lighting",
+      "usos": [
+        {
+          "titulo": "Dining room occupancy",
+          "texto": "See which areas are occupied and how the space is used.",
+          "exemplo": "Dining room: 18 of 24 tables"
+        },
+        {
+          "titulo": "Foot traffic",
+          "texto": "Track people coming in and going out by hour.",
+          "exemplo": "Peak arrivals: 8 p.m."
+        },
+        {
+          "titulo": "Heat maps",
+          "texto": "See the busiest areas and the underused spaces.",
+          "exemplo": "Terrace: most used area"
+        },
+        {
+          "titulo": "Peak hours",
+          "texto": "Compare periods and spot movement patterns throughout the day.",
+          "exemplo": "Saturday: +46%"
+        },
+        {
+          "titulo": "Visual search",
+          "texto": "Find footage by clothing and appearance, with human confirmation.",
+          "exemplo": "1 record found"
+        }
+      ],
+      "ultimoPasso": {
+        "titulo": "Analysis",
+        "texto": "Check metrics and compare periods to guide decisions about the operation."
+      },
+      "faq": [
+        {
+          "p": "Do I need to replace the restaurant's cameras?",
+          "r": "No. The AI works with any camera, including the ones the restaurant already has."
+        },
+        {
+          "p": "Can people be identified by facial recognition?",
+          "r": "Yes. AIP identifies people by their faces, with a technical and legal review of each application, according to its purpose and the applicable law. People can also be found by features such as clothing and colors."
+        },
+        {
+          "p": "Can I see the busiest hours?",
+          "r": "Yes. The platform tracks traffic by hour and lets you compare periods to spot movement patterns."
+        },
+        {
+          "p": "How do I access the restaurant's information?",
+          "r": "Metrics are available on a browser dashboard, with access controlled by user profile."
+        }
+      ]
+    },
+    "setor-publico": {
+      "nome": "Public sector",
+      "descricaoMenu": "Urban spaces, public buildings and services.",
+      "linhaCartao": "Monitoring and intelligence for urban management.",
+      "heroTitulo": "Visual intelligence for public management.",
+      "heroTexto": "Computer vision to support monitoring, security and the management of urban spaces.",
+      "alt": "Urban park and roundabout seen from above",
+      "usos": [
+        {
+          "titulo": "Identifying wanted persons",
+          "texto": "Facial recognition integrated with security forces' databases, under agreement and legal review.",
+          "exemplo": "Integration with the security center"
+        },
+        {
+          "titulo": "Crowds and disturbances",
+          "texto": "Detection of crowds and abnormal situations in squares, events and streets, with alerts to the teams.",
+          "exemplo": "Central square: alert at 10:10 p.m."
+        },
+        {
+          "titulo": "Perimeter",
+          "texto": "Alert when someone crosses defined boundaries in public buildings and areas.",
+          "exemplo": "Public school: 1 alert"
+        },
+        {
+          "titulo": "Public spaces",
+          "texto": "People counting and occupancy of squares, parks and events.",
+          "exemplo": "Central square: 1,540 people"
+        },
+        {
+          "titulo": "Roads and access points",
+          "texto": "License plate reading at entrances and strategic points.",
+          "exemplo": "North access: 3,200 vehicles/day"
+        },
+        {
+          "titulo": "Public buildings and services",
+          "texto": "Monitoring of schools, health units and municipal buildings.",
+          "exemplo": "12 sites"
+        },
+        {
+          "titulo": "Support for field teams",
+          "texto": "Real-time footage and marked clips for the responsible teams.",
+          "exemplo": "Clip sent: 00:35"
+        },
+        {
+          "titulo": "Urban planning",
+          "texto": "Comparing movement across periods to evaluate works and initiatives.",
+          "exemplo": "Before/after the works: +22%"
+        }
+      ],
+      "pratica": "Each project is assessed according to the institution's infrastructure, goals and technical and administrative requirements.",
+      "passos": [
+        {
+          "titulo": "Assessment",
+          "texto": "Review of the existing cameras and monitoring centers."
+        },
+        {
+          "titulo": "Integration",
+          "texto": "Connection of compatible cameras and, where there is no infrastructure, evaluation of Totem AI."
+        },
+        {
+          "titulo": "Configuration",
+          "texto": "Access profiles, auditing and retention periods defined by the agency."
+        },
+        {
+          "titulo": "Operations",
+          "texto": "Teams follow metrics and footage on a single dashboard."
+        }
+      ],
+      "governanca": {
+        "texto": "Information must be handled in line with its public purpose, the legal requirements and the conditions set out in the contract.",
+        "itens": [
+          "User profiles and permissions",
+          "Activity logs and auditing",
+          "Author and date of every recorded action",
+          "Defined retention and deletion periods",
+          "Facial identification, with technical and legal review, according to the public purpose and the applicable law"
+        ]
+      },
+      "faq": [
+        {
+          "p": "How can a public agency hire AIP?",
+          "r": "The procurement model is defined with the agency's technical and legal teams, according to the applicable law."
+        },
+        {
+          "p": "Can we use the cameras the city already has?",
+          "r": "Yes. The AI works with any camera, including the ones the city already has."
+        },
+        {
+          "p": "Does AIP use facial recognition?",
+          "r": "Yes. AIP identifies people by their faces, with a technical and legal review of each application, according to the public purpose and the applicable law."
+        },
+        {
+          "p": "Who can access the information?",
+          "r": "Authorized public servants, with profile-based access and audit logs."
+        }
+      ],
+      "encerramento": {
+        "titulo": "More intelligence for public spaces.",
+        "texto": "Tell us a little about what you need and our team will get in touch.",
+        "cta": "Talk to the AIP team"
+      }
+    }
+  },
+  "visuais": {
+    "pessoas": "PEOPLE",
+    "baseIntegrada": [
+      "Integrated",
+      "database"
+    ],
+    "doca": "Dock 12",
+    "estoque": "Storage 34",
+    "linha": "Line 40",
+    "colete": "✓ vest",
+    "capacete": "✕ hard hat",
+    "perfis": [
+      "Property manager",
+      "Administration",
+      "Gatehouse"
+    ]
+  },
+  "contato": {
+    "titulo": "Request a consultation.",
+    "texto": "Tell us a little about what you need and our team will get in touch.",
+    "email": "Email",
+    "naoPreencha": "Do not fill in this field",
+    "nome": "Name",
+    "telefone": "Phone",
+    "canais": {
+      "Telefone": "Phone",
+      "Telegram": "Telegram",
+      "WhatsApp": "WhatsApp"
+    },
+    "codigoPais": "Country code: {pais} +{ddi}",
+    "numeroDo": "{canal} number",
+    "numero": "Number",
+    "tipoOrganizacao": "Type of organization",
+    "tipos": {
+      "Empresa": "Company",
+      "Órgão público ou instituição": "Public agency or institution"
+    },
+    "mensagem": "Message",
+    "aceiteAntes": "I have read and accept the",
+    "aceiteLink": "Privacy Policy",
+    "enviar": "Send",
+    "enviando": "Sending...",
+    "sucessoTitulo": "We have received your information.",
+    "sucessoTexto": "Our team will get in touch.",
+    "buscar": "Search the list",
+    "nadaEncontrado": "Nothing found",
+    "erros": {
+      "nome": "Please enter your name.",
+      "email": "Please enter a valid email address.",
+      "canal": "Choose the channel and the country code.",
+      "telefoneDdd": "Please enter the number with the area code.",
+      "telefone": "Please enter the number.",
+      "tipo": "Select the type of organization.",
+      "mensagem": "Please write a message.",
+      "aceite": "You must accept the Privacy Policy.",
+      "limite": "Too many submissions in a short time. Please try again later.",
+      "falha": "We couldn't send your message right now. Please try again shortly."
+    }
+  },
+  "privacidade": {
+    "titulo": "Privacy Policy",
+    "avisoOficial": "The official version of this policy is in Portuguese. An English version is under legal review."
+  }
+}

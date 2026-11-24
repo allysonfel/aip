@@ -1,7 +1,11 @@
 import type { ReactNode } from "react";
-import { metadados } from "../_config/metadados";
+import { metadados } from "../../_config/metadados";
+import { i18n } from "../../_i18n/servidor";
 
-export const metadata = metadados("/privacidade", "Política de Privacidade", "Como a AIP trata os dados pessoais recebidos pelo site. Texto-base em revisão jurídica.");
+export async function generateMetadata() {
+  const { idioma, d } = await i18n();
+  return metadados(idioma, "/privacidade", d.meta.privacidade.titulo, d.meta.privacidade.descricao);
+}
 
 function Bloco({ titulo, children }: { titulo: string; children: ReactNode }) {
   return (
@@ -12,9 +16,17 @@ function Bloco({ titulo, children }: { titulo: string; children: ReactNode }) {
   );
 }
 
-export default function Privacidade() {
+// Até a revisão jurídica, /en e /ru mostram o texto oficial em português com um aviso no topo.
+export default async function Privacidade() {
+  const { idioma, d } = await i18n();
   return (
     <article className="margem max-w-[56rem] pb-24 pt-32 sm:pt-40">
+      {idioma !== "pt" && (
+        <p role="note" className="entra-1 mb-8 rounded-xl border border-[#5FD3FF]/50 px-4 py-3 text-sm text-white/90">
+          {d.privacidade.avisoOficial}
+        </p>
+      )}
+      <div lang="pt-BR">
       <h1 className="entra-1 titulo-tela">Política de Privacidade</h1>
       <p role="note" className="entra-2 mt-6 rounded-xl border border-white/30 px-4 py-3 text-sm">
         Em revisão jurídica. Este é um texto-base e pode ser alterado.
@@ -42,6 +54,7 @@ export default function Privacidade() {
       <Bloco titulo="7. Como falar conosco">
         <p>Use o formulário da página de contato para exercer seus direitos ou tirar dúvidas sobre esta política.</p>
       </Bloco>
+      </div>
     </article>
   );
 }

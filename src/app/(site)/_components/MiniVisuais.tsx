@@ -1,4 +1,6 @@
 import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useIdioma } from "../_i18n/Contexto";
+import { LOCALE } from "../_i18n/idiomas";
 
 // Mini-visuais dos cards "Como a tecnologia é usada". Desenho em linha fina
 // (branco ~70%) com um detalhe em ciano. A animação (uma vez, quando o card
@@ -247,7 +249,8 @@ function LinhaVideo() {
 
 /** V12 · Acesso por perfil */
 function Perfis() {
-  const camadas = ["Síndico", "Administração", "Portaria"];
+  const { d: t } = useIdioma();
+  const camadas = t.visuais.perfis;
   return (
     <Svg>
       {camadas.map((nome, i) => (
@@ -312,6 +315,7 @@ function Predios() {
 
 /** V15 · Identificação facial (malha abstrata, sem rosto realista) */
 function Facial() {
+  const { d: t } = useIdioma();
   // Pontos de uma malha oval simples; linhas ligam vizinhos.
   const p: [number, number][] = [
     [80, 14], [62, 22], [98, 22], [52, 40], [108, 40], [66, 42], [94, 42], [80, 52],
@@ -338,8 +342,8 @@ function Facial() {
         <rect x="152" y="40" width="80" height="36" rx="5" stroke={L} strokeWidth="1" />
         <ellipse cx="166" cy="52" rx="6" ry="2.5" stroke={C} strokeWidth="1" />
         <path d="M160 52 V63 Q166 66 172 63 V52 M160 57.5 Q166 60.5 172 57.5" stroke={C} strokeWidth="1" />
-        <text x="180" y="55" fill="rgb(255 255 255 / 0.8)" fontFamily="var(--font-barlow), sans-serif" fontSize="9">Base</text>
-        <text x="180" y="66" fill="rgb(255 255 255 / 0.8)" fontFamily="var(--font-barlow), sans-serif" fontSize="9">integrada</text>
+        <text x="180" y="55" fill="rgb(255 255 255 / 0.8)" fontFamily="var(--font-barlow), sans-serif" fontSize="9">{t.visuais.baseIntegrada[0]}</text>
+        <text x="180" y="66" fill="rgb(255 255 255 / 0.8)" fontFamily="var(--font-barlow), sans-serif" fontSize="9">{t.visuais.baseIntegrada[1]}</text>
       </g>
     </Svg>
   );
@@ -347,6 +351,7 @@ function Facial() {
 
 /** Número que sobe até `alvo` quando `ligado` (usado no V16). */
 function Contagem({ alvo, ligado }: { alvo: number; ligado: boolean }) {
+  const { idioma } = useIdioma();
   const [v, setV] = useState(0);
   useEffect(() => {
     if (!ligado) return;
@@ -364,11 +369,12 @@ function Contagem({ alvo, ligado }: { alvo: number; ligado: boolean }) {
     q = requestAnimationFrame(passo);
     return () => cancelAnimationFrame(q);
   }, [alvo, ligado]);
-  return <>{v.toLocaleString("pt-BR")}</>;
+  return <>{v.toLocaleString(LOCALE[idioma])}</>;
 }
 
 /** V16 · Densidade de público numa praça */
 function Densidade({ alvo = 0, ativo = false }: { alvo?: number; ativo?: boolean }) {
+  const { d: t } = useIdioma();
   // Grade 5 x 3 sobre a praça; quanto mais pessoas na célula, mais ciano.
   const dens = [
     [0.1, 0.25, 0.4, 0.2, 0.05],
@@ -399,7 +405,7 @@ function Densidade({ alvo = 0, ativo = false }: { alvo?: number; ativo?: boolean
         <Contagem alvo={alvo} ligado={ativo} />
       </text>
       <text x="230" y="78" textAnchor="end" fill="rgb(255 255 255 / 0.5)" fontFamily="var(--font-barlow), sans-serif" fontSize="8" letterSpacing="1">
-        PESSOAS
+        {t.visuais.pessoas}
       </text>
     </Svg>
   );
@@ -468,6 +474,7 @@ function Permanencia() {
 
 /** V20 · Circulação operacional: galpão com 3 setores e pessoas indo de um a outro pelos corredores */
 function CirculacaoOperacional({ ativo = false }: { ativo?: boolean }) {
+  const { d: t } = useIdioma();
   const grupo = useRef<SVGGElement>(null);
   // Uma rota entre cada par de setores, pelo corredor central.
   const rotas = ["M52 84 V60 H112 V30", "M150 30 V60 H168 V90", "M122 90 V60 H40 V34"];
@@ -501,9 +508,9 @@ function CirculacaoOperacional({ ativo = false }: { ativo?: boolean }) {
         ))}
       </g>
       <g fontFamily="var(--font-barlow), sans-serif" fontSize="8.5" fill="rgb(255 255 255 / 0.6)">
-        <text className="mv-ponto" style={d(1000)} x="20" y="100">Doca 12</text>
-        <text className="mv-ponto" style={d(1100)} x="218" y="40" textAnchor="end">Estoque 34</text>
-        <text className="mv-ponto" style={d(1200)} x="218" y="98" textAnchor="end">Linha 40</text>
+        <text className="mv-ponto" style={d(1000)} x="20" y="100">{t.visuais.doca}</text>
+        <text className="mv-ponto" style={d(1100)} x="218" y="40" textAnchor="end">{t.visuais.estoque}</text>
+        <text className="mv-ponto" style={d(1200)} x="218" y="98" textAnchor="end">{t.visuais.linha}</text>
       </g>
     </Svg>
   );
@@ -511,6 +518,7 @@ function CirculacaoOperacional({ ativo = false }: { ativo?: boolean }) {
 
 /** V21 · Controle de EPI: colete detectado (ciano), capacete ausente (vermelho, com alerta) */
 function Epi() {
+  const { d: t } = useIdioma();
   const V = "#ff5a5f";
   const fonte = { fontFamily: "var(--font-barlow), sans-serif", fontSize: 9 };
   return (
@@ -526,13 +534,13 @@ function Epi() {
       <rect className="mv-ponto" style={d(250)} x="72" y="34" width="48" height="40" rx="3" stroke={C} strokeWidth="1.25" />
       <g className="mv-ponto" style={d(450)}>
         <path d="M120 54 H134" stroke={C} strokeWidth="1" strokeDasharray="2 3" />
-        <text x="138" y="57" fill={C} {...fonte}>✓ colete</text>
+        <text x="138" y="57" fill={C} {...fonte}>{t.visuais.colete}</text>
       </g>
       {/* 2) Capacete ausente: a caixa entra em ciano e fica vermelha */}
       <rect className="mv-alerta-caixa" x="83" y="11" width="26" height="26" rx="3" strokeWidth="1.25" />
       <g className="mv-ponto" style={d(1300)}>
         <path d="M109 24 H134" stroke={V} strokeWidth="1" strokeDasharray="2 3" />
-        <text x="138" y="27" fill={V} {...fonte}>✕ capacete</text>
+        <text x="138" y="27" fill={V} {...fonte}>{t.visuais.capacete}</text>
       </g>
       <circle className="mv-ponto" style={d(1400)} cx="194" cy="24" r="3.5" fill={V} />
       <circle className="mv-pulso" style={{ animationDelay: "1600ms" }} cx="194" cy="24" r="3.5" stroke={V} strokeWidth="1.25" />

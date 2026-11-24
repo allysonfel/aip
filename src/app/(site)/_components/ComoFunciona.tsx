@@ -2,12 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import { MiniVisual, type VisualId } from "./MiniVisuais";
+import { useIdioma } from "../_i18n/Contexto";
 
-const PASSOS: { titulo: string; texto: string; visual: VisualId }[] = [
-  { titulo: "Conectamos às suas câmeras.", texto: "A AIP se integra às câmeras e gravadores que você já tem. Sem obra e sem trocar equipamento.", visual: "V22" },
-  { titulo: "A IA analisa as imagens.", texto: "A IA detecta pessoas, veículos e objetos e é configurada para o que importa na sua operação: contar, acompanhar, avisar ou reconhecer comportamentos específicos. A tecnologia se adapta à sua necessidade.", visual: "V23" },
-  { titulo: "Você acompanha no seu painel.", texto: "Tudo chega a um painel exclusivo da sua operação, no computador ou no celular, de qualquer lugar.", visual: "V24" },
-];
+// Mini gráfico de cada passo; os textos vêm do dicionário (cameras.comoFunciona).
+const VISUAIS: VisualId[] = ["V22", "V23", "V24"];
 
 /**
  * Três passos (lado a lado no desktop, empilhados no celular), cada um com
@@ -16,6 +14,8 @@ const PASSOS: { titulo: string; texto: string; visual: VisualId }[] = [
  * cards de Soluções).
  */
 export default function ComoFunciona() {
+  const { d } = useIdioma();
+  const PASSOS = d.cameras.comoFunciona.map((p, i) => ({ ...p, visual: VISUAIS[i] }));
   const ref = useRef<HTMLOListElement>(null);
   const [ativo, setAtivo] = useState(false);
   // Quantos passos já animaram: um de cada vez, acompanhando a linha.
@@ -30,7 +30,7 @@ export default function ComoFunciona() {
         if (!e.isIntersecting) return;
         obs.disconnect();
         setAtivo(true);
-        PASSOS.forEach((_, i) => timers.push(window.setTimeout(() => setPassos(i + 1), i * 450)));
+        VISUAIS.forEach((_, i) => timers.push(window.setTimeout(() => setPassos(i + 1), i * 450)));
       },
       { threshold: 0.3 },
     );

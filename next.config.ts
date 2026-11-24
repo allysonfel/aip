@@ -16,6 +16,11 @@ const nextConfig: NextConfig = {
       { source: '/login', destination: '/shopping-caruaru/login', permanent: false },
       { source: '/trocar-senha', destination: '/shopping-caruaru/trocar-senha', permanent: false },
       { source: '/sem-acesso', destination: '/shopping-caruaru/sem-acesso', permanent: false },
+      // Páginas antigas do site (antes eram páginas com permanentRedirect).
+      { source: '/empresas', destination: '/solucoes/shoppings-e-varejo', permanent: true },
+      { source: '/setor-publico', destination: '/solucoes/setor-publico', permanent: true },
+      { source: '/tecnologia', destination: '/', permanent: true },
+      { source: '/solucoes/estacionamentos', destination: '/', permanent: true },
     ];
   },
 };

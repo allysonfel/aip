@@ -1,14 +1,22 @@
 "use client";
 
-import { useActionState, useState, type ReactNode } from "react";
-import Link from "next/link";
+import { useActionState, useMemo, useState, type ReactNode } from "react";
+import { useIdioma } from "../_i18n/Contexto";
+import { f } from "../_i18n/dicionario";
+import type { Idioma } from "../_i18n/idiomas";
+import Link from "../_i18n/LinkI";
 import { SetaBotao } from "./Base";
-import { enviarContato, type EstadoContato } from "../contato/acoes";
-import { CANAIS, TIPOS } from "../contato/opcoes";
+import { enviarContato, type EstadoContato } from "../_contato/acoes";
+import { CANAIS, TIPOS } from "../_contato/opcoes";
 import { bandeira, PAIS_PADRAO, PAISES } from "../_config/paises";
 import Escolha, { type OpcaoEscolha } from "./Escolha";
 
-const OPCOES_DDI: OpcaoEscolha[] = PAISES.map((p) => ({ valor: p.iso, rotulo: p.nome, detalhe: `+${p.ddi}`, icone: bandeira(p.iso) }));
+/** Países com o nome no idioma da página (em português, a lista pronta; nos outros, Intl.DisplayNames), em ordem alfabética. */
+function paisesNoIdioma(idioma: Idioma) {
+  if (idioma === "pt") return PAISES;
+  const nomes = new Intl.DisplayNames([idioma], { type: "region" });
+  return PAISES.map((p) => ({ ...p, nome: nomes.of(p.iso) ?? p.nome })).sort((a, b) => a.nome.localeCompare(b.nome, idioma));
+}
 
 // Ícones dos canais de contato (traço simples, na cor do texto).
 const ICONES: Record<string, ReactNode> = {
@@ -47,7 +55,7 @@ function Rotulo({ nome, rotulo, erro, children }: { nome: string; rotulo: string
 }
 
 /** Grupo de botões marcáveis. `multiplo` permite escolher mais de uma opção. */
-function Opcoes({ nome, legenda, opcoes, marcados, multiplo = false, erro }: { nome: string; legenda: string; opcoes: readonly string[]; marcados: string[]; multiplo?: boolean; erro?: string }) {
+function Opcoes({ nome, legenda, opcoes, rotulos, marcados, multiplo = false, erro }: { nome: string; legenda: string; opcoes: readonly string[]; rotulos: Record<string, string>; marcados: string[]; multiplo?: boolean; erro?: string }) {
   return (
     <fieldset className="sm:col-span-2">
       <legend className="mb-2 text-sm text-white/85">{legenda}</legend>
@@ -55,7 +63,7 @@ function Opcoes({ nome, legenda, opcoes, marcados, multiplo = false, erro }: { n
         {opcoes.map((o) => (
           <label key={o} className="cursor-pointer rounded-xl border border-white/20 px-4 py-2.5 text-sm transition-colors hover:border-white/60 has-checked:border-white has-checked:bg-white has-checked:text-black has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-white">
             <input type={multiplo ? "checkbox" : "radio"} name={nome} value={o} defaultChecked={marcados.includes(o)} className="sr-only" />
-            {o}
+            {rotulos[o] ?? o}
           </label>
         ))}
       </div>
@@ -70,6 +78,7 @@ function Opcoes({ nome, legenda, opcoes, marcados, multiplo = false, erro }: { n
  * no formulário por um campo oculto (aceite=on), como o checkbox mandava.
  */
 function Aceite({ inicial, invalido }: { inicial: boolean; invalido: boolean }) {
+  const { d } = useIdioma();
   const [marcado, setMarcado] = useState(inicial);
   return (
     <div className="flex items-start text-sm text-white/85">
@@ -89,10 +98,10 @@ function Aceite({ inicial, invalido }: { inicial: boolean; invalido: boolean }) 
             </svg>
           )}
         </span>
-        <span className="pt-0.5">Li e aceito a</span>
+        <span className="pt-0.5">{d.contato.aceiteAntes}</span>
       </button>
       <span className="pt-0.5">
-        <Link href="/privacidade" target="_blank" className="underline underline-offset-2">Política de Privacidade</Link>.
+        <Link href="/privacidade" target="_blank" className="underline underline-offset-2">{d.contato.aceiteLink}</Link>.
       </span>
     </div>
   );
@@ -100,18 +109,22 @@ function Aceite({ inicial, invalido }: { inicial: boolean; invalido: boolean }) 
 
 /** Canal (Telefone, Telegram, WhatsApp) + código do país + número. */
 function Telefone({ valores, erro }: { valores: Record<string, string>; erro?: string }) {
+  const { idioma, d } = useIdioma();
+  const paises = useMemo(() => paisesNoIdioma(idioma), [idioma]);
+  const opcoesDdi: OpcaoEscolha[] = useMemo(() => paises.map((p) => ({ valor: p.iso, rotulo: p.nome, detalhe: `+${p.ddi}`, icone: bandeira(p.iso) })), [paises]);
   const [canal, setCanal] = useState(valores.canal || "WhatsApp");
   const [ddi, setDdi] = useState(valores.ddi_pais || PAIS_PADRAO);
-  const pais = PAISES.find((p) => p.iso === ddi) ?? PAISES[0];
+  const pais = paises.find((p) => p.iso === ddi) ?? paises[0];
+  const rotuloCanal = (c: string) => d.contato.canais[c as keyof typeof d.contato.canais] ?? c;
   return (
     <fieldset className="sm:col-span-2">
-      <legend className="mb-2 text-sm text-white/85">Telefone</legend>
+      <legend className="mb-2 text-sm text-white/85">{d.contato.telefone}</legend>
       <div className="mb-3 flex flex-wrap gap-0.5 min-[380px]:gap-1 sm:gap-2">
         {CANAIS.map((c) => (
           <label key={c} className="flex cursor-pointer items-center gap-1.5 rounded-lg border border-transparent px-2 py-1.5 text-sm min-[380px]:px-2.5 sm:gap-2 sm:px-3 text-white/70 transition-colors hover:text-white has-checked:border-white/40 has-checked:bg-white/10 has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-white">
             <input type="radio" name="canal" value={c} checked={canal === c} onChange={() => setCanal(c)} className="sr-only" />
             <IconeCanal canal={c} />
-            {c}
+            {rotuloCanal(c)}
           </label>
         ))}
       </div>
@@ -119,11 +132,11 @@ function Telefone({ valores, erro }: { valores: Record<string, string>; erro?: s
         <div className="shrink-0 border-r border-white/15">
           <Escolha
             nome="ddi_pais"
-            opcoes={OPCOES_DDI}
+            opcoes={opcoesDdi}
             valor={ddi}
             aoMudar={setDdi}
             busca
-            rotuloAcessivel={`Código do país: ${pais.nome} +${pais.ddi}`}
+            rotuloAcessivel={f(d.contato.codigoPais, { pais: pais.nome, ddi: pais.ddi })}
             classeGatilho="flex h-full items-center gap-1.5 rounded-l-xl py-3 pl-4 pr-3 outline-none focus-visible:bg-white/[0.06]"
             classePainel="w-[min(24rem,calc(100vw-2.5rem))]"
             gatilho={
@@ -139,9 +152,9 @@ function Telefone({ valores, erro }: { valores: Record<string, string>; erro?: s
           type="tel"
           autoComplete="tel-national"
           defaultValue={valores.telefone}
-          aria-label={`Número do ${canal}`}
+          aria-label={f(d.contato.numeroDo, { canal: rotuloCanal(canal) })}
           aria-invalid={erro ? true : undefined}
-          placeholder={pais.iso === "BR" ? "(00) 00000-0000" : "Número"}
+          placeholder={pais.iso === "BR" ? "(00) 00000-0000" : d.contato.numero}
           className="min-w-0 flex-1 bg-transparent px-4 py-3 text-white outline-none placeholder:text-white/40"
         />
       </div>
@@ -151,13 +164,14 @@ function Telefone({ valores, erro }: { valores: Record<string, string>; erro?: s
 }
 
 export default function FormContato({ tipo, origem }: { tipo?: string; origem: string }) {
+  const { idioma, d } = useIdioma();
   const [estado, acao, enviando] = useActionState<EstadoContato, FormData>(enviarContato, { ok: false });
 
   if (estado.ok) {
     return (
       <div role="status" className="rounded-2xl border border-white/20 p-8 md:p-12">
-        <p className="titulo-secao">Recebemos suas informações.</p>
-        <p className="corpo mt-4">Nossa equipe entrará em contato.</p>
+        <p className="titulo-secao">{d.contato.sucessoTitulo}</p>
+        <p className="corpo mt-4">{d.contato.sucessoTexto}</p>
       </div>
     );
   }
@@ -175,20 +189,21 @@ export default function FormContato({ tipo, origem }: { tipo?: string; origem: s
     <form action={acao} noValidate className="grid gap-6 sm:grid-cols-2">
       {/* Honeypot: invisível para pessoas, robôs preenchem. */}
       <div aria-hidden className="absolute -left-[9999px] h-px w-px overflow-hidden">
-        <label htmlFor="site_web">Não preencha este campo</label>
+        <label htmlFor="site_web">{d.contato.naoPreencha}</label>
         <input id="site_web" name="site_web" tabIndex={-1} autoComplete="off" />
       </div>
       <input type="hidden" name="origem" value={origem} />
+      <input type="hidden" name="idioma" value={idioma} />
 
-      {texto("nome", "Nome", { autoComplete: "name", required: true })}
-      {texto("email", "E-mail", { type: "email", autoComplete: "email", required: true })}
+      {texto("nome", d.contato.nome, { autoComplete: "name", required: true })}
+      {texto("email", d.contato.email, { type: "email", autoComplete: "email", required: true })}
 
       <Telefone valores={v} erro={e.telefone} />
 
-      <Opcoes nome="tipo_organizacao" legenda="Tipo de organização" opcoes={TIPOS} marcados={lista("tipo_organizacao", tipo)} multiplo erro={e.tipo_organizacao} />
+      <Opcoes nome="tipo_organizacao" legenda={d.contato.tipoOrganizacao} opcoes={TIPOS} rotulos={d.contato.tipos} marcados={lista("tipo_organizacao", tipo)} multiplo erro={e.tipo_organizacao} />
 
       <div className="sm:col-span-2">
-        <Rotulo nome="mensagem" rotulo="Mensagem" erro={e.mensagem}>
+        <Rotulo nome="mensagem" rotulo={d.contato.mensagem} erro={e.mensagem}>
           <textarea id="mensagem" name="mensagem" rows={5} defaultValue={v.mensagem} aria-invalid={e.mensagem ? true : undefined} className={CAMPO} />
         </Rotulo>
       </div>
@@ -202,7 +217,7 @@ export default function FormContato({ tipo, origem }: { tipo?: string; origem: s
 
       <div className="sm:col-span-2">
         <button type="submit" disabled={enviando} className="botao botao-claro">
-          {enviando ? "Enviando..." : "Enviar"}
+          {enviando ? d.contato.enviando : d.contato.enviar}
           <SetaBotao />
         </button>
       </div>
