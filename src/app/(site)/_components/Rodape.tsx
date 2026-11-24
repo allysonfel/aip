@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { LogoAIP } from "@/components/shopping/Logo";
-import { CIDADE, EMAIL, WHATSAPP } from "../_config/contato";
+import { CIDADE, EMAIL, INSTAGRAM, WHATSAPP } from "../_config/contato";
 import { PRODUTOS, SOLUCOES } from "../_config/navegacao";
 
 const COLUNAS = [
@@ -61,7 +61,7 @@ export default function Rodape() {
 
         <div>
           <h2 className="rotulo">Contato</h2>
-          {(EMAIL || WHATSAPP || CIDADE) && (
+          {(EMAIL || WHATSAPP || INSTAGRAM || CIDADE) && (
             <ul className="mt-4 flex flex-col gap-2.5 text-sm">
               {EMAIL && (
                 <li>
@@ -80,6 +80,25 @@ export default function Rodape() {
                     className="text-white/75 hover:text-white"
                   >
                     WhatsApp
+                  </a>
+                </li>
+              )}
+              {INSTAGRAM && (
+                <li>
+                  <a
+                    href={`https://instagram.com/${INSTAGRAM}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Instagram da AIP: @${INSTAGRAM}`}
+                    className="inline-flex items-center gap-2 text-white/75 hover:text-white"
+                  >
+                    {/* ícone de traço fino, na cor do texto */}
+                    <svg viewBox="0 0 24 24" aria-hidden className="h-4 w-4 shrink-0" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <rect x="3.5" y="3.5" width="17" height="17" rx="5" />
+                      <circle cx="12" cy="12" r="4" />
+                      <circle cx="17.2" cy="6.8" r="0.9" fill="currentColor" stroke="none" />
+                    </svg>
+                    Instagram
                   </a>
                 </li>
               )}
