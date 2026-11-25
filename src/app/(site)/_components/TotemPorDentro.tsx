@@ -175,8 +175,8 @@ function Desktop({ titulo, etapas }: { titulo: string; etapas: EtapaTotem[] }) {
   };
 
   return (
-    <div ref={secao} className="relative" style={{ height: `${n * 80 + 20}svh` }}>
-      <div ref={area} className="sticky top-0 h-svh overflow-hidden">
+    <div ref={secao} className="relative" style={{ height: `calc(var(--vh-fixo,1svh)*${n * 80 + 20})` }}>
+      <div ref={area} className="sticky top-0 h-[calc(var(--vh-fixo,1svh)*100)] overflow-hidden">
         <div className="margem grid h-full grid-cols-[minmax(0,1fr)_minmax(0,1fr)] items-center gap-16">
           <div className="relative z-10">
             <h2 className="titulo-secao max-w-[30rem]">{titulo}</h2>
@@ -210,7 +210,7 @@ function Desktop({ titulo, etapas }: { titulo: string; etapas: EtapaTotem[] }) {
             </div>
           </div>
           <div ref={palco} className="justify-self-center">
-            <Palco etapas={etapas} ativa={ativa} className="h-[84svh] max-h-[52rem]" />
+            <Palco etapas={etapas} ativa={ativa} className="h-[calc(var(--vh-fixo,1svh)*84)] max-h-[52rem]" />
           </div>
         </div>
         {linha && (
@@ -225,7 +225,7 @@ function Desktop({ titulo, etapas }: { titulo: string; etapas: EtapaTotem[] }) {
 }
 
 /**
- * Celular: a mesma lógica do desktop. A seção prende na tela (sticky, 100svh)
+ * Celular: a mesma lógica do desktop. A seção prende na tela (sticky, altura da tela)
  * e as etapas avançam com a rolagem: totem em cima (~57% da tela), tracinhos
  * de progresso e o texto da etapa ativa embaixo. Só transform e opacity animam.
  */
@@ -306,11 +306,11 @@ function Celular({ titulo, etapas }: { titulo: string; etapas: EtapaTotem[] }) {
       <div className="margem pb-6 pt-24">
         <h2 className="titulo-secao">{titulo}</h2>
       </div>
-      <div ref={secao} className="relative" style={{ height: `${n * 90 + 100}svh` }}>
-        <div ref={area} className="sticky top-0 flex h-svh flex-col overflow-hidden">
+      <div ref={secao} className="relative" style={{ height: `calc(var(--vh-fixo,1svh)*${n * 90 + 100})` }}>
+        <div ref={area} className="sticky top-0 flex h-[calc(var(--vh-fixo,1svh)*100)] flex-col overflow-hidden">
           {/* Totem: parte de cima da tela */}
-          <div className="flex h-[57svh] shrink-0 items-end justify-center pt-12">
-            <Palco refPalco={palco} etapas={etapas} ativa={ativa} style={{ height: "min(calc(57svh - 3rem), calc((100vw - 2rem) * 1.25))" }} />
+          <div className="flex h-[calc(var(--vh-fixo,1svh)*57)] shrink-0 items-end justify-center pt-12">
+            <Palco refPalco={palco} etapas={etapas} ativa={ativa} style={{ height: "min(calc((var(--vh-fixo,1svh)*57) - 3rem), calc((100vw - 2rem) * 1.25))" }} />
           </div>
           {/* Progresso */}
           <div className="margem relative z-10 flex gap-1.5 py-4">
@@ -365,7 +365,7 @@ function Estatico({ titulo, etapas, foto }: { titulo: string; etapas: EtapaTotem
           ))}
         </ol>
       </div>
-      <div className="relative mx-auto aspect-[4/5] h-[70svh] max-h-[48rem] funde-preto">
+      <div className="relative mx-auto aspect-[4/5] h-[calc(var(--vh-fixo,1svh)*70)] max-h-[48rem] funde-preto">
         <Image src={`${M}/${foto.src}`} alt={foto.alt} fill sizes="(min-width: 1024px) 40vw, 90vw" quality={85} className="object-contain" />
       </div>
     </div>

@@ -45,6 +45,14 @@ export default async function SiteLayout({ children, params }: { children: React
   return (
     <html lang={HTML_LANG[lang]} data-scroll-behavior="smooth" className={`${barlow.variable} ${barlowCondensed.variable} ${cirilico.variable} ${cirilicoTitulo.variable}`}>
       <body className="min-h-full">
+        {/* Altura da tela medida uma vez (--vh-fixo = 1% dela). No navegador do Instagram a barra de baixo
+            some e volta durante a rolagem e muda o svh: as seções de tela cheia mudavam de altura e a página
+            "pulava". Só remede quando a largura muda (girar o celular) ou fora do toque (janela do computador). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: "(function(){var r=document.documentElement,w=innerWidth,t=matchMedia('(pointer:coarse)').matches;function m(){r.style.setProperty('--vh-fixo',innerHeight/100+'px')}m();addEventListener('resize',function(){if(!t||innerWidth!==w){w=innerWidth;m()}})})()",
+          }}
+        />
         <ProvedorIdioma idioma={lang}>
           <a href="#conteudo" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60] focus:rounded-md focus:bg-white focus:px-4 focus:py-2 focus:text-black">
             {d.comum.pularConteudo}

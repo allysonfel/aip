@@ -71,7 +71,7 @@ export function Hero({ sobretitulo, migalhas, titulo, texto, botoes, midia, sobr
   // Com mídia: só o degradê do lado do texto, sem película sobre a imagem.
   const comMidia = !!midia;
   return (
-    <section className="relative isolate flex min-h-svh items-end overflow-hidden">
+    <section className="relative isolate flex min-h-[calc(var(--vh-fixo,1svh)*100)] items-end overflow-hidden">
       {/* Entrada em camadas: foto, título, texto e botões (ver .entra-* no CSS). */}
       <div className={`absolute inset-0 -z-20 ${midia && "video" in midia ? "entra-foto" : ""}`}>
         <div className="parallax absolute inset-0">
@@ -128,7 +128,7 @@ export function TelaDividida({ id, rotulo, titulo, texto, visual, lado = "esquer
  */
 export function TelaFoto({ foto, alt, titulo, texto, acao, rotulo, original = false, lateral = false, foco = "50% 50%" }: { foto: string; alt: string; titulo: string; texto: string; acao?: ReactNode; rotulo?: string; original?: boolean; lateral?: boolean; foco?: string }) {
   return (
-    <section className={`relative isolate flex min-h-svh overflow-hidden ${lateral ? "items-end lg:items-center" : "items-end"}`}>
+    <section className={`relative isolate flex min-h-[calc(var(--vh-fixo,1svh)*100)] overflow-hidden ${lateral ? "items-end lg:items-center" : "items-end"}`}>
       <Image src={`${M}/${foto}`} alt={alt} fill sizes={CAPA} quality={85} unoptimized={original} style={{ objectPosition: foco }} className="-z-20 object-cover" />
       <DegradeLateral />
       <Reveal className={`margem ${lateral ? "pb-16 sm:pb-24 lg:py-24" : "pb-16 sm:pb-24"}`}>

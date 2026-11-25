@@ -41,13 +41,13 @@ export default async function TotemIA() {
   return (
     <>
       {/* 1. Hero: texto à esquerda, totem à direita sobre o fundo preto. */}
-      <section className="relative isolate overflow-hidden pb-16 pt-24 lg:flex lg:min-h-svh lg:items-center lg:py-0">
+      <section className="relative isolate overflow-hidden pb-16 pt-24 lg:flex lg:min-h-[calc(var(--vh-fixo,1svh)*100)] lg:items-center lg:py-0">
         <div className="margem grid items-center gap-6 lg:grid-cols-[1.1fr_1fr] lg:gap-10">
           <div className="order-2 lg:order-1">
             <h1 className="entra-1 titulo-hero">{t.heroTitulo}</h1>
             <p className="entra-2 mt-6 max-w-[36rem] text-lg leading-relaxed text-white/80">{t.heroTexto}</p>
           </div>
-          <div className="relative order-1 mx-auto aspect-[4/5] h-[52svh] max-h-[30rem] funde-preto-leve lg:order-2 lg:h-[88svh] lg:max-h-[56rem]">
+          <div className="relative order-1 mx-auto aspect-[4/5] h-[calc(var(--vh-fixo,1svh)*52)] max-h-[30rem] funde-preto-leve lg:order-2 lg:h-[calc(var(--vh-fixo,1svh)*88)] lg:max-h-[56rem]">
             <FotoEntra src={`${M}/totem-frente.jpg`} alt={ALT_FRENTE} fill priority sizes="(min-width: 1024px) 45vw, 80vw" quality={85} className="object-contain" />
           </div>
         </div>
@@ -57,7 +57,7 @@ export default async function TotemIA() {
       <TotemPorDentro id="por-dentro" titulo={t.porDentroTitulo} etapas={ETAPAS} fotoFixa={{ src: "totem-frente.jpg", alt: ALT_FRENTE }} />
 
       {/* 3. Feito para resistir ao tempo: foto em tela cheia no desktop; no celular, foto em cima e texto embaixo. */}
-      <section className="relative isolate border-t border-linha lg:flex lg:min-h-svh lg:items-center lg:overflow-hidden lg:border-0">
+      <section className="relative isolate border-t border-linha lg:flex lg:min-h-[calc(var(--vh-fixo,1svh)*100)] lg:items-center lg:overflow-hidden lg:border-0">
         <div className="relative aspect-[4/3] w-full lg:absolute lg:inset-0 lg:-z-20 lg:aspect-auto">
           <Image src={`${M}/totem-chuva.jpg`} alt={t.tempoAlt} fill sizes="100vw" quality={85} style={{ objectPosition: "68% 50%" }} className="object-cover" />
           <div aria-hidden className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black to-transparent lg:hidden" />
@@ -76,7 +76,7 @@ export default async function TotemIA() {
 
       {/* 4. Central AIP 24 horas: foto inteira e o texto num bloco embaixo dela. */}
       <section className="relative">
-        <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:max-h-[92svh] lg:min-h-[32rem]">
+        <div className="relative aspect-[4/3] w-full sm:aspect-[16/9] lg:max-h-[calc(var(--vh-fixo,1svh)*92)] lg:min-h-[32rem]">
           <Image src={`${M}/central-24h.jpg`} alt={t.centralAlt} fill sizes="100vw" quality={85} style={{ objectPosition: "50% 40%" }} className="object-cover" />
           <div aria-hidden className="absolute inset-x-0 bottom-0 h-[30%] bg-gradient-to-t from-black via-black/60 to-transparent" />
         </div>
